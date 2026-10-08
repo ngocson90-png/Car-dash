@@ -1,649 +1,591 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Car Dashboard - Split Screen</title>
-    
-    <!-- Tailwind CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Car Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Leaflet Routing Machine CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
-    <!-- Leaflet Control Geocoder CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
-        @import url('https://fonts.cdnfonts.com/css/eurostile');
-        
         body {
-            font-family: 'Eurostile', 'Inter', sans-serif;
-            background-color: #0b0f19;
-            color: #f8fafc;
-            overflow: hidden;
-            user-select: none;
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* slate-900 */
+            color: #f8fafc; /* slate-50 */
+            margin: 0;
+            overflow: hidden; /* Prevent scrolling for a dashboard feel */
         }
-
-        .font-digital {
-            font-family: 'Eurostile', 'Orbitron', sans-serif;
+        .clock-font {
+            font-family: 'Share Tech Mono', monospace;
         }
-
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
+        /* Custom scrollbar for the sidebar if needed */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2); 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4); 
         }
         
-        .glass-card {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 1rem;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-        }
-
-        /* CartoDB Dark Matter Map styling */
-        .leaflet-container {
-            background: #0b0f19 !important;
-        }
-
-        /* Routing container styling */
+        /* Ẩn giao diện hướng dẫn mặc định của Leaflet Routing Machine để dashboard gọn gàng */
         .leaflet-routing-container {
-            background-color: rgba(15, 23, 42, 0.95) !important;
-            color: #f8fafc !important;
-            border-radius: 0.75rem !important;
-            padding: 10px !important;
-            max-height: 30vh !important;
-            overflow-y: auto;
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
-            font-size: 12px;
+            display: none !important;
         }
-        .leaflet-routing-container input {
-            background-color: #1e293b !important;
-            color: white !important;
-            border: 1px solid #334155 !important;
-            border-radius: 0.5rem;
-            padding: 4px 8px;
-        }
-        .leaflet-routing-alt h2 { color: #38bdf8 !important; font-size: 0.9rem; }
-        .leaflet-routing-alt h3 { color: #94a3b8 !important; font-size: 0.8rem; }
-        .leaflet-bar a {
-            background-color: #1e293b !important;
-            color: #f8fafc !important;
-            border-color: #334155 !important;
-        }
-        .leaflet-routing-remove-waypoint::after {
-            content: "\00d7" !important;
-            color: #ef4444 !important;
-            font-weight: bold;
-        }
-
-        #map { width: 100%; height: 100%; z-index: 10; }
-        #loading { transition: opacity 0.4s ease-out; }
-
-        /* Custom scrollbar for car dashboard */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
-        ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.3); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.6); }
     </style>
 </head>
-<body class="flex flex-col md:flex-row h-screen w-screen m-0 p-0">
+<body class="h-screen w-screen flex flex-col md:flex-row">
 
-    <!-- Loading Screen -->
-    <div id="loading" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950 text-white">
-        <i class="fa-solid fa-car-side text-6xl animate-bounce mb-4 text-sky-400"></i>
-        <h1 class="text-2xl font-bold font-digital">HỆ THỐNG SMART CAR SPLIT</h1>
-        <p class="text-slate-400 mt-2">Đang kết nối GPS & Trạm giải trí...</p>
-    </div>
-
-    <!-- Modal Hẹn Giờ Sạc Pin -->
-    <div id="alarm-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm">
-        <div class="glass-card bg-slate-900/95 p-6 w-[90%] max-w-md border border-sky-500/30 shadow-2xl rounded-2xl flex flex-col gap-4">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="text-lg font-bold text-sky-400 font-digital"><i class="fa-solid fa-bolt mr-2 text-yellow-400"></i>Cài đặt hẹn giờ sạc pin</h3>
-                <button onclick="closeAlarmModal()" class="text-slate-400 hover:text-white px-2 py-1"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="flex flex-col gap-3">
-                <label class="text-xs text-slate-300">Chọn thời gian báo thức nhắc nhở:</label>
-                <input type="time" id="alarm-time-input" class="bg-slate-950 border border-slate-700 text-white text-xl p-3 rounded-xl font-digital text-center focus:border-sky-500 outline-none">
-            </div>
-            <div class="flex gap-2 mt-2">
-                <button onclick="setAlarm()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-sky-500/20">Lưu lịch sạc</button>
-                <button onclick="cancelAlarm()" class="bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 px-4 py-3 rounded-xl font-bold border border-rose-800/50 transition-all">Hủy hẹn giờ</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Alarm Ringing Alert Popup -->
-    <div id="alarm-ringing-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-md animate-pulse">
-        <div class="glass-card bg-rose-950/90 p-8 w-[90%] max-w-md border-2 border-rose-500 shadow-[0_0_50px_rgba(244,63,94,0.5)] rounded-3xl flex flex-col items-center text-center gap-4">
-            <i class="fa-solid fa-battery-bolt text-6xl text-yellow-300 animate-bounce"></i>
-            <h2 class="text-2xl font-bold text-white font-digital">ĐÃ ĐẾN GIỜ HOÀN TẤT SẠC PIN!</h2>
-            <p class="text-rose-200 text-sm">Xe của bạn đã sạc xong theo thời gian đã hẹn. Hãy ngắt kết nối sạc.</p>
-            <button onclick="dismissAlarm()" class="mt-2 w-full bg-white hover:bg-slate-100 text-rose-950 font-bold py-3.5 rounded-xl shadow-xl text-lg transition-all">Đã hiểu / Tắt báo thức</button>
-        </div>
-    </div>
-
-    <!-- Sidebar / Bảng điều khiển trái (50%) -->
-    <div class="glass-panel w-full md:w-[420px] lg:w-[460px] h-2/5 md:h-full flex flex-col p-3 gap-3 z-20 shadow-2xl order-2 md:order-1 overflow-y-auto">
+    <aside class="w-full md:w-1/3 lg:w-1/4 h-auto md:h-full bg-slate-900 flex flex-col p-6 border-b md:border-b-0 md:border-r border-slate-700 shadow-2xl z-10 space-y-6 overflow-y-auto">
         
-        <!-- Khung Đồng hồ Siêu Lớn (Click để đổi Số / Kim) -->
-        <div class="glass-card flex flex-col justify-between items-center p-4 min-h-[200px] cursor-pointer hover:bg-slate-800/40 transition-colors border-sky-500/20 relative" onclick="toggleClock()" title="Chạm để đổi kiểu đồng hồ">
-            
-            <!-- Đồng hồ số -->
-            <div id="digital-view" class="flex flex-col items-center w-full my-auto">
-                <h1 id="clock" class="text-6xl lg:text-7xl leading-none font-digital font-bold text-transparent bg-clip-text bg-gradient-to-b from-white via-sky-100 to-sky-400 drop-shadow-[0_0_20px_rgba(14,165,233,0.4)] tracking-wide">
-                    00:00:00
-                </h1>
-            </div>
-
-            <!-- Đồng hồ kim -->
-            <div id="analog-view" class="hidden flex-col items-center w-full my-auto py-1">
-                <div class="relative w-[110px] h-[110px] rounded-full border-[4px] border-sky-500/50 bg-slate-900/90 shadow-[0_0_20px_rgba(14,165,233,0.3)]">
-                    <div class="absolute top-1 left-[49px] w-[2px] h-[8px] bg-sky-400"></div>
-                    <div class="absolute bottom-1 left-[49px] w-[2px] h-[8px] bg-sky-400"></div>
-                    <div id="hour-hand" class="absolute bg-white rounded-full" style="width:4px; height:30px; top:25px; left:49px; transform-origin: bottom; transform: rotate(0deg);"></div>
-                    <div id="minute-hand" class="absolute bg-slate-300 rounded-full" style="width:2px; height:40px; top:15px; left:49.5px; transform-origin: bottom; transform: rotate(0deg);"></div>
-                    <div id="second-hand" class="absolute bg-red-500" style="width:1px; height:44px; top:11px; left:50px; transform-origin: bottom; transform: rotate(0deg);"></div>
-                    <div class="absolute bg-sky-400 rounded-full z-10" style="width:8px; height:8px; top:47px; left:47px;"></div>
-                </div>
-            </div>
-            
-            <!-- Ngày Dương & Âm Lịch Thiên Văn Chuẩn Xác -->
-            <div class="flex flex-col items-center text-center w-full border-t border-slate-700/50 pt-2.5">
-                <p id="date-solar" class="text-sm lg:text-base font-bold text-slate-200 tracking-wide font-digital">---</p>
-                <div class="flex items-center justify-center gap-2 mt-1.5 px-3 py-1 bg-slate-950/80 rounded-full border border-sky-500/20 w-full shadow-inner">
-                    <i class="fa-solid fa-moon text-yellow-300 text-xs"></i>
-                    <p id="date-lunar" class="text-xs lg:text-sm text-sky-300 font-bold font-digital">Âm lịch: Đang tính toán...</p>
-                </div>
+        <!-- Clock & Date Section -->
+        <div class="flex flex-col items-center md:items-start space-y-1 bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-inner">
+            <h1 id="time-display" class="text-6xl md:text-7xl font-bold clock-font text-blue-400 tracking-tight">00:00</h1>
+            <p id="date-display" class="text-lg md:text-xl font-medium text-slate-300 mt-2">Loading date...</p>
+            <div class="flex items-center space-x-2 mt-1">
+                <span class="text-sm bg-indigo-900/50 text-indigo-300 py-1 px-3 rounded-full border border-indigo-700/50">
+                    <span class="font-bold">Âm lịch:</span> <span id="lunar-date-display">...</span>
+                </span>
             </div>
         </div>
 
-        <!-- Tiện ích: Thời tiết & Vận tốc & Hẹn giờ sạc -->
-        <div class="grid grid-cols-2 gap-2 flex-none">
-            <div class="glass-card p-3 flex flex-col justify-center items-center text-center">
-                <i id="weather-icon" class="fa-solid fa-cloud-sun text-2xl text-amber-400 mb-1"></i>
-                <span id="weather-location" class="text-[11px] text-slate-400">Đang định vị...</span>
-                <span id="weather-temp" class="text-lg font-bold font-digital mt-0.5 text-slate-100">--°C</span>
+        <!-- Weather Section -->
+        <div class="flex items-center justify-between bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-inner">
+            <div class="flex flex-col">
+                <span class="text-sm text-slate-400 font-medium uppercase tracking-wider">Thời tiết</span>
+                <span id="weather-desc" class="text-lg font-semibold text-slate-200">Đang tải...</span>
             </div>
-            <div class="glass-card p-3 flex flex-col justify-center items-center text-center border-l-2 border-l-sky-500">
-                <i class="fa-solid fa-gauge-high text-2xl text-sky-400 mb-1"></i>
-                <span class="text-[11px] text-slate-400">Vận tốc GPS</span>
-                <span id="speedo" class="text-lg font-bold font-digital mt-0.5 text-sky-400">0 km/h</span>
+            <div class="flex items-center space-x-3">
+                <span id="weather-icon" class="text-4xl text-yellow-400">🌤️</span>
+                <span id="weather-temp" class="text-3xl font-bold clock-font text-white">--°</span>
             </div>
         </div>
 
-        <!-- Hẹn giờ sạc nhanh -->
-        <div class="glass-card p-2.5 px-4 flex justify-between items-center bg-slate-900/60">
-            <div class="flex items-center gap-2.5">
-                <i class="fa-solid fa-bolt text-yellow-400 text-sm animate-pulse"></i>
+        <!-- Calendar Section -->
+        <div class="flex-grow flex flex-col bg-slate-800 p-4 lg:p-5 rounded-2xl border border-slate-700 shadow-inner">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-sm text-slate-400 font-medium uppercase tracking-wider">Lịch tháng</h2>
+                <div id="calendar-month-year" class="text-lg font-bold text-white tracking-wide">Tháng --, ----</div>
+            </div>
+            
+            <!-- Days of Week -->
+            <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-slate-400 mb-2">
+                <div>T2</div><div>T3</div><div>T4</div><div>T5</div><div>T6</div><div>T7</div><div class="text-red-400">CN</div>
+            </div>
+            
+            <!-- Calendar Grid -->
+            <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-sm md:text-base flex-grow content-start">
+                <!-- Days will be dynamically injected here -->
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-grow h-full relative w-full bg-slate-950">
+        <!-- Leaflet Map Container -->
+        <div id="map" class="w-full h-full z-0"></div>
+        
+        <!-- Loading Overlay for Map -->
+        <div id="map-loading" class="absolute inset-0 flex items-center justify-center bg-slate-900 z-10">
+            <div class="flex flex-col items-center space-y-4">
+                <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-slate-400 font-medium">Đang tải bản đồ & vị trí...</p>
+            </div>
+        </div>
+
+        <!-- Navigation Search UI -->
+        <div class="absolute top-4 left-4 right-16 md:left-8 md:right-auto md:w-[350px] z-[400]">
+            <div class="bg-slate-900/90 p-2 rounded-2xl border border-slate-700 shadow-2xl backdrop-blur-md flex items-center space-x-2">
+                <input type="text" id="destination-input" placeholder="Tìm điểm đến (vd: Hoan Kiem)..." class="bg-transparent text-white px-3 py-2 outline-none w-full placeholder-slate-400 text-sm font-medium">
+                <button id="navigate-btn" class="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl transition-colors shadow-lg shadow-blue-900/50">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </button>
+            </div>
+            
+            <!-- Route Info Panel -->
+            <div id="route-info" class="hidden mt-3 bg-slate-900/95 p-4 rounded-2xl border border-slate-700 shadow-2xl backdrop-blur-md">
+                <div class="flex justify-between items-end border-b border-slate-700/50 pb-3 mb-3">
+                    <div class="flex flex-col">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Thời gian tới</span>
+                        <span id="route-time" class="text-2xl font-bold text-emerald-400 clock-font drop-shadow-md">--</span>
+                    </div>
+                    <div class="flex flex-col text-right">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Khoảng cách</span>
+                        <span id="route-distance" class="text-lg font-bold text-white">-- km</span>
+                    </div>
+                </div>
+                <button id="cancel-route-btn" class="w-full py-2 bg-red-900/30 hover:bg-red-900/60 border border-red-900/50 text-red-400 text-sm font-semibold rounded-lg transition-colors">Hủy chuyến đi</button>
+            </div>
+        </div>
+
+        <!-- Demo Mode Toggle -->
+        <div class="absolute top-4 right-4 z-[400] bg-slate-900/90 p-3 rounded-xl border border-slate-700 shadow-xl backdrop-blur-sm">
+            <label class="flex items-center space-x-3 cursor-pointer">
+                <div class="relative">
+                    <input type="checkbox" id="demo-mode-toggle" class="sr-only">
+                    <div class="block bg-slate-700 w-10 h-6 rounded-full transition-colors toggle-bg"></div>
+                    <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform"></div>
+                </div>
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Hẹn giờ sạc pin</span>
-                    <span id="alarm-display" class="text-xs font-bold text-sky-300 font-digital">Chưa thiết lập</span>
+                    <span class="text-sm font-medium text-white">Chế độ Mô phỏng</span>
+                    <span class="text-xs text-slate-400">Giả lập di chuyển khi bị chặn GPS</span>
                 </div>
-            </div>
-            <button onclick="openAlarmModal()" class="bg-sky-600 hover:bg-sky-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-md shadow-sky-500/20">
-                <i class="fa-solid fa-clock mr-1"></i> Cài đặt
-            </button>
+            </label>
         </div>
+    </main>
 
-        <!-- Lịch tháng trực quan Dương & Âm chuẩn xác -->
-        <div class="glass-card p-3 flex flex-col gap-2">
-            <div class="flex justify-between items-center text-xs font-bold text-sky-400 border-b border-slate-700/60 pb-1.5">
-                <button onclick="changeMonth(-1)" class="hover:text-white px-2 py-0.5"><i class="fa-solid fa-chevron-left"></i></button>
-                <span id="calendar-month-year" class="font-digital tracking-wide text-sm">Tháng -- / ----</span>
-                <button onclick="changeMonth(1)" class="hover:text-white px-2 py-0.5"><i class="fa-solid fa-chevron-right"></i></button>
-            </div>
-            <div class="grid grid-cols-7 text-center text-[10px] text-slate-400 font-bold">
-                <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span class="text-red-400">CN</span>
-            </div>
-            <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-[11px]">
-                <!-- Javascript render calendar -->
-            </div>
-        </div>
-
-        <!-- Trạng thái hệ thống -->
-        <div class="glass-card p-2.5 mt-auto text-[11px] text-slate-400 flex justify-between items-center">
-            <span>Trạng thái xe: <strong class="text-emerald-400">Sẵn sàng</strong></span>
-            <span>Chế độ: <strong class="text-sky-400">Split-Screen Car</strong></span>
-        </div>
-    </div>
-
-    <!-- Màn hình phải (50%): Chia đôi đa nhiệm (Bản đồ / YouTube Không quảng cáo) -->
-    <div class="flex-1 h-3/5 md:h-full order-1 md:order-2 relative flex flex-col shadow-inner">
-        
-        <!-- Thanh công cụ chuyển đổi nhanh (Split Toolbar) -->
-        <div class="absolute top-3 right-3 z-30 flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md p-1.5 rounded-xl border border-sky-500/30 shadow-2xl">
-            <button id="btn-map" onclick="switchTab('map')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-sky-600 text-white shadow-md flex items-center gap-1.5">
-                <i class="fa-solid fa-map-location-dot"></i> Bản đồ GPS
-            </button>
-            <button id="btn-youtube" onclick="switchTab('youtube')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-300 hover:text-white flex items-center gap-1.5">
-                <i class="fa-brands fa-youtube text-rose-500"></i> YouTube
-            </button>
-        </div>
-
-        <!-- Khung 1: Bản đồ & Chỉ đường -->
-        <div id="pane-map" class="absolute inset-0 w-full h-full">
-            <div id="map"></div>
-        </div>
-
-        <!-- Khung 2: YouTube Không Quảng Cáo (Multi-Stream / Embedded Player) -->
-        <div id="pane-youtube" class="absolute inset-0 w-full h-full hidden bg-slate-950 flex flex-col p-4 z-20">
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mb-3 pt-2">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-rose-600/20 border border-rose-500/40 flex items-center justify-center text-rose-500">
-                        <i class="fa-brands fa-youtube text-lg"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-sm font-bold text-white font-digital">TRÌNH PHÁT YOUTUBE KHÔNG QUẢNG CÁO</h2>
-                        <p class="text-[11px] text-slate-400">Giải trí mượt mà trên xe ô tô</p>
-                    </div>
-                </div>
-                <!-- Thanh tìm kiếm video trực tiếp -->
-                <div class="flex w-full sm:w-auto gap-2">
-                    <input type="text" id="yt-search-input" placeholder="Tìm kiếm nhạc, MV, podcast..." class="bg-slate-900 border border-slate-700 text-white text-xs px-3 py-2 rounded-xl outline-none focus:border-rose-500 w-full sm:w-64" onkeydown="if(event.key==='Enter') searchYouTube()">
-                    <button onclick="searchYouTube()" class="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md shadow-rose-600/30 flex items-center gap-1">
-                        <i class="fa-solid fa-magnifying-glass"></i> Tìm
-                    </button>
-                </div>
-            </div>
-
-            <!-- Khung phát video chính -->
-            <div class="flex-1 w-full h-full rounded-2xl overflow-hidden border border-slate-800 bg-black relative flex flex-col">
-                <iframe id="yt-player" class="w-full h-full border-0" src="https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?autoplay=0&modestbranding=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-            </div>
-
-            <!-- Gợi ý nhanh các kênh giải trí trên xe -->
-            <div class="flex items-center gap-2 mt-3 overflow-x-auto pb-1">
-                <span class="text-[11px] text-slate-400 font-bold whitespace-nowrap"><i class="fa-solid fa-bolt text-amber-400 mr-1"></i> Gợi ý nhanh:</span>
-                <button onclick="playVideo('jfKfPfyJRdk')" class="text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-200 px-3 py-1.5 rounded-lg whitespace-nowrap transition-all">🎵 Lofi Chill Lái Xe</button>
-                <button onclick="playVideo('5qap5aO4i9A')" class="text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-200 px-3 py-1.5 rounded-lg whitespace-nowrap transition-all">🎶 Nhạc Trẻ Remix Hot</button>
-                <button onclick="playVideo('4xDzrJKXOOY')" class="text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-200 px-3 py-1.5 rounded-lg whitespace-nowrap transition-all">🚗 Nhạc Không Lời Đường Dài</button>
-                <button onclick="playVideo('9bZkp7q19f0')" class="text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-200 px-3 py-1.5 rounded-lg whitespace-nowrap transition-all">🔥 Nhạc EDM Sôi Động</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- JS Libraries -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
-    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <style>
+        /* Custom toggle styles */
+        #demo-mode-toggle:checked ~ .toggle-bg { background-color: #3b82f6; }
+        #demo-mode-toggle:checked ~ .dot { transform: translateX(100%); }
+    </style>
 
     <script>
-        window.addEventListener('unhandledrejection', function(event) {
-            console.warn("Bắt lỗi mạng ngầm:", event.reason);
-            event.preventDefault();
-        });
-
-        let map, userMarker, routingControl;
-        let isDigital = true;
-        let currentLat = 21.3216, currentLng = 105.2281; // Mặc định Phúc Thọ / Phú Thọ
-        let todayDate = new Date();
-        let displayMonth = todayDate.getMonth();
-        let displayYear = todayDate.getFullYear();
-        let alarmTimeSet = null;
-        let alarmInterval = null;
-
-        // --- THUẬT TOÁN ĐỔI ÂM LỊCH THIÊN VĂN CHUẨN XÁC VIỆT NAM ---
-        const PI = Math.PI;
-        function INT(d) { return Math.floor(d); }
-
-        function jdFromDate(dd, mm, yy) {
-            let a = INT((14 - mm) / 12);
-            let y = yy + 4800 - a;
-            let m = mm + 12 * a - 3;
-            let jd = dd + INT((153 * m + 2) / 5) + 365 * y + INT(y / 4) - INT(y / 100) + INT(y / 400) - 32045;
-            if (jd < 2299161) {
-                jd = dd + INT((153 * m + 2) / 5) + 365 * y + INT(y / 4) - 32083;
-            }
-            return jd;
-        }
-
-        function computeSunLongitude(jdn, timeZone) {
-            let T = (jdn - 2451545.0 - timeZone / 24.0) / 36525.0;
-            let L0 = 280.46645 + 36000.76983 * T + 0.0003032 * T * T;
-            let M = 357.52911 + 35999.05029 * T - 0.0001537 * T * T;
-            let C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(M * PI / 180) +
-                    (0.019993 - 0.000101 * T) * Math.sin(2 * M * PI / 180) +
-                    0.000289 * Math.sin(3 * M * PI / 180);
-            let sunLong = L0 + C;
-            sunLong = sunLong - 360 * INT(sunLong / 360);
-            return sunLong;
-        }
-
-        function getNewMoonDay(k, timeZone) {
-            let T = k / 1236.85;
-            let T2 = T * T;
-            let T3 = T2 * T;
-            let dr = PI / 180;
-            let Jd1 = 2415020.75933 + 29.53058868 * k + 0.0001178 * T2 - 0.000000155 * T3;
-            let M = 359.2242 + 29.10535608 * k - 0.0000333 * T2 - 0.00000347 * T3;
-            let Mprime = 306.0253 + 385.81691806 * k + 0.0107306 * T2 + 0.00001236 * T3;
-            let F = 21.2964 + 390.67050646 * k - 0.0016528 * T2 - 0.00000239 * T3;
-            let C1 = (0.1734 - 0.000393 * T) * Math.sin(M * dr) + 0.0021 * Math.sin(2 * M * dr);
-            let C2 = -0.4068 * Math.sin(Mprime * dr) + 0.0161 * Math.sin(2 * Mprime * dr);
-            let C3 = -0.0004 * Math.sin(2 * F * dr);
-            let deltat = (Mprime < 0 || Mprime >= 360) ? (0.0001 * Math.sin(Mprime * dr)) : 0;
-            let JdNew = Jd1 + C1 + C2 + C3 + deltat;
-            return INT(JdNew + 0.5 + timeZone / 24.0);
-        }
-
-        function getLunarMonth11(yy, timeZone) {
-            let off = jdFromDate(31, 12, yy) - 2415021;
-            let k = INT(off / 29.530588853);
-            let nm = getNewMoonDay(k, timeZone);
-            let sunLong = computeSunLongitude(nm, timeZone);
-            if (sunLong >= 9) {
-                nm = getNewMoonDay(k - 1, timeZone);
-            }
-            return nm;
-        }
-
-        function getLeapMonthOffset(a11, timeZone) {
-            let k = INT((a11 - 2415021.076998695) / 29.530588853 + 0.5);
-            let last = 0;
-            let i = 1;
-            let arc = computeSunLongitude(getNewMoonDay(k + i, timeZone), timeZone);
-            do {
-                last = arc;
-                i++;
-                arc = computeSunLongitude(getNewMoonDay(k + i, timeZone), timeZone);
-            } while (arc !== last && i < 14);
-            return i - 1;
-        }
-
-        function convertSolar2Lunar(dd, mm, yy, timeZone) {
-            let dayNumber = jdFromDate(dd, mm, yy);
-            let k = INT((dayNumber - 2415021.076998695) / 29.530588853);
-            let monthStart = getNewMoonDay(k + 1, timeZone);
-            if (monthStart > dayNumber) {
-                monthStart = getNewMoonDay(k, timeZone);
-            }
-            let a11 = getLunarMonth11(yy, timeZone);
-            let b11 = a11;
-            if (a11 >= monthStart) {
-                a11 = getLunarMonth11(yy - 1, timeZone);
-            } else {
-                b11 = getLunarMonth11(yy + 1, timeZone);
-            }
-            let lunarYear = yy;
-            if (a11 >= monthStart) {
-                lunarYear = yy - 1;
-            }
-            let diff = INT((monthStart - a11) / 29.530588853 + 0.5);
-            let lunarLeap = false;
-            let lunarMonth = diff + 11;
-            if (b11 - a11 > 365) {
-                let leapMonthDiff = getLeapMonthOffset(a11, timeZone);
-                if (diff >= leapMonthDiff) {
-                    lunarMonth = diff + 10;
-                    if (diff === leapMonthDiff) {
-                        lunarLeap = true;
-                    }
-                }
-            }
-            if (lunarMonth > 12) {
-                lunarMonth -= 12;
-                lunarYear++;
-            }
-            if (lunarMonth === 11 && diff >= 10) {
-                lunarMonth = 11;
-                lunarLeap = false;
-            }
-            let lunarDay = dayNumber - monthStart + 1;
-            return [lunarDay, lunarMonth, lunarYear, lunarLeap];
-        }
-
-        // --- 1. ĐỒNG HỒ & LỊCH ÂM DƯƠNG ---
+        // --- 1. Clock & Date Logic ---
         function updateClock() {
             const now = new Date();
-            const hrs = String(now.getHours()).padStart(2, '0');
-            const mins = String(now.getMinutes()).padStart(2, '0');
-            const secs = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('clock').textContent = `${hrs}:${mins}:${secs}`;
             
-            if (!isDigital) {
-                const hrDeg = ((now.getHours() % 12) * 30) + (now.getMinutes() * 0.5);
-                const minDeg = (now.getMinutes() * 6) + (now.getSeconds() * 0.1);
-                const secDeg = now.getSeconds() * 6;
-                
-                document.getElementById('hour-hand').style.transform = `rotate(${hrDeg}deg)`;
-                document.getElementById('minute-hand').style.transform = `rotate(${minDeg}deg)`;
-                document.getElementById('second-hand').style.transform = `rotate(${secDeg}deg)`;
-            }
-
+            // Time
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('time-display').textContent = `${hours}:${minutes}`;
+            
+            // Gregorian Date
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('date-solar').textContent = now.toLocaleDateString('vi-VN', options);
-
-            const [lDay, lMonth, lYear, lLeap] = convertSolar2Lunar(now.getDate(), now.getMonth() + 1, now.getFullYear(), 7.0);
-            const leapStr = lLeap ? " (Nhuận)" : "";
-            document.getElementById('date-lunar').textContent = `Âm lịch: Ngày ${lDay}/${lMonth}${leapStr} (${lYear})`;
-
-            // Kiểm tra báo thức sạc pin
-            if (alarmTimeSet) {
-                const currentHm = `${hrs}:${mins}`;
-                if (currentHm === alarmTimeSet) {
-                    triggerAlarm();
-                }
+            const gregDateStr = now.toLocaleDateString('vi-VN', options);
+            // Capitalize first letter
+            document.getElementById('date-display').textContent = gregDateStr.charAt(0).toUpperCase() + gregDateStr.slice(1);
+            
+            // Lunar Date (Using built-in Intl API for Chinese calendar)
+            try {
+                const lunarFormatter = new Intl.DateTimeFormat('vi-VN-u-ca-chinese', {
+                    day: 'numeric',
+                    month: 'numeric',
+                    year: 'numeric'
+                });
+                const lunarRaw = lunarFormatter.format(now);
+                // The format usually comes out like "28/8/2026", we just clean it up slightly
+                document.getElementById('lunar-date-display').textContent = lunarRaw.replace(/Năm/i, '').trim();
+            } catch (e) {
+                console.error("Lunar calendar API not supported by browser", e);
+                document.getElementById('lunar-date-display').textContent = "Không hỗ trợ";
             }
         }
         setInterval(updateClock, 1000);
-        updateClock();
+        updateClock(); // Initial call
 
-        function toggleClock() {
-            isDigital = !isDigital;
-            if (isDigital) {
-                document.getElementById('digital-view').classList.remove('hidden');
-                document.getElementById('analog-view').classList.add('hidden');
-            } else {
-                document.getElementById('digital-view').classList.add('hidden');
-                document.getElementById('analog-view').classList.remove('hidden');
-            }
-        }
+        // --- 2. Weather Logic (Open-Meteo API) ---
+        const weatherCodes = {
+            0: { desc: 'Trời quang', icon: '☀️' },
+            1: { desc: 'Ít mây', icon: '🌤️' },
+            2: { desc: 'Có mây', icon: '⛅' },
+            3: { desc: 'Nhiều mây', icon: '☁️' },
+            45: { desc: 'Sương mù', icon: '🌫️' },
+            48: { desc: 'Sương mù lạnh', icon: '🌫️' },
+            51: { desc: 'Mưa phùn nhẹ', icon: '🌧️' },
+            53: { desc: 'Mưa phùn', icon: '🌧️' },
+            55: { desc: 'Mưa phùn dày', icon: '🌧️' },
+            61: { desc: 'Mưa nhỏ', icon: '🌧️' },
+            63: { desc: 'Mưa vừa', icon: '🌧️' },
+            65: { desc: 'Mưa to', icon: '🌧️' },
+            71: { desc: 'Tuyết nhẹ', icon: '❄️' },
+            73: { desc: 'Tuyết vừa', icon: '❄️' },
+            75: { desc: 'Tuyết dày', icon: '❄️' },
+            95: { desc: 'Dông sét', icon: '⛈️' }
+        };
 
-        // --- 2. LỊCH THÁNG TRỰC QUAN ---
-        function renderCalendar(month, year) {
-            const grid = document.getElementById('calendar-grid');
-            grid.innerHTML = '';
-            document.getElementById('calendar-month-year').textContent = `Tháng ${month + 1} / ${year}`;
+        function fetchWeather(lat, lng) {
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true&timezone=auto`;
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    const temp = Math.round(data.current_weather.temperature);
+                    const code = data.current_weather.weathercode;
+                    const weatherInfo = weatherCodes[code] || { desc: 'Không rõ', icon: '🌡️' };
+                    
+                    document.getElementById('weather-temp').textContent = `${temp}°`;
+                    document.getElementById('weather-desc').textContent = weatherInfo.desc;
+                    document.getElementById('weather-icon').textContent = weatherInfo.icon;
+                })
+                .catch(err => {
+                    console.error("Error fetching weather:", err);
+                    document.getElementById('weather-desc').textContent = "Lỗi dữ liệu";
+                });
+        }
+    </script>
 
-            const firstDayIndex = (new Date(year, month, 1).getDay() + 6) % 7;
-            const totalDays = new Date(year, month + 1, 0).getDate();
-            const today = new Date();
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Routing & Geocoder plugins -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
-            for (let i = 0; i < firstDayIndex; i++) {
-                grid.innerHTML += `<div></div>`;
-            }
+    <script>
+        // --- 3. Map Logic (Leaflet + OpenStreetMap) ---
+        let map;
+        let userMarker;
+        let userLocation = null;
+        let watchId;
+        let isMapCenteredOnce = false;
+        
+        let routingControl = null;
+        let destinationMarker = null;
 
-            for (let day = 1; day <= totalDays; day++) {
-                const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-                const [lDay, lMonth, lYear, lLeap] = convertSolar2Lunar(day, month + 1, year, 7.0);
-                
-                const cell = document.createElement('div');
-                cell.className = `flex flex-col items-center justify-center py-1 rounded border border-slate-800 transition-all ${isToday ? 'bg-sky-600 text-white font-bold shadow-md shadow-sky-500/30' : 'bg-slate-900/40 text-slate-200 hover:bg-slate-800'}`;
-                cell.innerHTML = `
-                    <span class="text-xs font-digital">${day}</span>
-                    <span class="text-[9px] ${isToday ? 'text-sky-200' : 'text-sky-400'} font-digital">${lDay}/${lMonth}</span>
-                `;
-                grid.appendChild(cell);
-            }
-        }
+        // Demo mode variables
+        let isDemoMode = false;
+        let demoInterval = null;
+        let demoRouteCoordinates = [];
+        let demoCurrentIndex = 0;
+        let mapLocationActive = false;
 
-        function changeMonth(direction) {
-            displayMonth += direction;
-            if (displayMonth > 11) {
-                displayMonth = 0;
-                displayYear++;
-            } else if (displayMonth < 0) {
-                displayMonth = 11;
-                displayYear--;
-            }
-            renderCalendar(displayMonth, displayYear);
-        }
-        renderCalendar(displayMonth, displayYear);
-
-        // --- 3. THỜI TIẾT & HẸN GIỜ SẠC ---
-        async function fetchWeather(lat, lng) {
-            try {
-                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
-                const data = await res.json();
-                if (data && data.current_weather) {
-                    document.getElementById('weather-temp').textContent = `${Math.round(data.current_weather.temperature)}°C`;
-                    document.getElementById('weather-location').textContent = `GPS Vị trí`;
-                }
-            } catch (e) {
-                document.getElementById('weather-temp').textContent = "26°C";
-                document.getElementById('weather-location').textContent = "Việt Nam";
-            }
-        }
-
-        function openAlarmModal() {
-            document.getElementById('alarm-modal').classList.remove('hidden');
-        }
-        function closeAlarmModal() {
-            document.getElementById('alarm-modal').classList.add('hidden');
-        }
-        function setAlarm() {
-            const val = document.getElementById('alarm-time-input').value;
-            if (val) {
-                alarmTimeSet = val;
-                document.getElementById('alarm-display').textContent = `Báo thức: ${val}`;
-                closeAlarmModal();
-            }
-        }
-        function cancelAlarm() {
-            alarmTimeSet = null;
-            document.getElementById('alarm-display').textContent = "Chưa thiết lập";
-            closeAlarmModal();
-        }
-        function triggerAlarm() {
-            document.getElementById('alarm-ringing-modal').classList.remove('hidden');
-            alarmTimeSet = null; // Tắt sau khi kêu
-            document.getElementById('alarm-display').textContent = "Đã hoàn tất sạc!";
-        }
-        function dismissAlarm() {
-            document.getElementById('alarm-ringing-modal').classList.add('hidden');
-        }
-
-        // --- 4. CHUYỂN ĐỔI TAB SPLIT-SCREEN (BẢN ĐỒ / YOUTUBE) ---
-        function switchTab(tab) {
-            const btnMap = document.getElementById('btn-map');
-            const btnYoutube = document.getElementById('btn-youtube');
-            const paneMap = document.getElementById('pane-map');
-            const paneYoutube = document.getElementById('pane-youtube');
-
-            if (tab === 'map') {
-                btnMap.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-sky-600 text-white shadow-md flex items-center gap-1.5";
-                btnYoutube.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-300 hover:text-white flex items-center gap-1.5";
-                paneMap.classList.remove('hidden');
-                paneYoutube.classList.add('hidden');
-                if (map) map.invalidateSize();
-            } else {
-                btnYoutube.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-rose-600 text-white shadow-md flex items-center gap-1.5";
-                btnMap.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-300 hover:text-white flex items-center gap-1.5";
-                paneYoutube.classList.remove('hidden');
-                paneMap.classList.add('hidden');
-            }
-        }
-
-        // --- 5. TÌM KIẾM & PHÁT VIDEO YOUTUBE KHÔNG QUẢNG CÁO ---
-        function playVideo(videoId) {
-            const iframe = document.getElementById('yt-player');
-            iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&modestbranding=1`;
-        }
-
-        function searchYouTube() {
-            const query = document.getElementById('yt-search-input').value.trim();
-            if (!query) return;
-            // Dùng search embed thông minh qua từ khóa truy vấn
-            const iframe = document.getElementById('yt-player');
-            // Sử dụng danh sách phát tìm kiếm ngầm không quảng cáo
-            iframe.src = `https://www.youtube-nocookie.com/embed?listType=search&list=${encodeURIComponent(query)}&autoplay=1&modestbranding=1`;
-        }
-
-        // --- 6. KHỞI TẠO BẢN ĐỒ & GPS ---
         function initMap() {
-            const loc = [currentLat, currentLng];
-            map = L.map('map', { zoomControl: false }).setView(loc, 15);
+            // Default center (Hanoi)
+            const defaultCenter = [21.0285, 105.8542]; 
 
+            // Initialize Leaflet Map
+            map = L.map('map', {
+                zoomControl: false // We will use custom controls if needed, or hide it for a cleaner dashboard
+            }).setView(defaultCenter, 15);
+
+            // Add Dark-themed Map Tiles (CartoDB Dark Matter)
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
                 subdomains: 'abcd',
                 maxZoom: 20
             }).addTo(map);
 
-            L.control.zoom({ position: 'bottomright' }).addTo(map);
+            // Create custom icon for the car/user
+            const carIcon = L.divIcon({
+                className: 'custom-car-icon',
+                html: `<div style="background-color: #3b82f6; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(59,130,246,0.8);"></div>`,
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
 
-            routingControl = L.Routing.control({
-                waypoints: [
-                    L.latLng(currentLat, currentLng),
-                    L.latLng(currentLat + 0.02, currentLng + 0.02)
-                ],
-                routeWhileDragging: true,
-                geocoder: L.Control.Geocoder.photon(),
-                lineOptions: {
-                    styles: [{ color: '#0ea5e9', weight: 6, opacity: 0.85 }]
-                },
-                language: 'en'
-            }).addTo(map);
+            // Add user marker
+            userMarker = L.marker(defaultCenter, { icon: carIcon }).addTo(map);
 
-            map.on('click', function(e) {
-                const destLat = e.latlng.lat;
-                const destLng = e.latlng.lng;
-                if (routingControl) {
-                    routingControl.setWaypoints([
-                        L.latLng(currentLat, currentLng),
-                        L.latLng(destLat, destLng)
-                    ]);
+            // Add listener to the Demo Mode toggle
+            document.getElementById('demo-mode-toggle').addEventListener('change', function(e) {
+                isDemoMode = e.target.checked;
+                if (isDemoMode) {
+                    startDemoMode();
+                } else {
+                    stopDemoMode();
+                    // Try to resume real tracking if it was working
+                    if(mapLocationActive) startLocationTracking();
                 }
             });
 
-            if ('geolocation' in navigator) {
-                navigator.geolocation.watchPosition((position) => {
-                    currentLat = position.coords.latitude;
-                    currentLng = position.coords.longitude;
-                    const speedMs = position.coords.speed;
-
-                    if (speedMs !== null && speedMs >= 0) {
-                        document.getElementById('speedo').textContent = `${(speedMs * 3.6).toFixed(0)} km/h`;
-                    }
-
-                    const newPos = [currentLat, currentLng];
-                    if (userMarker) {
-                        userMarker.setLatLng(newPos);
-                    } else {
-                        userMarker = L.circleMarker(newPos, {
-                            radius: 8,
-                            fillColor: "#0ea5e9",
-                            color: "#ffffff",
-                            weight: 2,
-                            fillOpacity: 1
-                        }).addTo(map);
-                    }
-                    map.setView(newPos, map.getZoom());
-                    fetchWeather(currentLat, currentLng);
-                }, (error) => {
-                    fetchWeather(currentLat, currentLng);
-                }, { enableHighAccuracy: true });
-            } else {
-                fetchWeather(currentLat, currentLng);
-            }
-
-            setTimeout(() => {
-                map.invalidateSize();
-                const loader = document.getElementById('loading');
-                loader.style.opacity = '0';
-                setTimeout(() => loader.style.display = 'none', 400);
-            }, 800);
+            startLocationTracking();
         }
 
-        window.addEventListener('DOMContentLoaded', initMap);
+        function startLocationTracking() {
+            if (isDemoMode) return; // Don't start real tracking if demo is on
+
+            if (navigator.geolocation) {
+                watchId = navigator.geolocation.watchPosition(
+                    (position) => {
+                        mapLocationActive = true;
+                        const { latitude, longitude } = position.coords;
+                        updateUserLocation(L.latLng(latitude, longitude));
+                        document.getElementById('demo-mode-toggle').parentElement.parentElement.classList.add('hidden'); // Hide demo toggle if real GPS works
+                    },
+                    (error) => {
+                        mapLocationActive = false;
+                        handleLocationError(error);
+                    },
+                    { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+                );
+            } else {
+                handleLocationError({ code: 0, message: "Trình duyệt không hỗ trợ định vị." });
+            }
+        }
+
+        function updateUserLocation(latLng) {
+            userLocation = latLng;
+            userMarker.setLatLng(userLocation);
+            
+            document.getElementById('map-loading').style.display = 'none';
+
+            if (!isMapCenteredOnce || isDemoMode) {
+                map.setView(userLocation, 16);
+                if(!isMapCenteredOnce) {
+                    isMapCenteredOnce = true;
+                    fetchWeather(userLocation.lat, userLocation.lng);
+                }
+            }
+        }
+
+        function handleLocationError(error) {
+            let errorMsg = "Lỗi định vị không xác định.";
+            if (error.code === 1) { // PERMISSION_DENIED
+                errorMsg = "Bị chặn quyền truy cập vị trí (Có thể do iframe).";
+                // Auto-enable demo mode if blocked by permissions policy
+                if(error.message.includes("permissions policy")) {
+                     document.getElementById('demo-mode-toggle').checked = true;
+                     isDemoMode = true;
+                     startDemoMode();
+                     console.log(`${errorMsg} Đã tự động bật chế độ Mô phỏng.`);
+                     return;
+                }
+            } else if (error.code === 2) { // POSITION_UNAVAILABLE
+                errorMsg = "Thông tin vị trí không khả dụng.";
+            } else if (error.code === 3) { // TIMEOUT
+                errorMsg = "Quá thời gian yêu cầu lấy vị trí.";
+            }
+            
+            console.error(`Lỗi định vị (${error.code}):`, error.message);
+            
+            // Fallback location (Hanoi)
+            const fallbackLocation = L.latLng(21.0285, 105.8542);
+            updateUserLocation(fallbackLocation);
+        }
+
+        // --- Demo Mode Logic ---
+        function startDemoMode() {
+            if (watchId) navigator.geolocation.clearWatch(watchId);
+            
+            console.log("Đang chạy chế độ Mô phỏng (GPS ảo)...");
+            
+            // Generate a fake circle around current location IF no route is active
+            if (!routingControl && demoRouteCoordinates.length === 0) {
+                 const base = userLocation || L.latLng(21.0285, 105.8542);
+                 demoRouteCoordinates = generateFakeRoute(base, 0.02, 50);
+                 demoCurrentIndex = 0;
+            }
+
+            if (demoInterval) clearInterval(demoInterval);
+            demoInterval = setInterval(() => {
+                if (demoCurrentIndex < demoRouteCoordinates.length) {
+                    updateUserLocation(demoRouteCoordinates[demoCurrentIndex]);
+                    demoCurrentIndex++;
+                } else {
+                    // Loop the demo route, or stop if we arrived at destination
+                    if (routingControl) {
+                        stopDemoMode();
+                        // Optional: trigger arrival alert here
+                    } else {
+                        demoCurrentIndex = 0;
+                    }
+                }
+            }, 1000); // Move every second
+        }
+
+        function stopDemoMode() {
+            if (demoInterval) clearInterval(demoInterval);
+            demoInterval = null;
+            console.log("Đã tắt Mô phỏng. Đang thử lấy GPS thật...");
+        }
+
+        function generateFakeRoute(startLatLng, radius, steps) {
+            const coords = [];
+            for (let i = 0; i < steps; i++) {
+                const angle = (i / steps) * Math.PI * 2;
+                // slightly random movement
+                const dx = Math.cos(angle) * radius + (Math.random() * 0.002 - 0.001);
+                const dy = Math.sin(angle) * radius + (Math.random() * 0.002 - 0.001);
+                coords.push(L.latLng(startLatLng.lat + dy, startLatLng.lng + dx));
+            }
+            return coords;
+        }
+
+        // --- Navigation Logic ---
+        function searchAndNavigate() {
+            const input = document.getElementById('destination-input').value;
+            if (!input) return;
+            if (!userLocation) {
+                alert("Đang chờ tín hiệu GPS. Vui lòng đợi trong giây lát.");
+                return;
+            }
+
+            // Visual feedback on button
+            const btn = document.getElementById('navigate-btn');
+            const originalIcon = btn.innerHTML;
+            btn.innerHTML = `<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>`;
+
+            // Use Nominatim Geocoder to find coordinates
+            const geocoder = L.Control.Geocoder.nominatim();
+            geocoder.geocode(input, (results) => {
+                btn.innerHTML = originalIcon;
+                if (results && results.length > 0) {
+                    const dest = results[0].center;
+                    startRouting(dest, results[0].name);
+                } else {
+                    alert("Không tìm thấy địa điểm, vui lòng thử lại tên khác.");
+                }
+            });
+        }
+
+        function startRouting(destLatLng, destName) {
+            if (routingControl) map.removeControl(routingControl);
+            if (destinationMarker) map.removeLayer(destinationMarker);
+
+            // Add Custom Destination Pin
+            const destIcon = L.divIcon({
+                className: 'custom-dest-icon',
+                html: `<div style="background-color: #ef4444; width: 24px; height: 24px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.5);"></div>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 24]
+            });
+            destinationMarker = L.marker(destLatLng, { icon: destIcon }).addTo(map);
+            destinationMarker.bindPopup(`<div class="font-sans"><b>Điểm đến:</b><br><span class="text-xs text-gray-600">${destName}</span></div>`).openPopup();
+
+            // Set up Route Calculation
+            routingControl = L.Routing.control({
+                waypoints: [ userLocation, destLatLng ],
+                routeWhileDragging: false,
+                addWaypoints: false,
+                show: false, // Hide the large instruction panel
+                createMarker: () => null, // Hide default ugly markers
+                lineOptions: {
+                    styles: [{ color: '#3b82f6', opacity: 0.9, weight: 6, shadowColor: '#000', shadowBlur: 10 }]
+                }
+            }).addTo(map);
+
+            routingControl.on('routesfound', function(e) {
+                const route = e.routes[0];
+                
+                // Update UI Navigation Panel
+                document.getElementById('route-info').classList.remove('hidden');
+                
+                const totalMinutes = Math.round(route.summary.totalTime / 60);
+                let timeString = totalMinutes < 60 ? `${totalMinutes} phút` : `${Math.floor(totalMinutes/60)}h ${totalMinutes%60}p`;
+                document.getElementById('route-time').textContent = timeString;
+                
+                const distanceKm = (route.summary.totalDistance / 1000).toFixed(1);
+                document.getElementById('route-distance').textContent = `${distanceKm} km`;
+
+                // If Demo Mode is active, override tracking with the route coordinates
+                if (isDemoMode) {
+                    demoRouteCoordinates = route.coordinates;
+                    demoCurrentIndex = 0;
+                    startDemoMode(); // Restart simulation on the new route
+                }
+            });
+            
+            routingControl.on('routingerror', function(e) {
+                console.error("Lỗi vẽ tuyến đường:", e);
+                alert("Không thể tìm được đường xe đi khả thi tới điểm này.");
+            });
+        }
+
+        // Event Listeners for Nav UI
+        document.getElementById('navigate-btn').addEventListener('click', searchAndNavigate);
+        document.getElementById('destination-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchAndNavigate();
+        });
+        
+        document.getElementById('cancel-route-btn').addEventListener('click', () => {
+            if (routingControl) map.removeControl(routingControl);
+            if (destinationMarker) map.removeLayer(destinationMarker);
+            routingControl = null;
+            
+            document.getElementById('route-info').classList.add('hidden');
+            document.getElementById('destination-input').value = '';
+            
+            // Revert to circular driving pattern if in Demo Mode
+            if (isDemoMode) {
+                demoRouteCoordinates = generateFakeRoute(userLocation || L.latLng(21.0285, 105.8542), 0.02, 50);
+                demoCurrentIndex = 0;
+                startDemoMode();
+            }
+        });
+
+        // --- 4. Calendar Logic ---
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const monthYear = document.getElementById('calendar-month-year');
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            const currentDate = now.getDate();
+
+            // Display Month/Year
+            monthYear.textContent = `Tháng ${currentMonth + 1}, ${currentYear}`;
+
+            // Get first day of month and total days
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            // Adjust first day to start on Monday (0 = Mon, ..., 6 = Sun)
+            let startDay = firstDay === 0 ? 6 : firstDay - 1;
+
+            grid.innerHTML = ''; // Clear previous
+
+            // Empty cells for previous month padding
+            for (let i = 0; i < startDay; i++) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'p-1';
+                grid.appendChild(emptyDiv);
+            }
+
+            const getLunarDateForCell = (day, month, year) => {
+                try {
+                    const dateObj = new Date(year, month, day);
+                    const lunarFormatter = new Intl.DateTimeFormat('vi-VN-u-ca-chinese', {
+                        day: 'numeric',
+                        month: 'numeric'
+                    });
+                    const rawLunar = lunarFormatter.format(dateObj); // returns something like "28/8"
+                    const parts = rawLunar.split('/');
+                    
+                    if (parts.length >= 2) {
+                        // If it's the 1st of the lunar month, display "1/month" (e.g., "1/8")
+                        if (parts[0] === '1') {
+                            return `${parts[0]}/${parts[1]}`;
+                        }
+                        return parts[0];
+                    }
+                    return rawLunar.replace(/Năm/i, '').trim();
+                } catch (e) {
+                    return "";
+                }
+            };
+
+            // Days of the month
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayDiv = document.createElement('div');
+                
+                dayDiv.className = 'flex flex-col items-center justify-center p-1 md:p-1.5 rounded-xl transition-colors cursor-default select-none aspect-square';
+                
+                // Solar Day
+                const numSpan = document.createElement('span');
+                numSpan.textContent = i;
+                numSpan.className = 'z-10 text-sm md:text-base font-bold leading-none';
+                
+                // Lunar Day
+                const lunarSpan = document.createElement('span');
+                lunarSpan.textContent = getLunarDateForCell(i, currentMonth, currentYear);
+                lunarSpan.className = 'z-10 text-[9px] md:text-[10px] mt-1 leading-none font-medium';
+
+                // Highlight current day
+                if (i === currentDate) {
+                    dayDiv.classList.add('bg-blue-600', 'text-white', 'shadow-md', 'shadow-blue-900/50');
+                    lunarSpan.classList.add('text-blue-200');
+                } else {
+                    dayDiv.classList.add('text-slate-200', 'hover:bg-slate-700/50');
+                    lunarSpan.classList.add('text-slate-500');
+                }
+                
+                dayDiv.appendChild(numSpan);
+                dayDiv.appendChild(lunarSpan);
+                grid.appendChild(dayDiv);
+            }
+        }
+
+        // Initialize map and calendar on load
+        window.addEventListener('load', () => {
+            initMap();
+            renderCalendar();
+        });
     </script>
 </body>
 </html>
