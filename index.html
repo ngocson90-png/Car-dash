@@ -83,7 +83,7 @@ input::placeholder{color:var(--muted)}
 #home.open{display:flex}
 #home h4{margin:8px 0 0;font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;font-weight:600}
 #home .hint{font-size:13px;color:var(--muted);line-height:1.5}
-#homeTop{display:flex;gap:6px;align-items:center;justify-content:space-between}
+#homeTop{display:flex;gap:6px;align-items:center;justify-content:space-between;flex-wrap:wrap}#homeTop .row{flex-wrap:wrap}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
 .tile{cursor:pointer;background:var(--panel2);border-radius:10px;overflow:hidden;font-size:12px;line-height:1.3}
@@ -253,6 +253,7 @@ body[data-theme=light] .cgo2{color:#1a73e8;border-color:#1a73e8}
 .navmode .leaflet-bottom.leaflet-right{bottom:84px}
 .carwrap{transition:transform .9s linear}
 .car{transition:transform .5s ease-out}
+#ytTap{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:4;display:none;background:rgba(0,0,0,.82);color:#fff;border:2px solid #fff;border-radius:32px;padding:0 26px;min-height:56px!important;font-size:19px;font-weight:700;box-shadow:0 3px 12px rgba(0,0,0,.6)}
 </style>
 </head>
 <body data-sky="clear-day" data-theme="dark">
@@ -273,7 +274,7 @@ body[data-theme=light] .cgo2{color:#1a73e8;border-color:#1a73e8}
 
   <!-- YOUTUBE -->
   <section class="panel" id="p-yt">
-    <div class="yt-main"><div class="player-wrap"><div id="player"></div><div id="ytMsg"></div><div id="home"></div></div><div id="queue"></div></div>
+    <div class="yt-main"><div class="player-wrap"><div id="player"></div><div id="ytMsg"></div><button id="ytTap"></button><div id="home"></div></div><div id="queue"></div></div>
     <div class="row yctl">
       <button id="yHome" title="Trang chủ">🏠</button>
       <button id="yPrev" title="Bài trước">⏮</button>
@@ -994,8 +995,16 @@ let autoplay = store.get('autoplay', true), homeResults = null, trendItems = [];
 /* ---- Trang chủ: lưới bài hát, bấm là phát ---- */
 const DEFAULTS=[
   {type:'video',id:'jfKfPfyJRdk',title:'Lofi Girl – lofi hip hop radio (24/7)'},
-  {type:'video',id:'4xDzrJKXOOY',title:'Synthwave radio – beats to chill/game to (24/7)'}
+  {type:'video',id:'4xDzrJKXOOY',title:'Synthwave radio – beats to chill/game to (24/7)'},
+  {type:'video',id:'5qap5aO4i9A',title:'Lofi Girl – beats to relax/study to (24/7)'}
 ];
+const HOME_TABS=[
+  ['🎵 Nhạc',['Nhạc trẻ','Nhạc Bolero','Nhạc EDM','Nhạc vàng','Rap Việt','Nhạc Hoa lời Việt','Nhạc US UK']],
+  ['🌿 Thư giãn',['Lofi chill','Nhạc không lời','Piano thư giãn','Nhạc thiền','Tiếng mưa','Nhạc xe hơi']],
+  ['🔎 Khám phá',['Podcast','Truyện audio','Tin tức hôm nay','Hài hước','Du lịch Việt Nam']],
+  ['🕘 Gần đây',null]
+];
+let homeTab=store.get('htab',0);
 const CHIPS=['Nhạc trẻ','Nhạc Bolero','Lofi chill','Nhạc EDM','Nhạc không lời','Nhạc vàng','Nhạc xe hơi'];
 function mkTile(it,onclick,isCur){
   const d=document.createElement('div'); d.className='tile'+(isCur?' cur':'');
@@ -1017,23 +1026,31 @@ function renderHome(){
   const top=document.createElement('div'); top.id='homeTop';
   const b=document.createElement('b'); b.textContent='🏠 Trang chủ';
   const btns=document.createElement('div'); btns.className='row';
-  const ap=document.createElement('button'); ap.textContent='Tự phát bài cuối khi mở: '+(autoplay?'Bật':'Tắt');
+  const ap=document.createElement('button'); ap.textContent='Tự phát: '+(autoplay?'Bật':'Tắt'); ap.title='Tự phát lại bài lần trước khi mở trang';
   ap.onclick=()=>{ autoplay=!autoplay; store.set('autoplay',autoplay); renderHome(); };
   const x=document.createElement('button'); x.textContent='✕'; x.onclick=closeHome;
   const cl=document.createElement('button'); cl.textContent='Xóa danh sách';
   cl.onclick=()=>{ if(!confirm('Xóa toàn bộ danh sách phát?')) return; list=[]; cur=-1; plIds=[]; save(); renderList(); renderHome(); try{ player.stopVideo(); }catch(e){} };
-  btns.append(ap,cl,x); top.append(b,btns); h.appendChild(top);
+  const yo=document.createElement('button'); yo.textContent='YouTube ↗'; yo.title='Mở trang YouTube gốc'; yo.onclick=()=>window.open('https://www.youtube.com/','_blank');
+  btns.append(yo,ap,cl,x); top.append(b,btns); h.appendChild(top);
 
-  const c=document.createElement('div'); c.className='chips';
-  CHIPS.forEach(k=>{ const bt=document.createElement('button'); bt.textContent='▶ '+k; bt.onclick=()=>playSearch(k); c.appendChild(bt); });
-  h.appendChild(c);
-  const p=document.createElement('div'); p.className='hint';
-  p.textContent='Chạm 1 thể loại để phát ngay. Hoặc bấm 🎤 nói tên bài, hoặc 📋 để phát link vừa sao chép.';
-  h.appendChild(p);
-  if(homeResults) homeSection('Kết quả: '+homeResults.q, homeResults.items, it=>addItem({...it},true));
-  homeSection('Nghe gần đây', list, (it,i)=>play(i), (it,i)=>i===cur);
-  homeSection('Thịnh hành (Việt Nam)', trendItems, it=>addItem({...it},true));
-  homeSection('Gợi ý', DEFAULTS, it=>addItem({...it},true));
+  const tabs=document.createElement('div'); tabs.className='chips';
+  HOME_TABS.forEach(([label],i)=>{ const t=document.createElement('button'); t.textContent=label; t.className=i===homeTab?'on':''; t.onclick=()=>{ homeTab=i; store.set('htab',i); renderHome(); }; tabs.appendChild(t); });
+  h.appendChild(tabs);
+  const tb=HOME_TABS[homeTab];
+  if(tb[1]){
+    const c=document.createElement('div'); c.className='chips';
+    tb[1].forEach(k=>{ const bt=document.createElement('button'); bt.textContent='▶ '+k; bt.onclick=()=>playSearch(k); c.appendChild(bt); });
+    h.appendChild(c);
+    const p=document.createElement('div'); p.className='hint';
+    p.textContent='Chạm 1 mục để phát ngay. Hoặc bấm 🎤 nói tên bài, hoặc 📋 để phát link vừa sao chép.';
+    h.appendChild(p);
+  }else{
+    if(homeResults) homeSection('Kết quả: '+homeResults.q, homeResults.items, it=>addItem({...it},true));
+    homeSection('Nghe gần đây', list, (it,i)=>play(i), (it,i)=>i===cur);
+    homeSection('Thịnh hành (Việt Nam)', trendItems, it=>addItem({...it},true));
+    homeSection('Gợi ý', DEFAULTS, it=>addItem({...it},true));
+  }
 }
 function openHome(){ renderHome(); $('#home').classList.add('open'); refreshTrend(); }
 function closeHome(){ $('#home').classList.remove('open'); }
@@ -1066,8 +1083,23 @@ function fromPiped(j){
 function fromInv(a){
   return (Array.isArray(a)?a:[]).filter(x=>x.videoId&&(!x.type||x.type==='video')&&!(x.lengthSeconds>0&&x.lengthSeconds<65)).map(x=>({type:'video',id:x.videoId,title:x.title}));
 }
+let instCache=store.get('inst',null);
+function backends(){
+  const fresh=instCache&&Date.now()-instCache.t<24*3600e3;
+  return {p:[...new Set([...(fresh?instCache.p:[]),...PIPED])].slice(0,7), i:[...new Set([...(fresh?instCache.i:[]),...INVID])].slice(0,7)};
+}
+async function discover(){   // lấy danh sách máy chủ đang khỏe, làm mới mỗi ngày (không bắt buộc)
+  if(instCache&&Date.now()-instCache.t<24*3600e3) return;
+  try{
+    const [pi,iv]=await Promise.allSettled([fetchJ('https://piped-instances.kavin.rocks/',7000),fetchJ('https://api.invidious.io/instances.json?sort_by=health',7000)]);
+    const p=(Array.isArray(pi.value)?pi.value:[]).filter(x=>x.api_url&&(x.uptime_24h==null||x.uptime_24h>90)).sort((a,b)=>(b.uptime_24h||0)-(a.uptime_24h||0)).map(x=>x.api_url.replace(/\/$/,'')).slice(0,5);
+    const i=(Array.isArray(iv.value)?iv.value:[]).filter(x=>x[1]&&x[1].api===true&&x[1].cors===true&&x[1].type==='https'&&x[1].uri).map(x=>x[1].uri.replace(/\/$/,'')).slice(0,5);
+    if(p.length||i.length){ instCache={t:Date.now(),p,i}; store.set('inst',instCache); }
+  }catch(e){}
+}
 function anyBackend(pPath,iPath){
-  const tasks=[...PIPED.map(b=>fetchJ(b+pPath).then(fromPiped)),...INVID.map(b=>fetchJ(b+iPath).then(fromInv))]
+  const B=backends();
+  const tasks=[...B.p.map(b=>fetchJ(b+pPath,7000).then(fromPiped)),...B.i.map(b=>fetchJ(b+iPath,7000).then(fromInv))]
     .map(t=>t.then(r=>{ if(!r.length) throw new Error('empty'); return r; }));
   return Promise.any(tasks);
 }
@@ -1161,12 +1193,34 @@ function renderQueue(){
   });
 }
 async function seedList(){
-  let items=[];
-  try{ items=(await loadTrend()).slice(0,25); }catch(e){}
-  if(!items.length) items=DEFAULTS.map(x=>({...x}));
-  list=items; cur=0; save(); renderList();
+  list=DEFAULTS.map(x=>({...x})); cur=0; save(); renderList();      // phát NGAY, không chờ mạng
+  loadTrend().then(items=>{                                          // nạp thêm nhạc thịnh hành ở nền, không làm gián đoạn bài đang phát
+    const have=new Set(list.map(x=>x.id)), add=(items||[]).filter(x=>!have.has(x.id)).slice(0,25);
+    if(add.length){ list.push(...add); save(); renderList(); }
+  }).catch(()=>{});
 }
-
+let tapFn=null, watchT=null;
+function showTap(label,fn){ const b=$('#ytTap'); b.textContent=label; tapFn=fn; b.style.display='block'; }
+function hideTap(){ $('#ytTap').style.display='none'; tapFn=null; }
+$('#ytTap').onclick=()=>{ const f=tapFn; hideTap(); if(f) f(); };
+let firstTapArmed=false;
+function armFirstTap(){   // lần chạm đầu tiên vào trang (ngoài nút nổi) sẽ bật tiếng
+  if(firstTapArmed) return; firstTapArmed=true;
+  const h=e=>{
+    if(e.target && e.target.id==='ytTap') return;
+    document.removeEventListener('pointerdown',h,true);
+    try{ player.unMute(); player.setVolume(100); }catch(err){}
+    setTimeout(()=>{ try{ if(!player.isMuted() && $('#ytTap').textContent.indexOf('🔇')===0) hideTap(); }catch(err){} },250);
+  };
+  document.addEventListener('pointerdown',h,true);
+}
+function armWatch(){   // sau 6 giây vẫn chưa phát (trình duyệt chặn tự phát) -> hiện nút to để chạm 1 lần
+  clearTimeout(watchT);
+  watchT=setTimeout(()=>{ try{
+    const st=player.getPlayerState();
+    if(st!==1 && st!==3 && $('#ytMsg').style.display!=='flex') showTap('▶ Chạm để phát',()=>{ try{ player.unMute(); player.setVolume(100); player.playVideo(); }catch(e){} });
+  }catch(e){} },6000);
+}
 function loadYT(){
   if(location.protocol==='file:'){
     ytMsg('⚠ Bạn đang mở file trực tiếp từ máy (file://), YouTube sẽ không phát.<br>Hãy đưa file lên hosting/GitHub Pages (https) hoặc chạy bằng <code>localhost</code>.');
@@ -1190,6 +1244,10 @@ window.onYouTubeIframeAPIReady=()=>{
         else restoreYT();
       },
       onStateChange:e=>{
+        if(e.data===YT.PlayerState.PLAYING){
+          clearTimeout(watchT);
+          try{ if(player.isMuted()) showTap('🔇 Chạm để bật tiếng',()=>{ player.unMute(); player.setVolume(100); }); else hideTap(); }catch(err){}
+        }
         if(e.data===YT.PlayerState.ENDED) nextItem();
         if(e.data===YT.PlayerState.PLAYING){
           ytMsg('');
@@ -1226,8 +1284,8 @@ async function restoreYT(){
       player.mute(); closeHome();
       if(it.type==='playlist') player.loadPlaylist({list:it.id,listType:'playlist',index:idx,startSeconds:t});
       else player.loadVideoById({videoId:it.id,startSeconds:t});
-      toast('Đang tự phát (tắt tiếng) – chạm vào màn hình để bật tiếng');
-      document.addEventListener('pointerdown',()=>{ try{ player.unMute(); player.setVolume(100); }catch(e){} },{once:true});
+      armWatch();
+      armFirstTap();
     }else{
       if(it.type==='playlist') player.cuePlaylist({list:it.id,listType:'playlist',index:idx,startSeconds:t});
       else player.cueVideoById({videoId:it.id,startSeconds:t});
@@ -1253,6 +1311,7 @@ function play(i){
   const it=list[i];
   if(it.type==='playlist') player.loadPlaylist({list:it.id,listType:'playlist',index:0});
   else player.loadVideoById(it.id);
+  armWatch();
 }
 let advancing=false;
 async function nextItem(){
@@ -1348,7 +1407,7 @@ function setupMedia(){
 $('#yHome').onclick=()=>{ $('#home').classList.contains('open') ? closeHome() : openHome(); };
 
 /* ================= KHỞI ĐỘNG ================= */
-renderList(); emptyHint(); loadYT();
+renderList(); emptyHint(); loadYT(); discover();
 if(!list[cur] && !autoplay) openHome();   // tự phát tắt + chưa có bài -> hiện Trang chủ
 hourSky();
 (async()=>{
