@@ -53,6 +53,7 @@
             filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
         }
 
+        /* Fix leaflet routing styling & remove missing image box artifacts */
         .leaflet-routing-container {
             background-color: rgba(30, 41, 59, 0.95) !important;
             color: #f8fafc !important;
@@ -68,6 +69,21 @@
             border: 1px solid #475569 !important;
             border-radius: 0.5rem;
             padding: 5px 10px;
+        }
+        /* Custom clean up for clear buttons causing white square bugs */
+        .leaflet-routing-geocoder input {
+            padding-right: 20px !important;
+        }
+        .leaflet-routing-remove-waypoint {
+            background-color: transparent !important;
+            color: #ef4444 !important;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .leaflet-routing-collapse-button {
+            background-color: #334155 !important;
+            color: #38bdf8 !important;
+            border-radius: 4px;
         }
         .leaflet-routing-alt {
             background-color: transparent !important;
@@ -96,39 +112,39 @@
     <!-- Sidebar / Left Panel (Split 50/50 halves) -->
     <div class="glass-panel w-full md:w-[380px] lg:w-[420px] h-2/5 md:h-full flex flex-col p-3 gap-3 z-20 shadow-2xl relative order-2 md:order-1 overflow-y-auto">
         
-        <!-- NỬA TRÊN: Khung đồng hồ & Lịch âm dương siêu lớn -->
-        <div class="glass-card flex flex-col justify-between items-center p-4 min-h-[220px] cursor-pointer hover:bg-slate-800/60 transition-colors border-sky-500/30 flex-none" onclick="toggleClock()" title="Chạm để chuyển đổi kiểu đồng hồ">
+        <!-- NỬA TRÊN: Khung đồng hồ cao gấp đôi, chuyển đổi số/kim & Lịch âm dương siêu lớn -->
+        <div class="glass-card flex flex-col justify-between items-center p-5 min-h-[260px] cursor-pointer hover:bg-slate-800/60 transition-colors border-sky-500/30 flex-none" onclick="toggleClock()" title="Chạm để chuyển đổi kiểu đồng hồ">
             
-            <!-- Đồng hồ số (Mặc định to) -->
-            <div id="digital-view" class="flex flex-col items-center w-full">
-                <h1 id="clock" class="text-6xl lg:text-7xl leading-none font-digital font-bold text-transparent bg-clip-text bg-gradient-to-b from-white via-sky-200 to-sky-500 drop-shadow-[0_0_20px_rgba(14,165,233,0.4)] tracking-wide">
+            <!-- Đồng hồ số (Cực lớn) -->
+            <div id="digital-view" class="flex flex-col items-center w-full my-auto">
+                <h1 id="clock" class="text-7xl lg:text-8xl leading-none font-digital font-bold text-transparent bg-clip-text bg-gradient-to-b from-white via-sky-200 to-sky-500 drop-shadow-[0_0_25px_rgba(14,165,233,0.5)] tracking-wide">
                     --:--
                 </h1>
             </div>
 
-            <!-- Đồng hồ kim (Ẩn mặc định) -->
-            <div id="analog-view" class="hidden flex-col items-center w-full">
-                <div class="relative w-[120px] h-[120px] rounded-full flex-none border-[4px] border-sky-500/60 bg-slate-900 shadow-[inset_0_0_30px_rgba(0,0,0,0.9),0_0_20px_rgba(14,165,233,0.3)]">
-                    <div class="absolute top-2 left-[57px] w-[2px] h-[10px] bg-sky-400"></div>
-                    <div class="absolute bottom-2 left-[57px] w-[2px] h-[10px] bg-sky-400"></div>
-                    <div class="absolute top-[57px] left-2 w-[10px] h-[2px] bg-sky-400"></div>
-                    <div class="absolute top-[57px] right-2 w-[10px] h-[2px] bg-sky-400"></div>
+            <!-- Đồng hồ kim (Ẩn mặc định, siêu lớn) -->
+            <div id="analog-view" class="hidden flex-col items-center w-full my-auto">
+                <div class="relative w-[140px] h-[140px] rounded-full flex-none border-[5px] border-sky-500/60 bg-slate-900 shadow-[inset_0_0_35px_rgba(0,0,0,0.9),0_0_25px_rgba(14,165,233,0.4)]">
+                    <div class="absolute top-2 left-[64px] w-[2px] h-[12px] bg-sky-400"></div>
+                    <div class="absolute bottom-2 left-[64px] w-[2px] h-[12px] bg-sky-400"></div>
+                    <div class="absolute top-[64px] left-2 w-[12px] h-[2px] bg-sky-400"></div>
+                    <div class="absolute top-[64px] right-2 w-[12px] h-[2px] bg-sky-400"></div>
 
-                    <div id="hour-hand" class="absolute bg-white rounded-full shadow-md" style="width:5px; height:35px; top:25px; left:56px; transform-origin: bottom;"></div>
-                    <div id="minute-hand" class="absolute bg-slate-300 rounded-full shadow-md" style="width:3px; height:48px; top:12px; left:57px; transform-origin: bottom;"></div>
-                    <div id="second-hand" class="absolute bg-red-500 rounded-full" style="width:1px; height:52px; top:8px; left:58px; transform-origin: bottom;"></div>
-                    <div class="absolute bg-sky-400 rounded-full shadow-[0_0_10px_#fff] z-10" style="width:10px; height:10px; top:54px; left:54px;"></div>
+                    <div id="hour-hand" class="absolute bg-white rounded-full shadow-md" style="width:6px; height:40px; top:30px; left:63px; transform-origin: bottom;"></div>
+                    <div id="minute-hand" class="absolute bg-slate-300 rounded-full shadow-md" style="width:4px; height:56px; top:14px; left:64px; transform-origin: bottom;"></div>
+                    <div id="second-hand" class="absolute bg-red-500 rounded-full" style="width:1px; height:60px; top:10px; left:65px; transform-origin: bottom;"></div>
+                    <div class="absolute bg-sky-400 rounded-full shadow-[0_0_12px_#fff] z-10" style="width:12px; height:12px; top:61px; left:61px;"></div>
                 </div>
             </div>
             
             <!-- Ngày Dương & Âm Lịch (Cực lớn và rõ ràng) -->
             <div class="flex flex-col items-center text-center w-full border-t border-slate-700/50 pt-3 mt-2">
-                <p id="date-solar" class="text-base lg:text-lg font-bold text-slate-100 tracking-wide">
+                <p id="date-solar" class="text-lg lg:text-xl font-bold text-slate-100 tracking-wide font-digital">
                     Đang tải ngày...
                 </p>
-                <div class="flex items-center justify-center gap-2 mt-2 px-4 py-1.5 bg-slate-900/90 rounded-full border border-sky-500/40 shadow-inner w-full">
-                    <i class="fa-solid fa-moon text-yellow-300 text-sm"></i>
-                    <p id="date-lunar" class="text-sm lg:text-base text-sky-200 font-semibold font-digital">
+                <div class="flex items-center justify-center gap-2 mt-2 px-4 py-2 bg-slate-900/90 rounded-full border border-sky-500/40 shadow-inner w-full">
+                    <i class="fa-solid fa-moon text-yellow-300 text-base"></i>
+                    <p id="date-lunar" class="text-base lg:text-lg text-sky-200 font-bold font-digital">
                         --/--
                     </p>
                 </div>
@@ -381,6 +397,7 @@
                 className: 'dark-mode-map'
             }).addTo(map);
 
+            // Chạm/Click vào bản đồ để tự động chỉ đường đến điểm đó từ vị trí xe
             map.on('click', function(e) {
                 if (currentLat && currentLng && routingControl) {
                     routingControl.setWaypoints([
@@ -389,6 +406,11 @@
                     ]);
                 }
             });
+
+            // Ép bản đồ tải lại kích thước để tránh lỗi nền xám
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 300);
         }
 
         initMap();
@@ -396,6 +418,7 @@
         function centerMapOnUser() {
             if (currentLat && currentLng && map) {
                 map.setView([currentLat, currentLng], 17);
+                map.invalidateSize();
             }
         }
 
@@ -440,6 +463,7 @@
                         document.getElementById('loading').style.opacity = '0';
                         setTimeout(() => document.getElementById('loading').style.display = 'none', 500);
                         map.setView([lat, lng], 17);
+                        map.invalidateSize();
                         fetchWeather(lat, lng);
                         setupRouting(lat, lng);
                         isFirstLocation = false;
@@ -476,6 +500,7 @@
                         const mockLat = 10.762622, mockLng = 106.660172;
                         currentLat = mockLat; currentLng = mockLng;
                         map.setView([mockLat, mockLng], 15);
+                        map.invalidateSize();
                         userMarker = L.marker([mockLat, mockLng], {icon: carIcon}).addTo(map);
                         fetchWeather(mockLat, mockLng);
                         setupRouting(mockLat, mockLng);
