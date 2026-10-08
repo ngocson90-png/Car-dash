@@ -48,12 +48,12 @@
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
 
-        /* Dark mode map styling filter */
+        /* Dark mode map styling filter for OpenStreetMap */
         .dark-mode-map {
             filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
         }
 
-        /* Fix leaflet routing styling & remove missing image box artifacts */
+        /* Fix Leaflet Routing container styling & remove broken icon artifacts */
         .leaflet-routing-container {
             background-color: rgba(30, 41, 59, 0.95) !important;
             color: #f8fafc !important;
@@ -70,15 +70,20 @@
             border-radius: 0.5rem;
             padding: 5px 10px;
         }
-        /* Custom clean up for clear buttons causing white square bugs */
         .leaflet-routing-geocoder input {
-            padding-right: 20px !important;
+            padding-right: 25px !important;
         }
+        /* Sửa lỗi khung trắng/chữ X bằng cách định hình lại nút clear waypoint */
         .leaflet-routing-remove-waypoint {
-            background-color: transparent !important;
-            color: #ef4444 !important;
-            font-weight: bold;
-            font-size: 14px;
+            background-color: #475569 !important;
+            color: #f8fafc !important;
+            border-radius: 50%;
+            width: 18px !important;
+            height: 18px !important;
+            font-size: 11px !important;
+            line-height: 18px !important;
+            text-align: center;
+            text-decoration: none;
         }
         .leaflet-routing-collapse-button {
             background-color: #334155 !important;
@@ -109,7 +114,7 @@
         <p class="text-slate-400 mt-2">Đang tìm tín hiệu GPS</p>
     </div>
 
-    <!-- Sidebar / Left Panel (Split 50/50 halves) -->
+    <!-- Sidebar / Left Panel -->
     <div class="glass-panel w-full md:w-[380px] lg:w-[420px] h-2/5 md:h-full flex flex-col p-3 gap-3 z-20 shadow-2xl relative order-2 md:order-1 overflow-y-auto">
         
         <!-- NỬA TRÊN: Khung đồng hồ cao gấp đôi, chuyển đổi số/kim & Lịch âm dương siêu lớn -->
@@ -340,12 +345,10 @@
             const totalDays = new Date(year, month + 1, 0).getDate();
             const today = new Date();
 
-            // Các ô trống đầu tháng
             for (let i = 0; i < firstDayIndex; i++) {
                 grid.innerHTML += `<div></div>`;
             }
 
-            // Render các ngày trong tháng
             const chineseFormatter = new Intl.DateTimeFormat('vi-VN-u-ca-chinese', { day: 'numeric', month: 'numeric' });
 
             for (let day = 1; day <= totalDays; day++) {
@@ -355,7 +358,7 @@
                 let lunarDayStr = '';
                 try {
                     let parts = chineseFormatter.format(curr).split(' ');
-                    lunarDayStr = parts[1] || parts[0]; // Lấy ngày âm
+                    lunarDayStr = parts[1] || parts[0];
                 } catch(e) { lunarDayStr = ''; }
 
                 grid.innerHTML += `
@@ -390,14 +393,14 @@
             map = L.map('map', { zoomControl: false }).setView([16.047079, 108.206230], 6);
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-            // OpenStreetMap tile layer with Dark Mode CSS filter
+            // Dùng nguồn bản đồ OpenStreetMap kết hợp CSS Invert Dark Mode (Ổn định, không bao giờ lỗi Key)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap',
                 maxZoom: 19,
                 className: 'dark-mode-map'
             }).addTo(map);
 
-            // Chạm/Click vào bản đồ để tự động chỉ đường đến điểm đó từ vị trí xe
+            // Chạm/Click vào bản đồ để chỉ đường tự động từ vị trí xe đến điểm đó
             map.on('click', function(e) {
                 if (currentLat && currentLng && routingControl) {
                     routingControl.setWaypoints([
@@ -407,7 +410,6 @@
                 }
             });
 
-            // Ép bản đồ tải lại kích thước để tránh lỗi nền xám
             setTimeout(() => {
                 map.invalidateSize();
             }, 300);
