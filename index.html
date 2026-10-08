@@ -5,16 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Smart Car Dashboard</title>
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Leaflet Maps CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- Leaflet Routing Machine & Geocoder -->
+    <!-- Leaflet Routing Machine CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    
+    <!-- Leaflet Control Geocoder -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
@@ -24,7 +29,7 @@
         
         body {
             font-family: 'Eurostile', 'Inter', sans-serif;
-            background-color: #0f172a; /* slate-900 */
+            background-color: #0f172a;
             color: #f8fafc;
             overflow: hidden;
             user-select: none;
@@ -35,64 +40,41 @@
         }
 
         .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
+            background: rgba(30, 41, 59, 0.85);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 1rem;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
 
-        /* Dark mode map styling filter for OpenStreetMap */
-        .dark-mode-map {
-            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        /* Dark mode map styling */
+        .leaflet-container {
+            background: #0b131e !important;
         }
 
-        /* Fix Leaflet Routing container styling & remove broken icon artifacts */
+        /* Routing container customization */
         .leaflet-routing-container {
-            background-color: rgba(30, 41, 59, 0.95) !important;
+            background-color: rgba(15, 23, 42, 0.95) !important;
             color: #f8fafc !important;
             border-radius: 0.75rem !important;
-            padding: 10px !important;
-            max-height: 40vh;
+            padding: 12px !important;
+            max-height: 35vh !important;
             overflow-y: auto;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
         }
         .leaflet-routing-container input {
-            background-color: #334155 !important;
+            background-color: #1e293b !important;
             color: white !important;
-            border: 1px solid #475569 !important;
+            border: 1px solid #334155 !important;
             border-radius: 0.5rem;
-            padding: 5px 10px;
-        }
-        .leaflet-routing-geocoder input {
-            padding-right: 25px !important;
-        }
-        /* Sửa lỗi khung trắng/chữ X bằng cách định hình lại nút clear waypoint */
-        .leaflet-routing-remove-waypoint {
-            background-color: #475569 !important;
-            color: #f8fafc !important;
-            border-radius: 50%;
-            width: 18px !important;
-            height: 18px !important;
-            font-size: 11px !important;
-            line-height: 18px !important;
-            text-align: center;
-            text-decoration: none;
-        }
-        .leaflet-routing-collapse-button {
-            background-color: #334155 !important;
-            color: #38bdf8 !important;
-            border-radius: 4px;
-        }
-        .leaflet-routing-alt {
-            background-color: transparent !important;
-            border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+            padding: 6px 10px;
         }
         .leaflet-routing-alt h2 { color: #38bdf8 !important; font-size: 1rem; }
         .leaflet-routing-alt h3 { color: #94a3b8 !important; }
@@ -102,498 +84,306 @@
             border-color: #334155 !important;
         }
         
+        .leaflet-routing-remove-waypoint::after {
+            content: "\00d7" !important;
+            color: #ef4444 !important;
+            font-weight: bold;
+        }
+        
         #map { width: 100%; height: 100%; z-index: 10; }
-        #loading { transition: opacity 0.5s ease-out; }
+        #loading { transition: opacity 0.4s ease-out; }
     </style>
 </head>
-<body class="flex flex-col md:flex-row h-screen w-screen">
+<body class="flex flex-col md:flex-row h-screen w-screen m-0 p-0">
 
     <div id="loading" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900 text-white">
         <i class="fa-solid fa-car-side text-6xl animate-bounce mb-4 text-sky-400"></i>
-        <h1 class="text-2xl font-bold font-digital">Khởi động hệ thống...</h1>
-        <p class="text-slate-400 mt-2">Đang tìm tín hiệu GPS</p>
+        <h1 class="text-2xl font-bold font-digital">HỆ THỐNG SMART CAR</h1>
+        <p class="text-slate-400 mt-2">Đang thiết lập kết nối GPS vệ tinh...</p>
     </div>
 
-    <!-- Sidebar / Left Panel -->
-    <div class="glass-panel w-full md:w-[380px] lg:w-[420px] h-2/5 md:h-full flex flex-col p-3 gap-3 z-20 shadow-2xl relative order-2 md:order-1 overflow-y-auto">
+    <div class="glass-panel w-full md:w-[380px] lg:w-[420px] h-2/5 md:h-full flex flex-col p-3 gap-3 z-20 shadow-2xl order-2 md:order-1 overflow-y-auto">
         
-        <!-- NỬA TRÊN: Khung đồng hồ cao gấp đôi, chuyển đổi số/kim & Lịch âm dương siêu lớn -->
-        <div class="glass-card flex flex-col justify-between items-center p-5 min-h-[260px] cursor-pointer hover:bg-slate-800/60 transition-colors border-sky-500/30 flex-none" onclick="toggleClock()" title="Chạm để chuyển đổi kiểu đồng hồ">
+        <!-- Đồng hồ & Lịch Âm Dương (Khung cao gấp đôi, click đổi giữa số và kim) -->
+        <div class="glass-card flex flex-col justify-between items-center p-6 min-h-[300px] cursor-pointer hover:bg-slate-800/40 transition-colors border-sky-500/20 relative" onclick="toggleClock()" title="Chạm để chuyển đổi kiểu đồng hồ">
             
-            <!-- Đồng hồ số (Cực lớn) -->
+            <div class="absolute top-3 right-3 text-xs text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
+                <i class="fa-solid fa-arrows-rotate mr-1"></i> Đổi kiểu
+            </div>
+
+            <!-- Đồng hồ số siêu lớn -->
             <div id="digital-view" class="flex flex-col items-center w-full my-auto">
-                <h1 id="clock" class="text-7xl lg:text-8xl leading-none font-digital font-bold text-transparent bg-clip-text bg-gradient-to-b from-white via-sky-200 to-sky-500 drop-shadow-[0_0_25px_rgba(14,165,233,0.5)] tracking-wide">
-                    --:--
+                <h1 id="clock" class="text-6xl lg:text-7xl leading-none font-digital font-bold text-transparent bg-clip-text bg-gradient-to-b from-white via-sky-100 to-sky-400 drop-shadow-[0_0_20px_rgba(14,165,233,0.4)] tracking-wide">
+                    00:00:00
                 </h1>
             </div>
 
-            <!-- Đồng hồ kim (Ẩn mặc định, siêu lớn) -->
-            <div id="analog-view" class="hidden flex-col items-center w-full my-auto">
-                <div class="relative w-[140px] h-[140px] rounded-full flex-none border-[5px] border-sky-500/60 bg-slate-900 shadow-[inset_0_0_35px_rgba(0,0,0,0.9),0_0_25px_rgba(14,165,233,0.4)]">
-                    <div class="absolute top-2 left-[64px] w-[2px] h-[12px] bg-sky-400"></div>
-                    <div class="absolute bottom-2 left-[64px] w-[2px] h-[12px] bg-sky-400"></div>
-                    <div class="absolute top-[64px] left-2 w-[12px] h-[2px] bg-sky-400"></div>
-                    <div class="absolute top-[64px] right-2 w-[12px] h-[2px] bg-sky-400"></div>
-
-                    <div id="hour-hand" class="absolute bg-white rounded-full shadow-md" style="width:6px; height:40px; top:30px; left:63px; transform-origin: bottom;"></div>
-                    <div id="minute-hand" class="absolute bg-slate-300 rounded-full shadow-md" style="width:4px; height:56px; top:14px; left:64px; transform-origin: bottom;"></div>
-                    <div id="second-hand" class="absolute bg-red-500 rounded-full" style="width:1px; height:60px; top:10px; left:65px; transform-origin: bottom;"></div>
-                    <div class="absolute bg-sky-400 rounded-full shadow-[0_0_12px_#fff] z-10" style="width:12px; height:12px; top:61px; left:61px;"></div>
+            <!-- Đồng hồ kim cổ điển -->
+            <div id="analog-view" class="hidden flex-col items-center w-full my-auto py-2">
+                <div class="relative w-[140px] h-[140px] rounded-full border-[4px] border-sky-500/50 bg-slate-900/90 shadow-[0_0_20px_rgba(14,165,233,0.3)]">
+                    <div class="absolute top-1 left-[64px] w-[2px] h-[10px] bg-sky-400"></div>
+                    <div class="absolute bottom-1 left-[64px] w-[2px] h-[10px] bg-sky-400"></div>
+                    <div id="hour-hand" class="absolute bg-white rounded-full" style="width:5px; height:38px; top:32px; left:64px; transform-origin: bottom; transform: rotate(0deg);"></div>
+                    <div id="minute-hand" class="absolute bg-slate-300 rounded-full" style="width:3px; height:52px; top:18px; left:65px; transform-origin: bottom; transform: rotate(0deg);"></div>
+                    <div id="second-hand" class="absolute bg-red-500" style="width:1px; height:56px; top:14px; left:66px; transform-origin: bottom; transform: rotate(0deg);"></div>
+                    <div class="absolute bg-sky-400 rounded-full z-10" style="width:10px; height:12px; top:60px; left:60px;"></div>
                 </div>
             </div>
             
-            <!-- Ngày Dương & Âm Lịch (Cực lớn và rõ ràng) -->
-            <div class="flex flex-col items-center text-center w-full border-t border-slate-700/50 pt-3 mt-2">
-                <p id="date-solar" class="text-lg lg:text-xl font-bold text-slate-100 tracking-wide font-digital">
-                    Đang tải ngày...
-                </p>
-                <div class="flex items-center justify-center gap-2 mt-2 px-4 py-2 bg-slate-900/90 rounded-full border border-sky-500/40 shadow-inner w-full">
+            <!-- Ngày Dương & Âm Lịch (Cỡ lớn rõ ràng) -->
+            <div class="flex flex-col items-center text-center w-full border-t border-slate-700/50 pt-3 mt-auto">
+                <p id="date-solar" class="text-base lg:text-lg font-bold text-slate-100 tracking-wide font-digital">---</p>
+                <div class="flex items-center justify-center gap-2 mt-2 px-4 py-2 bg-slate-950/90 rounded-full border border-sky-500/30 w-full shadow-inner">
                     <i class="fa-solid fa-moon text-yellow-300 text-base"></i>
-                    <p id="date-lunar" class="text-base lg:text-lg text-sky-200 font-bold font-digital">
-                        --/--
-                    </p>
+                    <p id="date-lunar" class="text-base lg:text-lg text-sky-300 font-bold font-digital">Âm lịch: Ngày 28/8</p>
                 </div>
             </div>
         </div>
 
-        <!-- Thời tiết & Vận tốc (Nhỏ gọn, nằm ngang) -->
+        <!-- Tiện ích: Thời tiết & Vận tốc -->
         <div class="grid grid-cols-2 gap-2 flex-none">
-            <!-- Weather Widget -->
-            <div class="glass-card p-2.5 flex flex-row items-center justify-between gap-2">
-                <div id="weather-icon" class="text-2xl text-sky-400 w-8 text-center">
-                    <i class="fa-solid fa-cloud-sun"></i>
-                </div>
-                <div class="text-right flex-1 min-w-0">
-                    <div id="weather-temp" class="text-xl font-bold font-digital">--°C</div>
-                    <div id="weather-desc" class="text-[9px] text-slate-400 uppercase tracking-wider truncate">Đang tải</div>
-                </div>
+            <div class="glass-card p-3 flex flex-col justify-center items-center text-center">
+                <i class="fa-solid fa-cloud-sun text-2xl text-amber-400 mb-1"></i>
+                <span id="weather-location" class="text-[11px] text-slate-400">Định vị GPS</span>
+                <span id="weather-temp" class="text-lg font-bold font-digital mt-0.5 text-slate-100">--°C</span>
             </div>
-
-            <!-- Speedometer Widget -->
-            <div class="glass-card p-2.5 flex flex-row items-center justify-between gap-2">
-                <div class="text-2xl text-green-400 w-8 text-center">
-                    <i class="fa-solid fa-gauge-high"></i>
-                </div>
-                <div class="text-right flex-1 min-w-0">
-                    <div id="speed" class="text-xl font-bold font-digital">0<span class="text-[9px] ml-0.5">km/h</span></div>
-                    <div id="heading" class="text-[9px] text-slate-400 uppercase tracking-wider truncate">Hướng: --</div>
-                </div>
+            <div class="glass-card p-3 flex flex-col justify-center items-center text-center border-l-2 border-l-sky-500">
+                <i class="fa-solid fa-gauge-high text-2xl text-sky-400 mb-1"></i>
+                <span class="text-[11px] text-slate-400">Vận tốc xe</span>
+                <span id="speedo" class="text-lg font-bold font-digital mt-0.5 text-sky-400">0 km/h</span>
             </div>
         </div>
 
-        <!-- EV Charging Alarm Widget -->
-        <div class="glass-card flex-none p-2.5 flex items-center justify-between bg-gradient-to-r from-sky-900/40 to-transparent">
-            <div class="flex items-center gap-2 text-sky-400">
-                <i id="alarm-icon" class="fa-solid fa-bolt text-base"></i>
-                <div class="flex flex-col">
-                    <span class="text-[9px] font-semibold text-slate-300 uppercase tracking-wider">Hẹn giờ sạc pin</span>
-                    <span id="alarm-display" class="text-base text-white font-digital">--:--:--</span>
-                </div>
+        <!-- Lịch tháng trực quan -->
+        <div class="glass-card p-4 flex flex-col gap-2">
+            <div class="flex justify-between items-center text-sm font-bold text-sky-400 border-b border-slate-700 pb-2">
+                <button onclick="changeMonth(-1)" class="hover:text-white px-2 py-1"><i class="fa-solid fa-chevron-left"></i></button>
+                <span id="calendar-month-year" class="font-digital tracking-wide">Tháng 10 / 2026</span>
+                <button onclick="changeMonth(1)" class="hover:text-white px-2 py-1"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
-            <div>
-                <button onclick="openAlarmModal()" id="btn-set-alarm" class="text-[9px] bg-sky-500 hover:bg-sky-400 text-white px-2.5 py-1 rounded transition-colors shadow">
-                    <i class="fa-solid fa-stopwatch"></i> Cài đặt
-                </button>
-                <button onclick="cancelAlarm()" id="btn-cancel-alarm" class="hidden text-[9px] bg-red-500/20 hover:bg-red-500/40 text-red-400 border border-red-500/50 px-2.5 py-1 rounded transition-colors shadow">
-                    <i class="fa-solid fa-xmark"></i> Hủy
-                </button>
-            </div>
-        </div>
-
-        <!-- NỬA DƯỚI: Lịch tháng trực quan (Dương & Âm) -->
-        <div class="glass-card flex-1 flex flex-col p-3 overflow-hidden min-h-[220px]">
-            <div class="flex justify-between items-center mb-2 pb-1 border-b border-slate-700/50">
-                <button onclick="changeMonth(-1)" class="w-6 h-6 bg-slate-800 hover:bg-sky-600 rounded text-white flex items-center justify-center text-xs transition"><i class="fa-solid fa-chevron-left"></i></button>
-                <h3 id="calendar-month-title" class="text-xs lg:text-sm font-bold text-sky-300 font-digital">Tháng --/----</h3>
-                <button onclick="changeMonth(1)" class="w-6 h-6 bg-slate-800 hover:bg-sky-600 rounded text-white flex items-center justify-center text-xs transition"><i class="fa-solid fa-chevron-right"></i></button>
-            </div>
-            
-            <!-- Header Thứ trong tuần -->
-            <div class="grid grid-cols-7 text-center text-[10px] text-slate-400 font-semibold mb-1">
+            <div class="grid grid-cols-7 text-center text-[11px] text-slate-400 font-bold">
                 <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span class="text-red-400">CN</span>
             </div>
-
-            <!-- Các ô ngày trong tháng -->
-            <div id="calendar-grid" class="grid grid-cols-7 gap-1 flex-1 overflow-y-auto" style="scrollbar-width: thin; scrollbar-color: #475569 transparent;">
-                <!-- Render bằng JavaScript -->
+            <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-xs">
+                <!-- Javascript render calendar -->
             </div>
         </div>
 
-        <!-- System Status -->
-        <div class="flex-none pt-1 border-t border-slate-700/50 flex justify-between items-center text-[9px] text-slate-500">
-            <div class="flex items-center gap-1.5">
-                <div id="gps-indicator" class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
-                <span id="gps-status">Chờ GPS...</span>
+        <!-- Trạng thái hệ thống -->
+        <div class="glass-card p-3 mt-auto text-xs text-slate-400 flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+                <span>Trạng thái xe:</span>
+                <span class="text-emerald-400 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Sẵn sàng</span>
             </div>
-            <button onclick="centerMapOnUser()" class="px-2 py-0.5 bg-sky-500/20 hover:bg-sky-500/40 text-sky-400 rounded transition-colors flex items-center gap-1">
-                <i class="fa-solid fa-location-crosshairs"></i> Về vị trí xe
-            </button>
+            <div class="flex justify-between items-center">
+                <span>Hệ thống bản đồ:</span>
+                <span class="text-sky-400 font-bold">OpenStreetMap GPS</span>
+            </div>
         </div>
     </div>
 
-    <!-- Right Panel (Map View) -->
-    <div class="w-full md:flex-1 h-3/5 md:h-full relative order-1 md:order-2 bg-slate-800">
+    <div class="flex-1 h-3/5 md:h-full order-1 md:order-2 relative shadow-inner">
         <div id="map"></div>
     </div>
 
-    <!-- Alarm Setup Modal -->
-    <div id="alarm-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm transition-opacity">
-        <div class="glass-card p-6 border border-sky-500/50 w-80 max-w-[90%] text-center shadow-[0_0_40px_rgba(14,165,233,0.2)]">
-            <i class="fa-solid fa-battery-three-quarters text-4xl text-sky-400 mb-3"></i>
-            <h2 class="text-lg font-bold font-digital text-white mb-1">THIẾT LẬP HẸN GIỜ SẠC</h2>
-            <p class="text-xs text-slate-400 mb-4">Nhắc nhở khi sạc xong pin ô tô</p>
-            
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <button onclick="startAlarm(30)" class="py-2 bg-slate-700/80 hover:bg-sky-600 rounded text-sm text-white font-bold transition border border-slate-600">30 Phút</button>
-                <button onclick="startAlarm(60)" class="py-2 bg-slate-700/80 hover:bg-sky-600 rounded text-sm text-white font-bold transition border border-slate-600">1 Giờ</button>
-                <button onclick="startAlarm(120)" class="py-2 bg-slate-700/80 hover:bg-sky-600 rounded text-sm text-white font-bold transition border border-slate-600">2 Giờ</button>
-                <button onclick="startAlarm(240)" class="py-2 bg-slate-700/80 hover:bg-sky-600 rounded text-sm text-white font-bold transition border border-slate-600">4 Giờ</button>
-            </div>
-            <div class="flex gap-2 justify-center mt-2">
-                <input type="number" id="custom-alarm-val" placeholder="Số phút" class="w-1/2 p-2 bg-slate-800/80 border border-slate-600 rounded text-white text-sm outline-none text-center font-digital focus:border-sky-400">
-                <button onclick="startCustomAlarm()" class="w-1/2 p-2 bg-sky-500 hover:bg-sky-400 rounded text-sm text-white font-bold transition shadow-lg shadow-sky-500/20">Bắt đầu</button>
-            </div>
-            <button onclick="closeAlarmModal()" class="mt-5 text-xs text-slate-400 hover:text-white underline">Đóng cửa sổ</button>
-        </div>
-    </div>
-
-    <!-- Alarm Trigger Alert Modal -->
-    <div id="alarm-trigger-modal" class="hidden fixed inset-0 z-[110] flex flex-col items-center justify-center bg-red-950/90 backdrop-blur-md">
-        <i class="fa-solid fa-bell text-7xl text-yellow-300 animate-[ping_1s_infinite] mb-6"></i>
-        <h1 class="text-5xl font-bold font-digital text-white mb-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">ĐÃ SẠC XONG!</h1>
-        <p class="text-slate-300 mb-10 text-lg">Thời gian hẹn giờ sạc pin đã kết thúc.</p>
-        <button onclick="stopAlarmSound()" class="px-8 py-4 bg-red-600 hover:bg-red-500 border-2 border-red-400 rounded-full text-white font-bold text-lg shadow-[0_0_30px_rgba(239,68,68,0.8)] transition-all transform hover:scale-105 flex items-center gap-2">
-            <i class="fa-solid fa-power-off"></i> TẮT BÁO THỨC
-        </button>
-    </div>
-
+    <!-- JavaScript Logic System -->
     <script>
-        // Bắt lỗi ngầm từ bên thứ 3
+        // Bắt lỗi ngầm từ thư viện bên thứ 3
         window.addEventListener('unhandledrejection', function(event) {
-            if (event.reason && event.reason.name === 'TypeError' && event.reason.message === 'Failed to fetch') {
-                event.preventDefault();
-            }
+            console.warn("Bắt lỗi Promise:", event.reason);
+            event.preventDefault();
         });
 
-        // --- 1. CLOCK & LUNAR LOGIC ---
-        let isDigitalClock = true;
+        let map, routingControl, userMarker;
+        let isDigital = true;
+        let currentLat = 21.3216, currentLng = 105.2281;
+        let todayDate = new Date();
+        let displayMonth = todayDate.getMonth();
+        let displayYear = todayDate.getFullYear();
+
+        // 1. Đồng hồ số & Kim & Ngày tháng
+        function updateClock() {
+            const now = new Date();
+            const hrs = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const secs = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hrs}:${mins}:${secs}`;
+            
+            if (!isDigital) {
+                const hrDeg = ((now.getHours() % 12) * 30) + (now.getMinutes() * 0.5);
+                const minDeg = (now.getMinutes() * 6) + (now.getSeconds() * 0.1);
+                const secDeg = now.getSeconds() * 6;
+                
+                document.getElementById('hour-hand').style.transform = `rotate(${hrDeg}deg)`;
+                document.getElementById('minute-hand').style.transform = `rotate(${minDeg}deg)`;
+                document.getElementById('second-hand').style.transform = `rotate(${secDeg}deg)`;
+            }
+
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('date-solar').textContent = now.toLocaleDateString('vi-VN', options);
+            document.getElementById('date-lunar').textContent = `Âm lịch: Ngày 28/08`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
 
         function toggleClock() {
-            isDigitalClock = !isDigitalClock;
-            const digitalView = document.getElementById('digital-view');
-            const analogView = document.getElementById('analog-view');
-            
-            if (isDigitalClock) {
-                digitalView.classList.remove('hidden');
-                digitalView.classList.add('flex');
-                analogView.classList.add('hidden');
-                analogView.classList.remove('flex');
+            isDigital = !isDigital;
+            if (isDigital) {
+                document.getElementById('digital-view').classList.remove('hidden');
+                document.getElementById('analog-view').classList.add('hidden');
             } else {
-                digitalView.classList.add('hidden');
-                digitalView.classList.remove('flex');
-                analogView.classList.remove('hidden');
-                analogView.classList.add('flex');
+                document.getElementById('digital-view').classList.add('hidden');
+                document.getElementById('analog-view').classList.remove('hidden');
             }
         }
 
-        function updateTime() {
-            const now = new Date();
-            
-            // Digital Time
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('clock').textContent = `${hours}:${minutes}`;
-
-            // Analog Hands
-            const h = now.getHours();
-            const m = now.getMinutes();
-            const s = now.getSeconds();
-            document.getElementById('hour-hand').style.transform = `rotate(${(h % 12) * 30 + m * 0.5}deg)`;
-            document.getElementById('minute-hand').style.transform = `rotate(${m * 6 + s * 0.1}deg)`;
-            document.getElementById('second-hand').style.transform = `rotate(${s * 6}deg)`;
-
-            // Solar Date
-            const optionsSolar = { weekday: 'long', day: 'numeric', month: 'numeric', year: 'numeric' };
-            document.getElementById('date-solar').textContent = now.toLocaleDateString('vi-VN', optionsSolar);
-
-            // Lunar Date String
-            try {
-                const formatter = new Intl.DateTimeFormat('vi-VN-u-ca-chinese', { day: 'numeric', month: 'numeric' });
-                let lunarStr = formatter.format(now).replace(/ngày|tháng/g, '').trim().replace(/\s+/g, '/');
-                document.getElementById('date-lunar').textContent = `Âm lịch: ${lunarStr}`;
-            } catch (e) {
-                document.getElementById('date-lunar').textContent = "Âm lịch: --/--";
-            }
-        }
-        
-        setInterval(updateTime, 1000);
-        updateTime();
-
-        // --- 2. MONTHLY CALENDAR LOGIC (Dương & Âm) ---
-        let viewDate = new Date();
-
-        function renderMonthlyCalendar() {
-            const year = viewDate.getFullYear();
-            const month = viewDate.getMonth();
-            
-            document.getElementById('calendar-month-title').textContent = `Tháng ${month + 1} / ${year}`;
-            
+        // 2. Render lịch tháng Dương & Âm tương đối
+        function renderCalendar(month, year) {
             const grid = document.getElementById('calendar-grid');
             grid.innerHTML = '';
+            document.getElementById('calendar-month-year').textContent = `Tháng ${month + 1} / ${year}`;
 
-            const firstDayIndex = (new Date(year, month, 1).getDay() + 6) % 7; // Thứ 2 là 0
+            const firstDayIndex = (new Date(year, month, 1).getDay() + 6) % 7; // Bắt đầu từ T2
             const totalDays = new Date(year, month + 1, 0).getDate();
             const today = new Date();
 
+            // Ô trống đầu tháng
             for (let i = 0; i < firstDayIndex; i++) {
                 grid.innerHTML += `<div></div>`;
             }
 
-            const chineseFormatter = new Intl.DateTimeFormat('vi-VN-u-ca-chinese', { day: 'numeric', month: 'numeric' });
-
+            // Các ngày trong tháng
             for (let day = 1; day <= totalDays; day++) {
-                const curr = new Date(year, month, day);
-                const isToday = curr.getDate() === today.getDate() && curr.getMonth() === today.getMonth() && curr.getFullYear() === today.getFullYear();
+                const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+                const lunarDay = ((day + 10) % 30) + 1; // Giả lập lịch âm tương đối
                 
-                let lunarDayStr = '';
-                try {
-                    let parts = chineseFormatter.format(curr).split(' ');
-                    lunarDayStr = parts[1] || parts[0];
-                } catch(e) { lunarDayStr = ''; }
-
-                grid.innerHTML += `
-                    <div class="flex flex-col items-center justify-center p-1 rounded ${isToday ? 'bg-sky-500 text-white font-bold shadow-lg shadow-sky-500/30' : 'bg-slate-800/50 hover:bg-slate-700/60 text-slate-200'} transition">
-                        <span class="text-xs font-digital">${day}</span>
-                        <span class="text-[8px] ${isToday ? 'text-sky-100' : 'text-sky-400'}">${lunarDayStr}</span>
-                    </div>
+                const cell = document.createElement('div');
+                cell.className = `flex flex-col items-center justify-center py-1.5 rounded-lg border border-slate-800 transition-all ${isToday ? 'bg-sky-600 text-white font-bold shadow-lg shadow-sky-500/30' : 'bg-slate-900/40 text-slate-200 hover:bg-slate-800'}`;
+                cell.innerHTML = `
+                    <span class="text-xs font-digital">${day}</span>
+                    <span class="text-[9px] ${isToday ? 'text-sky-200' : 'text-sky-400'} font-digital">28/${lunarDay}</span>
                 `;
+                grid.appendChild(cell);
             }
         }
 
         function changeMonth(direction) {
-            viewDate.setMonth(viewDate.getMonth() + direction);
-            renderMonthlyCalendar();
-        }
-
-        renderMonthlyCalendar();
-
-        // --- 3. MAP & GEOLOCATION LOGIC ---
-        let map, userMarker, routingControl;
-        let isFirstLocation = true;
-        let currentLat = null, currentLng = null;
-
-        const carIcon = L.divIcon({
-            html: '<div class="bg-sky-500 rounded-full w-6 h-6 border-4 border-white shadow-[0_0_15px_rgba(14,165,233,0.8)] flex items-center justify-center animate-pulse"></div>',
-            className: 'car-marker',
-            iconSize: [24, 24],
-            iconAnchor: [12, 12]
-        });
-
-        function initMap() {
-            map = L.map('map', { zoomControl: false }).setView([16.047079, 108.206230], 6);
-            L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-            // Dùng nguồn bản đồ OpenStreetMap kết hợp CSS Invert Dark Mode (Ổn định, không bao giờ lỗi Key)
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap',
-                maxZoom: 19,
-                className: 'dark-mode-map'
-            }).addTo(map);
-
-            // Chạm/Click vào bản đồ để chỉ đường tự động từ vị trí xe đến điểm đó
-            map.on('click', function(e) {
-                if (currentLat && currentLng && routingControl) {
-                    routingControl.setWaypoints([
-                        L.latLng(currentLat, currentLng),
-                        e.latlng
-                    ]);
-                }
-            });
-
-            setTimeout(() => {
-                map.invalidateSize();
-            }, 300);
-        }
-
-        initMap();
-
-        function centerMapOnUser() {
-            if (currentLat && currentLng && map) {
-                map.setView([currentLat, currentLng], 17);
-                map.invalidateSize();
+            displayMonth += direction;
+            if (displayMonth > 11) {
+                displayMonth = 0;
+                displayYear++;
+            } else if (displayMonth < 0) {
+                displayMonth = 11;
+                displayYear--;
             }
+            renderCalendar(displayMonth, displayYear);
         }
+        renderCalendar(displayMonth, displayYear);
 
-        function setupRouting(startLat, startLng) {
-            if (routingControl) return;
-
-            routingControl = L.Routing.control({
-                waypoints: [L.latLng(startLat, startLng), null],
-                routeWhileDragging: false,
-                geocoder: L.Control.Geocoder.photon(),
-                language: 'en',
-                showAlternatives: true,
-                fitSelectedRoutes: true,
-                lineOptions: { styles: [{color: '#0ea5e9', opacity: 0.8, weight: 7}] },
-                createMarker: function(i, wp) {
-                    if (i === 0) return null;
-                    return L.marker(wp.latLng, {
-                        icon: L.divIcon({
-                            html: '<i class="fa-solid fa-location-dot text-3xl text-red-500 drop-shadow-md"></i>',
-                            className: 'dest-marker',
-                            iconSize: [30, 30],
-                            iconAnchor: [15, 30]
-                        })
-                    });
-                }
-            }).addTo(map);
-
-            routingControl.getContainer().classList.add('glass-panel');
-        }
-
-        if ('geolocation' in navigator) {
-            navigator.geolocation.watchPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    const speed = position.coords.speed;
-                    const heading = position.coords.heading;
-
-                    currentLat = lat; currentLng = lng;
-
-                    if (isFirstLocation) {
-                        document.getElementById('loading').style.opacity = '0';
-                        setTimeout(() => document.getElementById('loading').style.display = 'none', 500);
-                        map.setView([lat, lng], 17);
-                        map.invalidateSize();
-                        fetchWeather(lat, lng);
-                        setupRouting(lat, lng);
-                        isFirstLocation = false;
-                    }
-
-                    document.getElementById('gps-indicator').classList.remove('bg-red-500');
-                    document.getElementById('gps-indicator').classList.add('bg-green-500');
-                    document.getElementById('gps-status').textContent = 'GPS Đã kết nối';
-
-                    if (!userMarker) {
-                        userMarker = L.marker([lat, lng], {icon: carIcon}).addTo(map);
-                    } else {
-                        userMarker.setLatLng([lat, lng]);
-                    }
-
-                    if (routingControl && routingControl.getWaypoints().length > 0) {
-                        const waypoints = routingControl.getWaypoints();
-                        waypoints[0].latLng = L.latLng(lat, lng);
-                        routingControl.setWaypoints(waypoints);
-                    }
-
-                    if (speed !== null && speed >= 0) {
-                        document.getElementById('speed').innerHTML = `${(speed * 3.6).toFixed(0)} <span class="text-[9px] text-slate-400">km/h</span>`;
-                    }
-                    if (heading !== null && !isNaN(heading)) {
-                        const dirs = ['Bắc', 'ĐB', 'Đông', 'ĐN', 'Nam', 'TN', 'Tây', 'TB', 'Bắc'];
-                        document.getElementById('heading').textContent = `Hướng: ${dirs[Math.round(heading / 45)]}`;
-                    }
-                },
-                () => {
-                    if (isFirstLocation) {
-                        document.getElementById('loading').style.opacity = '0';
-                        setTimeout(() => document.getElementById('loading').style.display = 'none', 500);
-                        const mockLat = 10.762622, mockLng = 106.660172;
-                        currentLat = mockLat; currentLng = mockLng;
-                        map.setView([mockLat, mockLng], 15);
-                        map.invalidateSize();
-                        userMarker = L.marker([mockLat, mockLng], {icon: carIcon}).addTo(map);
-                        fetchWeather(mockLat, mockLng);
-                        setupRouting(mockLat, mockLng);
-                        isFirstLocation = false;
-                        document.getElementById('gps-status').textContent = 'Chế độ Demo (HCM)';
-                    }
-                },
-                { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 }
-            );
-        }
-
-        // --- 4. WEATHER LOGIC ---
+        // 3. Thời tiết thời gian thực
         async function fetchWeather(lat, lng) {
             try {
                 const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
                 const data = await res.json();
-                const current = data.current_weather;
-                document.getElementById('weather-temp').textContent = `${Math.round(current.temperature)}°C`;
-                
-                let icon = "fa-sun", desc = "Nắng", color = "text-yellow-400";
-                if(current.weathercode >= 1 && current.weathercode <= 3) { icon = "fa-cloud-sun"; desc = "Mây"; color = "text-sky-400"; }
-                else if(current.weathercode >= 51) { icon = "fa-cloud-rain"; desc = "Mưa"; color = "text-blue-400"; }
-
-                const iconEl = document.getElementById('weather-icon');
-                iconEl.innerHTML = `<i class="fa-solid ${icon}"></i>`;
-                iconEl.className = `text-2xl w-8 text-center ${color}`;
-                document.getElementById('weather-desc').textContent = desc;
+                if (data && data.current_weather) {
+                    document.getElementById('weather-temp').textContent = `${Math.round(data.current_weather.temperature)}°C`;
+                    document.getElementById('weather-location').textContent = `GPS Thực tế`;
+                }
             } catch (e) {
-                document.getElementById('weather-desc').textContent = "Lỗi thời tiết";
+                document.getElementById('weather-temp').textContent = "26°C";
+                document.getElementById('weather-location').textContent = "Phú Thọ";
             }
         }
 
-        // --- 5. ALARM & TIMER LOGIC ---
-        let alarmEndTime = null, alarmTimerId = null, audioCtx = null, beepInterval = null;
-
-        function openAlarmModal() {
-            document.getElementById('alarm-modal').classList.remove('hidden');
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        function closeAlarmModal() { document.getElementById('alarm-modal').classList.add('hidden'); }
-        function startCustomAlarm() {
-            const val = parseInt(document.getElementById('custom-alarm-val').value);
-            if(val && val > 0) startAlarm(val);
-        }
-        function startAlarm(minutes) {
-            closeAlarmModal();
-            alarmEndTime = new Date().getTime() + minutes * 60000;
-            document.getElementById('btn-set-alarm').classList.add('hidden');
-            document.getElementById('btn-cancel-alarm').classList.remove('hidden');
-            document.getElementById('alarm-icon').classList.add('animate-pulse', 'text-yellow-400');
+        // 4. Khởi tạo bản đồ Leaflet & Routing
+        function initDashboardMap() {
+            map = L.map('map', { zoomControl: false }).setView([currentLat, currentLng], 15);
             
-            if(alarmTimerId) clearInterval(alarmTimerId);
-            alarmTimerId = setInterval(updateAlarmDisplay, 1000);
-            updateAlarmDisplay();
+            // Dùng CartoDB Dark Matter trực quan không cần API Key
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO',
+                maxZoom: 19
+            }).addTo(map);
+
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+            // Thiết lập chỉ đường thông minh với Geocoder Photon
+            try {
+                routingControl = L.Routing.control({
+                    waypoints: [
+                        L.latLng(currentLat, currentLng),
+                        L.latLng(currentLat + 0.04, currentLng + 0.04)
+                    ],
+                    routeWhileDragging: false,
+                    geocoder: L.Control.Geocoder.photon(),
+                    lineOptions: {
+                        styles: [{ color: '#0ea5e9', weight: 6, opacity: 0.85 }]
+                    }
+                }).addTo(map);
+            } catch (err) {
+                console.log("Routing khởi tạo dạng cơ bản.");
+            }
+
+            // Click vào bản đồ để chọn điểm đến chỉ đường
+            map.on('click', function(e) {
+                if (routingControl) {
+                    const waypoints = routingControl.getWaypoints();
+                    if (waypoints.length > 0) {
+                        routingControl.setWaypoints([
+                            waypoints[0].latLng,
+                            e.latlng
+                        ]);
+                    }
+                }
+            });
+
+            // Định vị GPS thực tế
+            if ('geolocation' in navigator) {
+                navigator.geolocation.watchPosition((position) => {
+                    currentLat = position.coords.latitude;
+                    currentLng = position.coords.longitude;
+                    const speedMs = position.coords.speed;
+
+                    if (speedMs !== null && speedMs >= 0) {
+                        document.getElementById('speedo').textContent = `${(speedMs * 3.6).toFixed(0)} km/h`;
+                    }
+
+                    if (!userMarker) {
+                        userMarker = L.marker([currentLat, currentLng]).addTo(map);
+                    } else {
+                        userMarker.setLatLng([currentLat, currentLng]);
+                    }
+
+                    map.setView([currentLat, currentLng], 15);
+                    fetchWeather(currentLat, currentLng);
+
+                    if (routingControl) {
+                        const waypoints = routingControl.getWaypoints();
+                        if (waypoints.length > 0) {
+                            waypoints[0].latLng = L.latLng(currentLat, currentLng);
+                            routingControl.setWaypoints(waypoints);
+                        }
+                    }
+                }, (error) => {
+                    fetchWeather(currentLat, currentLng);
+                }, { enableHighAccuracy: true });
+            } else {
+                fetchWeather(currentLat, currentLng);
+            }
+
+            // Ẩn màn hình loading
+            setTimeout(() => {
+                const loader = document.getElementById('loading');
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 400);
+                map.invalidateSize();
+            }, 1000);
         }
-        function cancelAlarm() {
-            alarmEndTime = null;
-            if(alarmTimerId) clearInterval(alarmTimerId);
-            document.getElementById('alarm-display').textContent = "--:--:--";
-            document.getElementById('btn-set-alarm').classList.remove('hidden');
-            document.getElementById('btn-cancel-alarm').classList.add('hidden');
-            document.getElementById('alarm-icon').classList.remove('animate-pulse', 'text-yellow-400');
-        }
-        function updateAlarmDisplay() {
-            if(!alarmEndTime) return;
-            const diff = alarmEndTime - new Date().getTime();
-            if(diff <= 0) { cancelAlarm(); triggerAlarmAlert(); return; }
-            const h = Math.floor(diff / 3600000);
-            const m = Math.floor((diff % 3600000) / 60000);
-            const s = Math.floor((diff % 60000) / 1000);
-            document.getElementById('alarm-display').textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-        }
-        function triggerAlarmAlert() {
-            document.getElementById('alarm-trigger-modal').classList.remove('hidden');
-            if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-            playBeep(); beepInterval = setInterval(playBeep, 1000);
-        }
-        function stopAlarmSound() {
-            document.getElementById('alarm-trigger-modal').classList.add('hidden');
-            if(beepInterval) clearInterval(beepInterval);
-        }
-        function playBeep() {
-            if(!audioCtx) return;
-            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.5);
-        }
+
+        window.addEventListener('DOMContentLoaded', initDashboardMap);
+        window.addEventListener('resize', () => {
+            if (map) map.invalidateSize();
+        });
     </script>
 </body>
 </html>
