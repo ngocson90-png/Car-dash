@@ -114,14 +114,10 @@ input::placeholder{color:var(--muted)}
 #ytResults:empty{display:none}
 
 /* map */
-.map-wrap{flex:1;min-height:110px;border-radius:12px;overflow:hidden;background:#222;position:relative}
-.map-wrap iframe{width:100%;height:100%;border:0;display:none}
+.map-wrap{flex:1;min-height:110px;border-radius:16px;overflow:hidden;background:#222;position:relative}
 #map{position:absolute;inset:0;touch-action:none}
 .leaflet-container{font:inherit;background:#222}
 .leaflet-control-zoom a{width:42px!important;height:42px!important;line-height:42px!important;font-size:24px!important}
-#mInfo{position:absolute;left:8px;top:8px;z-index:500;background:rgba(0,0,0,.75);padding:7px 12px;border-radius:10px;font-size:14px;display:none;cursor:pointer}
-#mRes{position:absolute;left:8px;right:8px;bottom:8px;z-index:500;max-height:55%;overflow:auto;display:none;flex-direction:column;gap:4px;background:rgba(0,0,0,.88);padding:6px;border-radius:10px}
-#mRes button{text-align:left;white-space:normal}
 
 /* đồng hồ */
 #p-clock{align-items:center;justify-content:center;text-align:center;cursor:pointer;position:relative;container-type:size}
@@ -165,10 +161,101 @@ input::placeholder{color:var(--muted)}
 #fx.snow{opacity:.7;background-image:radial-gradient(circle,#fff 2px,transparent 3px);background-size:48px 48px;animation:snow 5s linear infinite}
 @keyframes rain{to{background-position:-26px 90px}}
 @keyframes snow{to{background-position:20px 48px}}
-#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:rgba(0,0,0,.8);padding:8px 14px;border-radius:10px;font-size:13px;z-index:10;display:none}
+#toast{position:fixed;left:50%;top:64px;max-width:90vw;text-align:center;transform:translateX(-50%);background:rgba(0,0,0,.8);padding:8px 14px;border-radius:10px;font-size:13px;z-index:10;display:none}
+.yctl{flex-wrap:wrap}
+.yctl input{flex:1 1 150px}
+@media (pointer:coarse){
+  button{min-height:46px;padding:9px 14px;font-size:16px}
+  input{min-height:46px;font-size:16px}
+  .tile{font-size:14px}
+  #home .chips button{min-height:54px;font-size:17px;flex:1 1 140px}
+}
+#gwrap{position:absolute;inset:0}
+.gframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.chgpin{font-size:18px;text-align:center;line-height:30px;background:#2e7d32;border:2px solid #fff;border-radius:50%;color:#fff}
+#ytMsg{color:#fff}
+/* bản đồ Google ban đêm: đảo màu bản đồ cho dịu mắt */
+body[data-theme=dark] #gwrap:not(.sat) .gframe{filter:invert(.92) hue-rotate(180deg) contrast(.92)}
+/* giao diện SÁNG */
+body[data-theme=light]{--bg1:#cfe6ff;--bg2:#f4f9ff;--panel:rgba(255,255,255,.74);--panel2:rgba(0,0,0,.07);--text:#12202f;--muted:rgba(18,32,47,.62);--accent:#ffb300}
+body[data-theme=light][data-sky=rain],body[data-theme=light][data-sky=storm]{--bg1:#c3cedb;--bg2:#e9eef4}
+body[data-theme=light][data-sky=fog],body[data-theme=light][data-sky=cloud-day],body[data-theme=light][data-sky=cloud-night]{--bg1:#d5dce6;--bg2:#f1f4f8}
+body[data-theme=light] button{border-color:rgba(0,0,0,.16)}
+body[data-theme=light] button.on{color:#1d1400}
+body[data-theme=light] input{background:rgba(255,255,255,.95);border-color:rgba(0,0,0,.2)}
+body[data-theme=light] #home{background:#f3f7fb}
+body[data-theme=light] #analog .face{fill:rgba(255,255,255,.55);stroke:rgba(0,0,0,.45)}
+body[data-theme=light] #analog .tick{stroke:rgba(0,0,0,.4)}
+body[data-theme=light] #analog .tick.h{stroke:#12202f}
+body[data-theme=light] #analog text{fill:#12202f}
+body[data-theme=light] #analog .hand{stroke:#12202f}
+body[data-theme=light] #analog .sec{stroke:#e65100}
+body[data-theme=light] #lunar b{color:#a35d00}
+#p-map{padding:0;gap:0}
+#mTop{position:absolute;left:10px;right:10px;top:10px;z-index:1100;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+#mTop>*{pointer-events:auto}
+#mSearch{display:flex;align-items:center;gap:2px;height:52px;padding:0 6px;background:#fff;color:#202124;border-radius:26px;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+#mSearch input{flex:1;min-width:0;border:0;background:transparent;color:inherit;font-size:17px;min-height:0;padding:0 4px;border-radius:0;outline:none}
+#mSearch input::placeholder{color:#70757a}
+.sbtn{background:transparent;border:0;min-height:0!important;width:44px;height:44px;padding:0!important;font-size:20px;color:inherit;border-radius:50%}
+#mChips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 6px;margin:0 -2px}
+#mChips::-webkit-scrollbar{display:none}
+.pchip{flex:0 0 auto;background:#fff;color:#202124;border:0;border-radius:20px;padding:0 14px!important;min-height:40px!important;font-size:15px;box-shadow:0 1px 5px rgba(0,0,0,.4)}
+.pchip.on{background:#e8f0fe;color:#1a73e8;font-weight:600}
+.fab{width:54px;height:54px;min-height:0!important;padding:0!important;border-radius:50%;border:0;background:#fff;color:#1a73e8;font-size:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.45)}
+.fab.blue,.fab.on{background:#1a73e8;color:#fff}
+#mLyr{position:absolute;right:10px;top:122px;z-index:1100;width:46px;height:46px;font-size:20px}
+#mFab{position:absolute;right:10px;bottom:62px;z-index:1100;display:flex;flex-direction:column;gap:12px}
+#lyr{position:absolute;right:64px;top:122px;z-index:1200;display:none;flex-direction:column;gap:2px;background:#fff;color:#202124;border-radius:14px;padding:6px;box-shadow:0 4px 14px rgba(0,0,0,.45);min-width:170px}
+#lyr button{background:transparent;border:0;color:inherit;text-align:left;border-radius:8px;min-height:42px!important}
+#lyr button.on{background:#e8f0fe;color:#1a73e8;font-weight:600}
+#lyr hr{border:0;border-top:1px solid #ddd;margin:4px 0;width:100%}
+#mInfo{position:absolute;left:10px;bottom:16px;max-width:calc(100% - 90px);z-index:1100;background:#1a73e8;color:#fff;padding:11px 16px;border-radius:24px;font-size:15px;font-weight:600;display:none;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.45);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#chg,#mRes{position:absolute;left:0;right:0;bottom:0;z-index:1150;max-height:58%;overflow:auto;display:none;flex-direction:column;gap:2px;background:#2b2f36;color:#e8eaed;padding:6px 14px 12px;border-radius:20px 20px 0 0;box-shadow:0 -3px 14px rgba(0,0,0,.45)}
+.sgrab{width:40px;height:4px;border-radius:2px;background:rgba(128,128,128,.6);margin:2px auto 8px;flex:0 0 auto}
+.shd{display:flex;align-items:center;gap:8px;margin-bottom:4px}.shd b{flex:1;font-size:16px}
+.sx{width:40px;height:40px;min-height:0!important;padding:0!important;border-radius:50%;background:rgba(128,128,128,.25);border:0;color:inherit}
+.crow{display:flex;align-items:center;gap:10px;padding:10px 4px;border-top:1px solid rgba(128,128,128,.28);cursor:pointer}
+.crow .ct{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.crow .ct b{font-size:15px}.crow .ct span{font-size:13px;opacity:.7}
+.cgo{width:44px;height:44px;min-height:0!important;padding:0!important;border-radius:50%;background:#1a73e8;color:#fff;border:0;font-size:20px;flex:0 0 auto}
+#chg .hint,#mRes .hint{padding:6px 2px;color:inherit}
+#mRes button{text-align:left;white-space:normal;background:transparent;border:0;border-top:1px solid rgba(128,128,128,.28);border-radius:0;color:inherit}
+body[data-theme=dark] .fab:not(.on):not(.blue){background:#2b2f36;color:#8ab4f8}
+body[data-theme=dark] #mSearch,body[data-theme=dark] #lyr,body[data-theme=dark] .pchip:not(.on){background:#2b2f36;color:#e8eaed}
+body[data-theme=dark] #mSearch input::placeholder{color:#9aa0a6}
+body[data-theme=dark] .pchip.on,body[data-theme=dark] #lyr button.on{background:#394457;color:#8ab4f8}
+body[data-theme=dark] #lyr hr{border-top-color:#444}
+body[data-theme=light] #chg,body[data-theme=light] #mRes{background:#fff;color:#202124}
+.cgo2{height:44px;min-height:0!important;padding:0 12px!important;border-radius:22px;background:transparent;color:#8ab4f8;border:1.5px solid #8ab4f8;font-size:15px;font-weight:700;flex:0 0 auto}
+body[data-theme=light] .cgo2{color:#1a73e8;border-color:#1a73e8}
+.cgo{font-size:18px}
+#navTop,#navBot,#nSpeed{display:none}
+.navmode #navTop{display:block;position:absolute;left:8px;right:8px;top:8px;z-index:1150}
+.nmain{display:flex;gap:12px;align-items:center;background:#0f6b5a;color:#fff;border-radius:16px;padding:12px 16px;box-shadow:0 3px 10px rgba(0,0,0,.5)}
+.nico{font-size:46px;line-height:1;width:58px;text-align:center;flex:0 0 auto}
+.nico span,.nthen span{display:inline-block}
+.ntxt{display:flex;flex-direction:column;min-width:0}
+.ntxt b{font-size:30px;line-height:1.1}
+.ntxt span{font-size:19px;opacity:.96;overflow:hidden;text-overflow:ellipsis}
+#nThen{align-items:center;gap:8px;background:#0b4f43;color:#fff;border-radius:0 0 14px 14px;padding:6px 14px;font-size:15px;margin-left:14px;box-shadow:0 3px 8px rgba(0,0,0,.4)}
+.nthen{font-size:20px}
+.navmode #navBot{display:flex;position:absolute;left:8px;right:8px;bottom:8px;z-index:1150;align-items:center;gap:10px;background:#1c1f26;color:#fff;border-radius:22px;padding:10px 12px 10px 18px;box-shadow:0 -2px 12px rgba(0,0,0,.5)}
+.nsum{flex:1;display:flex;flex-direction:column;min-width:0}
+.nsum b{font-size:27px;line-height:1.15}
+.nsum span{font-size:15px;opacity:.8}
+#nExit{background:#d93025;color:#fff;border:0;border-radius:28px;padding:0 24px;min-height:50px!important;font-size:18px;font-weight:700}
+#nVol.fab{width:48px;height:48px;background:#2b2f36;color:#fff;font-size:20px}
+.navmode #nSpeed{display:flex;position:absolute;left:10px;bottom:98px;z-index:1100;flex-direction:column;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;background:#fff;color:#202124;border:3px solid #cfd2d6;box-shadow:0 2px 8px rgba(0,0,0,.45);line-height:1}
+#nSpeed b{font-size:24px}#nSpeed small{font-size:11px;opacity:.7}
+.navmode #mTop,.navmode #mRoute,.navmode #mLyr,.navmode #lyr,.navmode #mInfo,.navmode .leaflet-control-zoom{display:none!important}
+.navmode #mFab{bottom:98px}
+.navmode .leaflet-bottom.leaflet-right{bottom:84px}
+.carwrap{transition:transform .9s linear}
+.car{transition:transform .5s ease-out}
 </style>
 </head>
-<body data-sky="clear-day">
+<body data-sky="clear-day" data-theme="dark">
 <div id="fx"></div>
 
 <div id="bar">
@@ -178,7 +265,7 @@ input::placeholder{color:var(--muted)}
   <button data-p="weather">⛅ Thời tiết</button>
   <span class="sp"></span>
   <button id="bLayout" title="Đổi cách chia màn hình">⇆ Bố cục: tự động</button>
-  <button id="bWake" title="Giữ màn hình luôn sáng">☀ Giữ sáng</button>
+  <button id="bTheme" title="Đổi giao diện Sáng / Tối / Tự động">🌗 Tự động</button>
   <button id="bFull">⛶</button>
 </div>
 
@@ -187,14 +274,16 @@ input::placeholder{color:var(--muted)}
   <!-- YOUTUBE -->
   <section class="panel" id="p-yt">
     <div class="yt-main"><div class="player-wrap"><div id="player"></div><div id="ytMsg"></div><div id="home"></div></div><div id="queue"></div></div>
-    <div class="row">
+    <div class="row yctl">
       <button id="yHome" title="Trang chủ">🏠</button>
-      <button id="yPrev">⏮</button>
-      <button id="yNext">⏭</button>
-      <input id="yIn" placeholder="Dán link / ID video, playlist hoặc gõ từ khóa tìm kiếm">
+      <button id="yPrev" title="Bài trước">⏮</button>
+      <button id="yPlay" title="Phát / tạm dừng">⏯</button>
+      <button id="yNext" title="Bài sau">⏭</button>
+      <button id="yMic" title="Nói tên bài hát" style="display:none">🎤</button>
+      <button id="yPaste" title="Phát link YouTube đã sao chép">📋</button>
+      <input id="yIn" placeholder="Gõ tên bài / ca sĩ, hoặc dán link YouTube">
       <button id="yGo">Phát</button>
       <button id="yAdd" title="Thêm vào danh sách">＋</button>
-      <button id="yKey" title="Nhập YouTube API key (tùy chọn) để tìm kiếm">🔑</button>
     </div>
     <div id="ytResults"></div>
     <div id="ytList"></div>
@@ -202,14 +291,30 @@ input::placeholder{color:var(--muted)}
 
   <!-- BẢN ĐỒ -->
   <section class="panel" id="p-map">
-    <div class="map-wrap"><div id="map"></div><iframe id="mapFrame" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe><div id="mInfo"></div><div id="mRes"></div></div>
-    <div class="row">
-      <input id="mIn" placeholder="Tìm địa điểm / địa chỉ đến">
-      <button id="mGo">Tìm</button>
-      <button id="mRoute" title="Chỉ đường từ vị trí hiện tại">➜ Đường</button>
-      <button id="mMe" title="Vị trí của tôi">📍</button>
-      <button id="mSat" title="Bản đồ / vệ tinh">🛰</button>
-      <button id="mG" title="Chuyển sang Google Maps nhúng">G</button>
+    <div class="map-wrap">
+      <div id="gwrap"></div><div id="map" style="display:none"></div>
+      <div id="mTop">
+        <div id="mSearch">
+          <button id="mGo" class="sbtn" title="Tìm">🔍</button>
+          <input id="mIn" placeholder="Tìm ở đây" enterkeyhint="search" autocomplete="off">
+          <button id="mClr" class="sbtn" style="display:none" title="Xóa">✕</button>
+          <button id="mMic" class="sbtn" style="display:none" title="Nói nơi cần đến">🎤</button>
+        </div>
+        <div id="mChips"></div>
+      </div>
+      <div id="lyr">
+        <button data-l="m">🗺 Mặc định</button><button data-l="k">🛰 Vệ tinh</button>
+        <hr><button data-e="google">Google Maps</button><button data-e="osm">OpenStreetMap</button>
+      </div>
+      <button id="mLyr" class="fab" title="Kiểu bản đồ">🗺</button>
+      <div id="mFab">
+        <button id="mMe" class="fab" title="Vị trí của tôi">🎯</button>
+        <button id="mRoute" class="fab blue" title="Chỉ đường từ vị trí hiện tại">➜</button>
+      </div>
+      <div id="mInfo"></div><div id="mRes"></div><div id="chg"></div>
+      <div id="navTop"><div class="nmain"><div id="nIco" class="nico">↑</div><div class="ntxt"><b id="nDist"></b><span id="nInstr"></span></div></div><div id="nThen">Sau đó <span id="nThenIco" class="nthen"></span></div></div>
+      <div id="nSpeed"><b>0</b><small>km/h</small></div>
+      <div id="navBot"><div class="nsum"><b id="nMin"></b><span id="nSub"></span></div><button id="nVol" class="fab" title="Giọng nói">🔊</button><button id="nExit">Thoát</button></div>
     </div>
   </section>
 
@@ -277,21 +382,21 @@ applyLayout();
 
 /* toàn màn hình & giữ sáng */
 $('#bFull').onclick=()=>{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.(); };
-let wake=null, wakeWanted=false;
-async function setWake(){
-  try{ wake = await navigator.wakeLock.request('screen'); wake.onrelease=()=>{wake=null}; }catch(e){ toast('Trình duyệt không hỗ trợ giữ sáng màn hình'); wakeWanted=false; }
-  $('#bWake').classList.toggle('on', wakeWanted);
+/* ===== Giữ màn hình luôn sáng (tự động, không cần bấm) ===== */
+let wake=null;
+async function keepAwake(){
+  try{ if(!wake && navigator.wakeLock && document.visibilityState==='visible'){ wake=await navigator.wakeLock.request('screen'); wake.onrelease=()=>{ wake=null; }; } }catch(e){}
 }
-$('#bWake').onclick=async()=>{
-  wakeWanted=!wakeWanted; store.set('wake',wakeWanted);
-  if(wakeWanted) await setWake(); else { wake?.release(); wake=null; $('#bWake').classList.remove('on'); }
-};
-// Nhớ chế độ giữ sáng: trình duyệt chỉ cho bật sau lần chạm đầu tiên
-if(store.get('wake',false)){
-  wakeWanted=true; $('#bWake').classList.add('on');
-  document.addEventListener('pointerdown',()=>{ if(wakeWanted && !wake) setWake(); },{once:true});
-}
-document.addEventListener('visibilitychange',()=>{ if(wakeWanted && document.visibilityState==='visible') setWake(); });
+keepAwake(); document.addEventListener('pointerdown',keepAwake); document.addEventListener('visibilitychange',keepAwake);
+
+/* ===== Giao diện Sáng / Tối / Tự động (theo giờ: 6h–18h sáng, còn lại tối) ===== */
+const THEMES=['auto','light','dark'], THEME_LABEL={auto:'🌗 Tự động',light:'☀️ Sáng',dark:'🌙 Tối'};
+let themePref=store.get('theme','auto');
+function effTheme(){ if(themePref!=='auto') return themePref; const h=new Date().getHours(); return (h>=6&&h<18)?'light':'dark'; }
+let themeHook=null;
+function applyTheme(){ document.body.dataset.theme=effTheme(); $('#bTheme').textContent=THEME_LABEL[themePref]; if(themeHook) themeHook(); }
+$('#bTheme').onclick=()=>{ themePref=THEMES[(THEMES.indexOf(themePref)+1)%3]; store.set('theme',themePref); applyTheme(); };
+setInterval(applyTheme,60000); applyTheme();
 
 /* ================= ĐỒNG HỒ ================= */
 let h12 = store.get('h12', false);
@@ -497,137 +602,393 @@ async function searchLoc(){
 $('#locGo').onclick=searchLoc; $('#locIn').onkeydown=e=>{ if(e.key==='Enter') searchLoc(); };
 setInterval(loadWeather, 15*60*1000);
 
-/* ================= BẢN ĐỒ (Leaflet + OpenStreetMap/CARTO, miễn phí, không cần key) ================= */
-let mapGoogle = store.get('mapGoogle', false), mapSat = store.get('mapSat', false);
-let lmap=null, tileLayer=null, meMarker=null, meCircle=null, destMarker=null, routeLine=null, lastPos=null, follow=true, dest=null;
+/* ================= BẢN ĐỒ: Google Maps nhúng (xem/tìm) + dẫn đường từng ngã rẽ (OpenStreetMap + OSRM, miễn phí) ================= */
+let engine = store.get('mapEngine','google'), mapSat = store.get('mapSat',false);
+let lastPos=null, follow=true, gState={mode:'me',q:''}, gShownPos=null, gLastLoad=0, gPausedUntil=0, gWarned=false;
+let lmap=null, tileLayer=null, meMarker=null, meCircle=null, destMarker=null, chgLayer=null;
+let nav=null, navLayer=null, carMarker=null, navVoice=store.get('navVoice',true), navIdle=null, navZoomAt=0;
 const TILES={
   v:{url:'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',opt:{subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap · © CARTO'}},
+  d:{url:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',opt:{subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap · © CARTO'}},
   s:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',opt:{maxZoom:19,attribution:'Tiles © Esri'}}
 };
 const NOM='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=vi&q=';
+function distM(a,b){
+  const R=6371e3,r=Math.PI/180,dLa=(b.lat-a.lat)*r,dLo=(b.lon-a.lon)*r;
+  const x=Math.sin(dLa/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)**2;
+  return 2*R*Math.asin(Math.sqrt(x));
+}
+function bearing(a,b){
+  const r=Math.PI/180, y=Math.sin((b.lon-a.lon)*r)*Math.cos(b.lat*r), x=Math.cos(a.lat*r)*Math.sin(b.lat*r)-Math.sin(a.lat*r)*Math.cos(b.lat*r)*Math.cos((b.lon-a.lon)*r);
+  return (Math.atan2(y,x)/r+360)%360;
+}
+const hereStr=()=> lastPos ? lastPos.lat+','+lastPos.lon : (loc ? loc.lat+','+loc.lon : '21.0285,105.8542');
+const hereObj=()=> lastPos ? lastPos : (loc ? {lat:loc.lat,lon:loc.lon} : null);
+function fmtDist(d){ if(d<1000) return Math.max(10,Math.round(d/10)*10)+' m'; return (d/1000).toFixed(1).replace('.',',')+' km'; }
+function fmtMin(m){ return m>=60 ? Math.floor(m/60)+' giờ '+(m%60)+' phút' : m+' phút'; }
+function hhmm(t){ return new Date(t).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',hour12:false}); }
+function openGmaps(d){ window.open('https://www.google.com/maps/dir/?api=1&destination='+d.lat+','+d.lon+'&travelmode=driving&dir_action=navigate','_blank'); }
 
+/* ---------- GPS dùng chung ---------- */
+function startGeo(){
+  if(!navigator.geolocation) return;
+  navigator.geolocation.watchPosition(p=>{
+    lastPos={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy,spd:p.coords.speed,hdg:p.coords.heading};
+    if(nav) navTick(); else if(lmap) osmUpdateMe(p.coords.accuracy);
+    gFollow();
+  },err=>{ if(err.code===1 && !startGeo.warned){ startGeo.warned=true; toast('Hãy cho phép quyền định vị để bản đồ hiện vị trí của bạn'); } },
+  {enableHighAccuracy:true,maximumAge:2000,timeout:30000});
+}
+
+/* ---------- GOOGLE MAPS (iframe nhúng) ---------- */
+function gUrl(){
+  const base='https://maps.google.com/maps?hl=vi&output=embed&t='+(mapSat?'k':'m'), here=hereStr();
+  switch(gState.mode){
+    case 'search':   return base+'&z=15&ll='+here+'&q='+encodeURIComponent(gState.q);
+    case 'pin':      return base+'&z=16&q='+gState.q;
+    case 'chargers': return base+'&z=13&ll='+here+'&q='+encodeURIComponent('Trạm sạc VinFast');
+    default:         return base+'&z=16&q='+here;
+  }
+}
+function gLoad(url){
+  const wrap=$('#gwrap'); wrap.classList.toggle('sat',mapSat);
+  const f=document.createElement('iframe'); f.className='gframe'; f.setAttribute('allowfullscreen',''); f.referrerPolicy='no-referrer-when-downgrade';
+  f.style.visibility='hidden';
+  const show=()=>{ f.style.visibility='visible'; wrap.querySelectorAll('iframe').forEach(o=>{ if(o!==f) o.remove(); }); };
+  f.onload=show; setTimeout(show,8000);              // tải xong mới đổi khung, tránh nháy trắng
+  f.src=url; wrap.appendChild(f);
+  gLastLoad=Date.now(); gShownPos=lastPos?{lat:lastPos.lat,lon:lastPos.lon}:null;
+  $('#mMe').classList.toggle('on',gState.mode==='me');
+}
+function gFollow(){
+  if(engine!=='google'||!follow||!lastPos||nav) return;
+  if(Date.now()<gPausedUntil) return;
+  if(!gShownPos){ gLoad(gUrl()); return; }           // có GPS lần đầu: nhảy về vị trí thật
+  if(gState.mode!=='me') return;
+  if(distM(gShownPos,lastPos)>25 && Date.now()-gLastLoad>6000) gLoad(gUrl());
+}
+// Chạm vào bản đồ Google => tạm dừng tự di chuyển 60 giây để bạn kéo xem
+window.addEventListener('blur',()=>setTimeout(()=>{
+  const a=document.activeElement;
+  if(engine==='google' && a && a.classList && a.classList.contains('gframe')){
+    gPausedUntil=Date.now()+60e3; $('#mMe').classList.remove('on');
+    if(!gWarned){ gWarned=true; toast('Tạm dừng tự theo vị trí 60 giây – bấm 🎯 để theo lại ngay'); }
+  }
+},0));
+
+/* ---------- OPENSTREETMAP (Leaflet) ---------- */
 function setTiles(){
   if(!lmap) return;
   if(tileLayer) lmap.removeLayer(tileLayer);
-  const t=TILES[mapSat?'s':'v']; tileLayer=L.tileLayer(t.url,t.opt).addTo(lmap);
+  const t=TILES[mapSat?'s':(effTheme()==='dark'?'d':'v')]; tileLayer=L.tileLayer(t.url,t.opt).addTo(lmap);
 }
-function initMap(){
-  if(typeof L==='undefined'){ mapGoogle=true; return false; }   // không tải được Leaflet -> dùng Google nhúng
-  const v=store.get('mview',null);
-  const c=v?[v.lat,v.lng]:(loc?[loc.lat,loc.lon]:[21.0285,105.8542]);
-  lmap=L.map('map',{zoomControl:true,attributionControl:true}).setView(c,v?v.z:14);
+themeHook=()=>{ if(lmap){ setTiles(); if(nav) drawRoute(); } };
+function ensureLeaflet(){
+  if(lmap) return true;
+  if(typeof L==='undefined'){ toast('Không tải được bản đồ OSM'); return false; }
+  const v=store.get('mview',null), c=lastPos?[lastPos.lat,lastPos.lon]:(v?[v.lat,v.lng]:(loc?[loc.lat,loc.lon]:[21.0285,105.8542]));
+  lmap=L.map('map',{zoomControl:false}).setView(c,v?v.z:14); L.control.zoom({position:'bottomleft'}).addTo(lmap);
   setTiles();
-  lmap.on('dragstart',()=>{ follow=false; $('#mMe').classList.remove('on'); });
-  lmap.on('moveend',()=>{ const k=lmap.getCenter(); store.set('mview',{lat:k.lat,lng:k.lng,z:lmap.getZoom()}); });
-  lmap.on('contextmenu',e=>setDest({lat:e.latlng.lat,lon:e.latlng.lng,name:'Điểm đã chọn'}));   // chạm giữ để chọn đích
+  lmap.on('dragstart',()=>{
+    follow=false; $('#mMe').classList.remove('on');
+    if(nav){ clearTimeout(navIdle); navIdle=setTimeout(()=>{ if(nav){ follow=true; $('#mMe').classList.add('on'); } },12000); }   // tự quay lại xe sau 12 giây
+  });
+  lmap.on('moveend',()=>{ if(nav) return; const k=lmap.getCenter(); store.set('mview',{lat:k.lat,lng:k.lng,z:lmap.getZoom()}); });
+  lmap.on('contextmenu',e=>{   // chạm giữ để chọn đích
+    const d={name:'Điểm đã chọn',sub:'',lat:e.latlng.lat,lon:e.latlng.lng}; osmSetDest(d);
+    renderSheet('Điểm đã chọn',[d],'');
+  });
   new ResizeObserver(()=>lmap.invalidateSize()).observe($('#map'));
-  startGeo();
+  if(lastPos){ osmUpdateMe(lastPos.acc||20); lmap.setView([lastPos.lat,lastPos.lon],16); }
   return true;
 }
-function startGeo(){
-  if(!navigator.geolocation) return;
-  $('#mMe').classList.add('on');
-  navigator.geolocation.watchPosition(p=>{
-    const ll=[p.coords.latitude,p.coords.longitude];
-    lastPos={lat:ll[0],lon:ll[1]};
-    if(!lmap) return;
-    if(!meMarker){
-      meCircle=L.circle(ll,{radius:p.coords.accuracy,color:'#2f80ed',weight:1,fillOpacity:.12}).addTo(lmap);
-      meMarker=L.circleMarker(ll,{radius:9,color:'#fff',weight:3,fillColor:'#2f80ed',fillOpacity:1}).addTo(lmap);
-    }else{ meMarker.setLatLng(ll); meCircle.setLatLng(ll).setRadius(p.coords.accuracy); }
-    if(follow){
-      if(!startGeo.first){ startGeo.first=true; lmap.setView(ll,Math.max(lmap.getZoom(),16)); }
-      else lmap.panTo(ll,{animate:true});
-    }
-  },err=>{ if(err.code===1 && !startGeo.warned){ startGeo.warned=true; toast('Hãy cho phép quyền định vị để bản đồ hiện vị trí của bạn'); } },{enableHighAccuracy:true,maximumAge:5000,timeout:30000});
-}
-function setDest(d){
-  dest=d; if(destMarker) lmap.removeLayer(destMarker);
-  destMarker=L.circleMarker([d.lat,d.lon],{radius:10,color:'#fff',weight:3,fillColor:'#e53935',fillOpacity:1}).addTo(lmap)
-    .bindPopup(d.name.split(',').slice(0,2).join(',')).openPopup();
-  follow=false; $('#mMe').classList.remove('on');
-  lmap.setView([d.lat,d.lon],Math.max(lmap.getZoom(),15));
-}
-function clearRoute(){
-  if(routeLine){ lmap.removeLayer(routeLine); routeLine=null; }
-  if(destMarker){ lmap.removeLayer(destMarker); destMarker=null; }
-  dest=null; $('#mInfo').style.display='none';
-}
-async function searchPlace(q){
-  try{
-    const r=await (await fetch(NOM+encodeURIComponent(q))).json();
-    const box=$('#mRes'); box.innerHTML='';
-    if(!r.length){ toast('Không tìm thấy địa điểm'); box.style.display='none'; return; }
-    r.forEach(x=>{
-      const b=document.createElement('button'); b.textContent=x.display_name;
-      b.onclick=()=>{ box.style.display='none'; setDest({lat:+x.lat,lon:+x.lon,name:x.display_name}); };
-      box.appendChild(b);
-    });
-    box.style.display='flex';
-  }catch(e){ toast('Lỗi tìm địa điểm – kiểm tra mạng'); }
-}
-async function routeTo(){
-  try{
-    let d=dest; const q=$('#mIn').value.trim();
-    if(!d && q){
-      const r=await (await fetch(NOM+encodeURIComponent(q))).json();
-      if(r[0]){ d={lat:+r[0].lat,lon:+r[0].lon,name:r[0].display_name}; setDest(d); }
-    }
-    if(!d){ toast('Chọn đích: tìm địa điểm, hoặc chạm giữ trên bản đồ'); return; }
-    if(!lastPos){ toast('Chưa có vị trí hiện tại – hãy cho phép định vị'); return; }
-    const u='https://router.project-osrm.org/route/v1/driving/'+lastPos.lon+','+lastPos.lat+';'+d.lon+','+d.lat+'?overview=full&geometries=geojson';
-    const r=await (await fetch(u)).json();
-    if(r.code!=='Ok'){ toast('Không tìm được đường đi'); return; }
-    const rt=r.routes[0];
-    if(routeLine) lmap.removeLayer(routeLine);
-    routeLine=L.geoJSON(rt.geometry,{style:{color:'#2f80ed',weight:6,opacity:.85}}).addTo(lmap);
-    lmap.fitBounds(routeLine.getBounds(),{padding:[30,30]});
-    follow=false; $('#mMe').classList.remove('on');
-    const min=Math.round(rt.duration/60), tm=min>=60?Math.floor(min/60)+' giờ '+(min%60)+' phút':min+' phút';
-    const info=$('#mInfo'); info.textContent='🚗 '+(rt.distance/1000).toFixed(1)+' km · '+tm+'  ✕'; info.style.display='block';
-  }catch(e){ toast('Lỗi tìm đường – kiểm tra mạng'); }
-}
-/* ---- chế độ Google Maps nhúng (dự phòng) ---- */
-function showGoogle(q){
-  const base='https://maps.google.com/maps?hl=vi&output=embed&t='+(mapSat?'k':'m');
-  let u;
-  if(q) u=base+'&z=15&q='+encodeURIComponent(q);
-  else if(lastPos) u=base+'&z=16&q='+lastPos.lat+','+lastPos.lon;
-  else { const c=lmap?lmap.getCenter():null; u=base+'&z=15&q='+encodeURIComponent(c?c.lat+','+c.lng:(loc?loc.lat+','+loc.lon:'Hà Nội')); }
-  $('#mapFrame').src=u;
-}
-function applyMapMode(){
-  $('#map').style.display=mapGoogle?'none':'block';
-  $('#mapFrame').style.display=mapGoogle?'block':'none';
-  $('#mG').classList.toggle('on',mapGoogle);
-  if(mapGoogle) showGoogle(); else if(lmap) setTimeout(()=>lmap.invalidateSize(),60);
-}
-$('#mGo').onclick=()=>{ const q=$('#mIn').value.trim(); if(!q) return; mapGoogle?showGoogle(q):searchPlace(q); };
-$('#mIn').onkeydown=e=>{ if(e.key==='Enter') $('#mGo').click(); };
-$('#mMe').onclick=()=>{
-  follow=true; $('#mMe').classList.add('on');
-  if(mapGoogle){ showGoogle(); return; }
-  if(lastPos) lmap.setView([lastPos.lat,lastPos.lon],Math.max(lmap.getZoom(),16));
-  else toast('Chưa lấy được vị trí – hãy cho phép quyền định vị');
-};
-$('#mRoute').onclick=()=>{
-  if(mapGoogle){
-    const q=$('#mIn').value.trim();
-    if(!q||!lastPos){ toast(q?'Chưa có vị trí hiện tại':'Nhập địa điểm cần đến'); return; }
-    $('#mapFrame').src='https://maps.google.com/maps?hl=vi&output=embed&saddr='+lastPos.lat+','+lastPos.lon+'&daddr='+encodeURIComponent(q);
-    return;
+function osmUpdateMe(acc){
+  if(!lmap||!lastPos||nav) return;
+  const ll=[lastPos.lat,lastPos.lon];
+  if(!meMarker){
+    meCircle=L.circle(ll,{radius:acc,color:'#2f80ed',weight:1,fillOpacity:.12}).addTo(lmap);
+    meMarker=L.circleMarker(ll,{radius:9,color:'#fff',weight:3,fillColor:'#2f80ed',fillOpacity:1}).addTo(lmap);
+  }else{ meMarker.setLatLng(ll); meCircle.setLatLng(ll).setRadius(acc); }
+  if(engine==='osm' && follow){
+    if(!osmUpdateMe.first){ osmUpdateMe.first=true; lmap.setView(ll,Math.max(lmap.getZoom(),16)); } else lmap.panTo(ll,{animate:true});
   }
-  routeTo();
-};
-$('#mSat').onclick=()=>{ mapSat=!mapSat; store.set('mapSat',mapSat); $('#mSat').classList.toggle('on',mapSat); mapGoogle?showGoogle():setTiles(); };
-$('#mG').onclick=()=>{ mapGoogle=!mapGoogle; store.set('mapGoogle',mapGoogle); applyMapMode(); };
-$('#mInfo').onclick=clearRoute;
-$('#mSat').classList.toggle('on',mapSat);
-initMap(); applyMapMode();
+}
+function osmSetDest(d){
+  if(!lmap) return;
+  if(destMarker) lmap.removeLayer(destMarker);
+  destMarker=L.circleMarker([d.lat,d.lon],{radius:10,color:'#fff',weight:3,fillColor:'#e53935',fillOpacity:1}).addTo(lmap).bindPopup((d.name||'').split(',').slice(0,2).join(','));
+  follow=false; $('#mMe').classList.remove('on'); lmap.setView([d.lat,d.lon],Math.max(lmap.getZoom(),16));
+}
+
+/* ---------- TÌM ĐỊA ĐIỂM (Photon + Nominatim, miễn phí, ưu tiên gần vị trí hiện tại) ---------- */
+async function geocode(q){
+  const b=hereObj(), bias=b?'&lat='+b.lat+'&lon='+b.lon:'';
+  const nom=fetchJ(NOM+encodeURIComponent(q)+(b?'&viewbox='+(b.lon-.5)+','+(b.lat+.5)+','+(b.lon+.5)+','+(b.lat-.5):''),9000).then(a=>{
+    if(!a.length) throw new Error('empty');
+    return a.map(x=>({name:x.name||x.display_name.split(',')[0],sub:x.display_name.split(',').slice(1,3).join(',').trim(),lat:+x.lat,lon:+x.lon}));
+  });
+  nom.catch(()=>{});
+  try{
+    const j=await fetchJ('https://photon.komoot.io/api/?limit=6&q='+encodeURIComponent(q)+bias,9000), f=j.features||[];
+    if(!f.length) throw new Error('empty');
+    return f.map(x=>{
+      const p=x.properties||{}, addr=[[p.housenumber,p.street].filter(Boolean).join(' '),p.district||p.suburb,p.city||p.county,p.state].filter(Boolean);
+      return {name:p.name||addr[0]||q,sub:(p.name?addr:addr.slice(1)).join(', '),lat:x.geometry.coordinates[1],lon:x.geometry.coordinates[0]};
+    });
+  }catch(e){ return await nom; }
+}
+async function showDestinations(q){
+  renderSheet('Đến đâu?',[],'Đang tìm "'+q+'" …');
+  try{
+    const items=await geocode(q), h=hereObj();
+    items.forEach(x=>{ if(h) x.sub=(x.sub?x.sub+' · ':'')+fmtDist(distM(h,x)); });
+    renderSheet('Kết quả cho "'+q+'"',items,'');
+  }catch(e){ renderSheet('Đến đâu?',[],'Không tìm thấy "'+q+'" hoặc máy chủ tìm kiếm đang bận. Thử nói/gõ cụ thể hơn (ví dụ thêm tên đường, quận).'); }
+}
+
+/* ---------- BẢNG KẾT QUẢ (trượt từ dưới lên) ---------- */
+function closeSheet(){ $('#chg').style.display='none'; setChip(''); if(chgLayer&&lmap){ lmap.removeLayer(chgLayer); chgLayer=null; } }
+function previewPlace(it){
+  if(engine==='google'){ gState={mode:'pin',q:it.lat+','+it.lon}; gLoad(gUrl()); }
+  else if(ensureLeaflet()) osmSetDest(it);
+}
+function renderSheet(title,items,msg){
+  const box=$('#chg'); box.innerHTML='<div class="sgrab"></div>'; box.style.display='flex';
+  const hd=document.createElement('div'); hd.className='shd';
+  const t=document.createElement('b'); t.textContent=title;
+  const x=document.createElement('button'); x.className='sx'; x.textContent='✕'; x.onclick=closeSheet; hd.append(t,x); box.appendChild(hd);
+  if(msg){ const p=document.createElement('div'); p.className='hint'; p.textContent=msg; box.appendChild(p); }
+  items.forEach(it=>{
+    const r=document.createElement('div'); r.className='crow';
+    const tx=document.createElement('div'); tx.className='ct';
+    const n=document.createElement('b'); n.textContent=it.name; const d=document.createElement('span'); d.textContent=it.sub||''; tx.append(n,d);
+    const go=document.createElement('button'); go.className='cgo'; go.textContent='▶'; go.title='Dẫn đường'; go.onclick=e=>{ e.stopPropagation(); startNav(it); };
+    const gg=document.createElement('button'); gg.className='cgo2'; gg.textContent='G↗'; gg.title='Mở app Google Maps để dẫn đường'; gg.onclick=e=>{ e.stopPropagation(); openGmaps(it); };
+    r.onclick=()=>previewPlace(it);
+    r.append(tx,gg,go); box.appendChild(r);
+  });
+}
+
+/* ---------- TRẠM SẠC VINFAST (dữ liệu OpenStreetMap, không cần key) ---------- */
+const VIN=/vinfast|v-green|vgreen|vin\s?fast/i;
+async function fetchChargers(){
+  if(!lastPos) return null;
+  const key=Math.round(lastPos.lat*50)+','+Math.round(lastPos.lon*50), c=store.get('chg',null);
+  if(c && c.key===key && Date.now()-c.t<6*3600e3) return c.items;
+  const q='[out:json][timeout:25];(node["amenity"="charging_station"](around:25000,'+lastPos.lat+','+lastPos.lon+');way["amenity"="charging_station"](around:25000,'+lastPos.lat+','+lastPos.lon+'););out center 150;';
+  const post=u=>fetch(u,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(q)}).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); });
+  const j=await Promise.any(['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'].map(post));
+  const items=(j.elements||[]).map(e=>{
+    const t=e.tags||{}, la=e.lat??(e.center&&e.center.lat), lo=e.lon??(e.center&&e.center.lon);
+    return {lat:la,lon:lo,name:t.name||t.operator||t.brand||'Trạm sạc',tag:[t.name,t.operator,t.brand,t.network].join(' '),cap:t.capacity||''};
+  }).filter(x=>x.lat!=null && VIN.test(x.tag)).map(x=>({...x,d:distM(lastPos,{lat:x.lat,lon:x.lon})})).sort((a,b)=>a.d-b.d).slice(0,8);
+  store.set('chg',{key,t:Date.now(),items}); return items;
+}
+async function showChargers(){
+  if(!lastPos){ toast('Chưa có vị trí hiện tại – hãy cho phép định vị'); return; }
+  setChip('CHG');
+  if(engine==='google'){ gState={mode:'chargers',q:''}; gLoad(gUrl()); }
+  renderSheet('⚡ Trạm sạc VinFast gần bạn',[],'Đang tìm trạm sạc VinFast gần bạn…');
+  try{
+    const items=await fetchChargers();
+    const rows=items.map(it=>({...it,sub:fmtDist(it.d)+(it.cap?' · '+it.cap+' cổng':'')}));
+    renderSheet('⚡ Trạm sạc VinFast gần bạn',rows,rows.length?'':'Dữ liệu OpenStreetMap chưa ghi nhận trạm VinFast trong 25 km quanh bạn.'+(engine==='google'?' Bản đồ Google phía trên đang tìm "Trạm sạc VinFast" – hãy xem các ghim.':''));
+    if(engine==='osm' && rows.length && ensureLeaflet()){
+      if(chgLayer) lmap.removeLayer(chgLayer);
+      chgLayer=L.layerGroup(rows.map(it=>L.marker([it.lat,it.lon],{icon:L.divIcon({className:'chgpin',html:'⚡',iconSize:[30,30]})}).bindPopup(it.name))).addTo(lmap);
+    }
+  }catch(e){ renderSheet('⚡ Trạm sạc VinFast gần bạn',[],'Chưa tải được danh sách trạm sạc (máy chủ bản đồ bận).'+(engine==='google'?' Bản đồ Google phía trên vẫn đang tìm trạm sạc VinFast.':'')); }
+}
+
+/* ================= DẪN ĐƯỜNG TỪNG NGÃ RẼ (như Google Maps) ================= */
+function proj(p,a,b){   // khoảng cách (m) từ điểm p tới đoạn a-b, và vị trí t trên đoạn
+  const k=Math.cos(p.lat*Math.PI/180), R=111320;
+  const ax=(a[1]-p.lon)*k*R, ay=(a[0]-p.lat)*R, bx=(b[1]-p.lon)*k*R, by=(b[0]-p.lat)*R;
+  const dx=bx-ax, dy=by-ay, L2=dx*dx+dy*dy; let t=L2?-(ax*dx+ay*dy)/L2:0; t=Math.max(0,Math.min(1,t));
+  return {d:Math.hypot(ax+t*dx,ay+t*dy),t};
+}
+async function fetchRoute(a,b){
+  const path=a.lon+','+a.lat+';'+b.lon+','+b.lat+'?overview=full&geometries=geojson&steps=true&alternatives=false';
+  const hosts=['https://router.project-osrm.org/route/v1/driving/','https://routing.openstreetmap.de/routed-car/route/v1/driving/'];
+  const j=await Promise.any(hosts.map(h=>fetchJ(h+path,12000).then(r=>{ if(r.code!=='Ok'||!r.routes||!r.routes[0]) throw new Error('no route'); return r; })));
+  const rt=j.routes[0], steps=rt.legs.flatMap(l=>l.steps), pts=rt.geometry.coordinates.map(c=>[c[1],c[0]]);
+  const cum=[0]; for(let i=1;i<pts.length;i++) cum.push(cum[i-1]+distM({lat:pts[i-1][0],lon:pts[i-1][1]},{lat:pts[i][0],lon:pts[i][1]}));
+  const stepStart=[]; let acc=0; steps.forEach(s=>{ stepStart.push(acc); acc+=s.distance; });
+  return {pts,cum,steps,stepStart,distance:cum[cum.length-1]||rt.distance,duration:rt.duration};
+}
+function vnInstr(st){
+  if(!st) return {text:'',ico:'↑',ang:0};
+  const m=st.maneuver||{}, t=m.type, md=m.modifier||'', nm=st.name?(' vào '+st.name):'';
+  const DIR={'uturn':['Quay đầu xe',180],'sharp right':['Rẽ gấp sang phải',135],'right':['Rẽ phải',90],'slight right':['Chếch sang phải',45],'straight':['Đi thẳng',0],'slight left':['Chếch sang trái',-45],'left':['Rẽ trái',-90],'sharp left':['Rẽ gấp sang trái',-135]};
+  const d=DIR[md]; let text, ang=d?d[1]:0, ico='↑';
+  switch(t){
+    case 'depart': text='Đi về phía '+(st.name||'trước mặt'); ang=0; break;
+    case 'arrive': text='Bạn sẽ đến nơi'+(md.includes('left')?' (bên trái)':md.includes('right')?' (bên phải)':''); ico='🏁'; break;
+    case 'roundabout': case 'rotary': case 'roundabout turn': text='Vào vòng xuyến'+(m.exit?', ra lối thứ '+m.exit:'')+(st.name?' vào '+st.name:''); ico='⟳'; break;
+    case 'merge': text='Nhập làn'+nm; break;
+    case 'on ramp': text='Đi vào đường nhánh'+nm; break;
+    case 'off ramp': text='Ra khỏi đường chính'+nm; break;
+    case 'fork': text='Giữ làn bên '+(md.includes('left')?'trái':'phải')+nm; ang=md.includes('left')?-30:30; break;
+    case 'end of road': text='Cuối đường, '+(d?d[0].toLowerCase():'rẽ')+nm; break;
+    case 'continue': case 'new name': text='Đi thẳng'+(st.name?' trên '+st.name:''); break;
+    default: text=(d?d[0]:'Đi tiếp')+nm;
+  }
+  return {text,ang,ico};
+}
+function setIco(el,i){ el.innerHTML=''; const s=document.createElement('span'); s.textContent=i.ico; if(i.ico==='↑') s.style.transform='rotate('+i.ang+'deg)'; el.appendChild(s); }
+function say(t){
+  if(!navVoice||!('speechSynthesis' in window)) return;
+  try{
+    const u=new SpeechSynthesisUtterance(t); u.lang='vi-VN';
+    const vol=v=>{ try{ if(player) player.setVolume(v); }catch(e){} };   // hạ nhỏ nhạc khi đang nói
+    u.onstart=()=>vol(25); u.onend=()=>vol(100); u.onerror=()=>vol(100);
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }catch(e){}
+}
+function drawRoute(){
+  if(!nav||!lmap) return;
+  if(navLayer) lmap.removeLayer(navLayer);
+  const dark=effTheme()==='dark', pts=nav.route.pts;
+  navLayer=L.layerGroup([
+    L.polyline(pts,{color:dark?'#06314a':'#fff',weight:13,opacity:.95,lineCap:'round',lineJoin:'round'}),
+    L.polyline(pts,{color:dark?'#27d3ff':'#1a73e8',weight:8,opacity:1,lineCap:'round',lineJoin:'round'})
+  ]).addTo(lmap);
+}
+async function startNav(d,rerouting){
+  if(!lastPos){ toast('Chưa có vị trí hiện tại – hãy cho phép định vị'); return; }
+  if(!rerouting){ closeSheet(); toast('Đang tính đường…'); }
+  let route;
+  try{ route=await fetchRoute(lastPos,d); }
+  catch(e){
+    if(rerouting){ toast('Chưa tính lại được đường – vẫn giữ tuyến cũ'); return; }
+    toast('Không tính được đường (máy chủ bản đồ bận). Thử lại, hoặc bấm G↗ để mở app Google Maps.'); return;
+  }
+  if(!ensureLeaflet()){ openGmaps(d); return; }
+  const prev = nav ? nav.prevEngine : engine;
+  nav={dest:d,route,segIdx:0,spoken:{},off:0,lastReroute:rerouting?Date.now():0,prevEngine:prev,hdg:0,prev:null,arrived:false};
+  engine='osm'; applyEngine();
+  $('#p-map').classList.add('navmode'); $('#lyr').style.display='none';
+  if(meMarker){ lmap.removeLayer(meMarker); lmap.removeLayer(meCircle); meMarker=meCircle=null; }
+  if(destMarker){ lmap.removeLayer(destMarker); destMarker=null; }
+  if(chgLayer){ lmap.removeLayer(chgLayer); chgLayer=null; }
+  drawRoute();
+  const ll=[lastPos.lat,lastPos.lon];
+  if(!carMarker) carMarker=L.marker(ll,{icon:L.divIcon({className:'carwrap',html:'<div class="car"><svg viewBox="0 0 44 44" width="46" height="46"><circle cx="22" cy="22" r="20" fill="#fff" fill-opacity=".92"/><path d="M22 6 L33 34 L22 28 L11 34 Z" fill="#1a73e8" stroke="#0b3d91" stroke-width="1.5" stroke-linejoin="round"/></svg></div>',iconSize:[46,46],iconAnchor:[23,23]}),zIndexOffset:1000,interactive:false});
+  carMarker.setLatLng(ll).addTo(lmap);
+  follow=true; $('#mMe').classList.add('on'); navZoomAt=0;
+  lmap.setView(ll,17);
+  $('#nVol').textContent=navVoice?'🔊':'🔇';
+  if(rerouting) say('Đã tính lại đường'); else say('Bắt đầu dẫn đường đến '+d.name);
+  navTick();
+}
+function stopNav(){
+  if(!nav) return;
+  const prev=nav.prevEngine; nav=null; clearTimeout(navIdle);
+  try{ speechSynthesis.cancel(); player&&player.setVolume(100); }catch(e){}
+  if(navLayer&&lmap){ lmap.removeLayer(navLayer); navLayer=null; }
+  if(carMarker&&lmap) lmap.removeLayer(carMarker);
+  $('#p-map').classList.remove('navmode');
+  engine=prev; applyEngine(); follow=true; $('#mMe').classList.add('on');
+  osmUpdateMe.first=false; if(lmap&&lastPos) osmUpdateMe(lastPos.acc||20);
+}
+function navTick(){
+  if(!nav||!lastPos||!lmap) return;
+  const R=nav.route, here=lastPos, n=R.pts.length;
+  // 1) bám lên tuyến đường
+  let best={d:1e9,i:0,t:0};
+  const scan=(a,b)=>{ for(let i=a;i<b;i++){ const r=proj(here,R.pts[i],R.pts[i+1]); if(r.d<best.d) best={d:r.d,i,t:r.t}; } };
+  scan(Math.max(0,nav.segIdx-3),Math.min(n-1,nav.segIdx+150));
+  if(best.d>60) scan(0,n-1);
+  nav.segIdx=best.i;
+  const s=R.cum[best.i]+best.t*(R.cum[best.i+1]-R.cum[best.i]), rem=Math.max(0,R.distance-s);
+  // 2) lệch đường -> tính lại
+  nav.off = best.d>45 ? nav.off+1 : 0;
+  if(nav.off>=3 && Date.now()-nav.lastReroute>12e3){ nav.lastReroute=Date.now(); nav.off=0; say('Đang tính lại đường'); startNav(nav.dest,true); return; }
+  // 3) ngã rẽ tiếp theo
+  let si=0; while(si+1<R.steps.length && R.stepStart[si+1]<=s+1) si++;
+  const nxt=R.steps[si+1], dNext=nxt?Math.max(0,R.stepStart[si+1]-s):rem;
+  const ins=(si===0&&s<40)?vnInstr(R.steps[0]):vnInstr(nxt);
+  $('#nDist').textContent=fmtDist(dNext); $('#nInstr').textContent=ins.text; setIco($('#nIco'),ins);
+  const then=R.steps[si+2]; $('#nThen').style.display=then?'inline-flex':'none'; if(then) setIco($('#nThenIco'),vnInstr(then));
+  const sec=R.duration*(R.distance?rem/R.distance:0), min=Math.max(1,Math.round(sec/60));
+  $('#nMin').textContent=fmtMin(min); $('#nSub').textContent=fmtDist(rem)+' · '+hhmm(Date.now()+sec*1000);
+  const kmh=here.spd!=null&&!isNaN(here.spd)?Math.round(here.spd*3.6):0; $('#nSpeed b').textContent=kmh;
+  // 4) giọng nói
+  if(nxt){
+    const k1=si+':300', k2=si+':80', words=vnInstr(nxt).text, lf=t=>t.charAt(0).toLowerCase()+t.slice(1);
+    if(dNext<=300 && dNext>110 && !nav.spoken[k1]){ nav.spoken[k1]=1; say('Sau '+(Math.round(dNext/50)*50)+' mét, '+lf(words)); }
+    if(dNext<=80 && !nav.spoken[k2]){ nav.spoken[k2]=1; nav.spoken[k1]=1; say(words); }
+  }
+  // 5) đến nơi
+  if(rem<35 && !nav.arrived){ nav.arrived=true; say('Bạn đã đến nơi'); toast('🏁 Bạn đã đến nơi'); setTimeout(stopNav,6000); }
+  // 6) xe và camera
+  const ll=[here.lat,here.lon];
+  let h=nav.hdg;
+  if(here.hdg!=null && !isNaN(here.hdg) && (here.spd||0)>1.5) h=here.hdg;
+  else if(nav.prev && distM(nav.prev,here)>6){ h=bearing(nav.prev,here); }
+  if(!nav.prev || distM(nav.prev,here)>6) nav.prev={lat:here.lat,lon:here.lon};
+  nav.hdg=h;
+  carMarker.setLatLng(ll);
+  const el=carMarker.getElement(); if(el&&el.firstChild) el.firstChild.style.transform='rotate('+h+'deg)';
+  if(follow){
+    const spd=(here.spd||0)*3.6, wantZ=spd<25?18:spd<55?17:spd<85?16:15;
+    if(wantZ!==lmap.getZoom() && Date.now()-navZoomAt>10e3){ navZoomAt=Date.now(); lmap.setZoom(wantZ,{animate:true}); }
+    const z=lmap.getZoom(), pt=lmap.project(L.latLng(ll),z), off=lmap.getSize().y*0.18, r=h*Math.PI/180;
+    pt.x+=Math.sin(r)*off; pt.y-=Math.cos(r)*off;
+    lmap.panTo(lmap.unproject(pt,z),{animate:true,duration:.9,easeLinearity:1});
+  }
+}
+
+/* ---------- NÚT BẤM (giao diện giống Google Maps trên điện thoại) ---------- */
+const PLACES=[['⚡ Trạm sạc VinFast','CHG'],['⛽ Cây xăng','Cây xăng'],['☕ Cà phê','Quán cà phê'],['🍜 Quán ăn','Quán ăn'],['🅿️ Bãi đỗ xe','Bãi đỗ xe'],['🏥 Bệnh viện','Bệnh viện'],['🛒 Siêu thị','Siêu thị'],['🏧 ATM','ATM']];
+function setChip(k){ document.querySelectorAll('#mChips .pchip').forEach(c=>c.classList.toggle('on',c.dataset.k===k)); }
+function mapSearch(q,chip){
+  q=(q||'').trim(); if(!q) return;
+  $('#mIn').value=q; $('#mClr').style.display=''; setChip(chip||''); closeSheet();
+  if(engine==='google'){ gState={mode:'search',q}; gLoad(gUrl()); } else showDestinations(q);
+}
+function mapRoute(){
+  const q=$('#mIn').value.trim() || (gState.mode==='search'?gState.q:'');
+  if(!q){ toast('Nhập hoặc nói nơi cần đến, rồi bấm ➜'); $('#mIn').focus(); return; }
+  if(!lastPos){ toast('Chưa có vị trí hiện tại – hãy cho phép định vị'); return; }
+  setChip(''); showDestinations(q);
+}
+function mapMe(){
+  follow=true; gPausedUntil=0; $('#mMe').classList.add('on'); closeSheet();
+  if(nav){ if(lastPos){ navTick(); } return; }
+  if(engine==='google'){ gState={mode:'me',q:''}; gLoad(gUrl()); }
+  else if(ensureLeaflet()){ if(lastPos) lmap.setView([lastPos.lat,lastPos.lon],Math.max(lmap.getZoom(),16)); else toast('Chưa lấy được vị trí – hãy cho phép quyền định vị'); }
+}
+function applyEngine(){
+  $('#gwrap').style.display=engine==='google'?'block':'none';
+  $('#map').style.display=engine==='osm'?'block':'none';
+  if(engine==='google'){ gLoad(gUrl()); } else if(ensureLeaflet()) setTimeout(()=>lmap.invalidateSize(),60);
+}
+function refreshLyr(){
+  document.querySelectorAll('#lyr [data-l]').forEach(b=>b.classList.toggle('on',(b.dataset.l==='k')===mapSat));
+  document.querySelectorAll('#lyr [data-e]').forEach(b=>b.classList.toggle('on',b.dataset.e===engine));
+}
+PLACES.forEach(([label,q])=>{
+  const b=document.createElement('button'); b.className='pchip'; b.dataset.k=q; b.textContent=label;
+  b.onclick=()=>{ q==='CHG' ? showChargers() : mapSearch(q,q); };
+  $('#mChips').appendChild(b);
+});
+$('#mGo').onclick=()=>mapSearch($('#mIn').value);
+$('#mIn').onkeydown=e=>{ if(e.key==='Enter'){ mapSearch($('#mIn').value); $('#mIn').blur(); } };
+$('#mIn').oninput=()=>{ $('#mClr').style.display=$('#mIn').value?'':'none'; };
+$('#mClr').onclick=()=>{ $('#mIn').value=''; $('#mClr').style.display='none'; closeSheet(); if(gState.mode!=='me') mapMe(); };
+$('#mRoute').onclick=mapRoute;
+$('#mMe').onclick=mapMe;
+$('#mLyr').onclick=()=>{ const l=$('#lyr'); l.style.display=l.style.display==='flex'?'none':'flex'; refreshLyr(); };
+document.querySelectorAll('#lyr [data-l]').forEach(b=>b.onclick=()=>{ mapSat=b.dataset.l==='k'; store.set('mapSat',mapSat); engine==='google'?gLoad(gUrl()):setTiles(); refreshLyr(); });
+document.querySelectorAll('#lyr [data-e]').forEach(b=>b.onclick=()=>{ engine=b.dataset.e; store.set('mapEngine',engine); applyEngine(); refreshLyr(); $('#lyr').style.display='none'; });
+$('#nExit').onclick=stopNav;
+$('#nVol').onclick=()=>{ navVoice=!navVoice; store.set('navVoice',navVoice); $('#nVol').textContent=navVoice?'🔊':'🔇'; if(!navVoice){ try{ speechSynthesis.cancel(); }catch(e){} } };
+$('#mMe').classList.add('on');
+startGeo(); applyEngine();
 
 /* ================= YOUTUBE (IFrame API, miễn phí) ================= */
 let list = store.get('ylist', []), cur = store.get('ycur', -1), player=null, ready=false, pending=null;
-let apiKey = store.get('ykey','');
 let autoplay = store.get('autoplay', true), homeResults = null, trendItems = [];
 
 /* ---- Trang chủ: lưới bài hát, bấm là phát ---- */
@@ -663,31 +1024,26 @@ function renderHome(){
   cl.onclick=()=>{ if(!confirm('Xóa toàn bộ danh sách phát?')) return; list=[]; cur=-1; plIds=[]; save(); renderList(); renderHome(); try{ player.stopVideo(); }catch(e){} };
   btns.append(ap,cl,x); top.append(b,btns); h.appendChild(top);
 
-  if(apiKey){
-    const c=document.createElement('div'); c.className='chips';
-    CHIPS.forEach(k=>{ const bt=document.createElement('button'); bt.textContent=k; bt.onclick=()=>searchYT(k); c.appendChild(bt); });
-    h.appendChild(c);
-  }else{
-    const p=document.createElement('div'); p.className='hint';
-    p.textContent='Mẹo: bấm 🔑 và nhập YouTube API key (miễn phí) để hiện nhạc thịnh hành và tìm theo từ khóa. Hoặc dán link video/playlist vào ô bên dưới.';
-    h.appendChild(p);
-  }
+  const c=document.createElement('div'); c.className='chips';
+  CHIPS.forEach(k=>{ const bt=document.createElement('button'); bt.textContent='▶ '+k; bt.onclick=()=>playSearch(k); c.appendChild(bt); });
+  h.appendChild(c);
+  const p=document.createElement('div'); p.className='hint';
+  p.textContent='Chạm 1 thể loại để phát ngay. Hoặc bấm 🎤 nói tên bài, hoặc 📋 để phát link vừa sao chép.';
+  h.appendChild(p);
   if(homeResults) homeSection('Kết quả: '+homeResults.q, homeResults.items, it=>addItem({...it},true));
   homeSection('Nghe gần đây', list, (it,i)=>play(i), (it,i)=>i===cur);
   homeSection('Thịnh hành (Việt Nam)', trendItems, it=>addItem({...it},true));
   homeSection('Gợi ý', DEFAULTS, it=>addItem({...it},true));
 }
-function openHome(){ renderHome(); $('#home').classList.add('open'); if(apiKey) refreshTrend(); }
+function openHome(){ renderHome(); $('#home').classList.add('open'); refreshTrend(); }
 function closeHome(){ $('#home').classList.remove('open'); }
 async function loadTrend(){
-  const c=store.get('trend',null), tag=apiKey.slice(-6);
-  if(c && c.k===tag && Date.now()-c.t<3600e3) return c.items;
-  const base='https://www.googleapis.com/youtube/v3/videos?part=snippet,status&chart=mostPopular&regionCode=VN&maxResults=30&key='+apiKey;
-  let r=await (await fetch(base+'&videoCategoryId=10')).json();
-  if(r.error||!r.items||!r.items.length) r=await (await fetch(base)).json();
-  if(r.error){ toast('Lỗi API: '+r.error.message); return []; }
-  const items=r.items.filter(v=>!v.status||v.status.embeddable!==false).map(v=>({type:'video',id:v.id,title:decode(v.snippet.title)}));
-  store.set('trend',{t:Date.now(),k:tag,items}); return items;
+  const c=store.get('trend',null);
+  if(c && c.items && c.items.length && Date.now()-c.t<3600e3) return c.items;
+  let items=[];
+  try{ items=await kTrending(); }catch(e){ if(c&&c.items) items=c.items; }   // máy chủ bận -> dùng bản lưu cũ
+  if(items.length) store.set('trend',{t:Date.now(),items});
+  return items;
 }
 async function refreshTrend(){
   try{
@@ -696,6 +1052,51 @@ async function refreshTrend(){
   }catch(e){ toast('Không tải được nhạc thịnh hành'); }
 }
 
+/* ---- Tìm kiếm / thịnh hành KHÔNG cần API key: hỏi song song nhiều máy chủ công cộng, máy nào trả lời trước thì dùng ---- */
+const PIPED=['https://pipedapi.kavin.rocks','https://pipedapi.adminforge.de','https://api.piped.private.coffee'];
+const INVID=['https://inv.nadeko.net','https://yewtu.be','https://invidious.nerdvpn.de'];
+function fetchJ(url,ms=8000){
+  const c=new AbortController(), t=setTimeout(()=>c.abort(),ms);
+  return fetch(url,{signal:c.signal}).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); }).finally(()=>clearTimeout(t));
+}
+function fromPiped(j){
+  const a=Array.isArray(j)?j:(j&&j.items)||[];
+  return a.filter(x=>x.url&&x.url.includes('/watch?v=')&&!x.isShort).map(x=>({type:'video',id:x.url.split('v=')[1].slice(0,11),title:x.title}));
+}
+function fromInv(a){
+  return (Array.isArray(a)?a:[]).filter(x=>x.videoId&&(!x.type||x.type==='video')&&!(x.lengthSeconds>0&&x.lengthSeconds<65)).map(x=>({type:'video',id:x.videoId,title:x.title}));
+}
+function anyBackend(pPath,iPath){
+  const tasks=[...PIPED.map(b=>fetchJ(b+pPath).then(fromPiped)),...INVID.map(b=>fetchJ(b+iPath).then(fromInv))]
+    .map(t=>t.then(r=>{ if(!r.length) throw new Error('empty'); return r; }));
+  return Promise.any(tasks);
+}
+function kSearch(q){ const e=encodeURIComponent(q); return anyBackend('/search?q='+e+'&filter=videos','/api/v1/search?q='+e+'&type=video&region=VN'); }
+async function kTrending(){
+  try{ return await anyBackend('/trending?region=VN','/api/v1/trending?region=VN&type=music'); }
+  catch(e){ return await kSearch('nhạc trẻ hay nhất'); }
+}
+async function cachedSearch(q){
+  const key=q.trim().toLowerCase(), all=store.get('scache',{}), hit=all[key];
+  if(hit && Date.now()-hit.t<12*3600e3) return hit.items;
+  try{
+    const items=await kSearch(q);
+    all[key]={t:Date.now(),items};
+    const ks=Object.keys(all); if(ks.length>15) ks.sort((a,b)=>all[a].t-all[b].t).slice(0,ks.length-15).forEach(k=>delete all[k]);
+    store.set('scache',all); return items;
+  }catch(e){ if(hit) return hit.items; throw e; }   // máy chủ bận: dùng kết quả cũ nếu có
+}
+let searching=false;
+async function playSearch(q){
+  q=(q||'').trim(); if(!q||searching) return;
+  searching=true; toast('Đang tìm: '+q+' …');
+  try{
+    const items=(await cachedSearch(q)).slice(0,25);
+    list=items; cur=-1; plIds=[]; save(); renderList(); closeHome(); play(0);
+    $('#yIn').value='';
+  }catch(e){ toast('Chưa tìm được (máy chủ tìm kiếm đang bận). Thử lại sau ít giây, hoặc dùng 📋 để phát link đã sao chép.'); }
+  searching=false;
+}
 function parseYT(s){
   s=s.trim();
   try{
@@ -761,7 +1162,7 @@ function renderQueue(){
 }
 async function seedList(){
   let items=[];
-  if(apiKey){ try{ items=(await loadTrend()).slice(0,25); }catch(e){} }
+  try{ items=(await loadTrend()).slice(0,25); }catch(e){}
   if(!items.length) items=DEFAULTS.map(x=>({...x}));
   list=items; cur=0; save(); renderList();
 }
@@ -784,7 +1185,7 @@ window.onYouTubeIframeAPIReady=()=>{
     playerVars:pv,
     events:{
       onReady:()=>{
-        ready=true;
+        ready=true; setupMedia();
         if(pending!==null){ const i=pending; pending=null; play(i); }
         else restoreYT();
       },
@@ -853,7 +1254,21 @@ function play(i){
   if(it.type==='playlist') player.loadPlaylist({list:it.id,listType:'playlist',index:0});
   else player.loadVideoById(it.id);
 }
-function nextItem(){ if(list.length) play((cur+1)%list.length); }
+let advancing=false;
+async function nextItem(){
+  if(!list.length||advancing) return; advancing=true;
+  try{
+    if(cur>=list.length-1){   // hết danh sách: nạp thêm bài liên quan để nhạc không bị dừng
+      const it=list[cur], base=(it&&(it.title||titleCache[it.id]))||'nhạc trẻ hay nhất';
+      try{
+        const have=new Set(list.map(x=>x.id));
+        const add=(await cachedSearch(base)).filter(x=>!have.has(x.id)).slice(0,15);
+        if(add.length){ list.push(...add); save(); renderList(); }
+      }catch(e){}
+    }
+    play((cur+1)%list.length);
+  }finally{ advancing=false; }
+}
 $('#yNext').onclick=()=>{
   const it=list[cur];
   if(it && it.type==='playlist' && ready) player.nextVideo(); else nextItem();
@@ -877,15 +1292,7 @@ function addItem(it, andPlay){
   save(); renderList();
   if(andPlay) play(idx);
 }
-async function searchYT(q){
-  if(!apiKey){ toast('Muốn tìm bằng từ khóa cần API key (bấm 🔑). Hoặc dán link video/playlist.'); openHome(); return; }
-  try{
-    const r=await (await fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&videoCategoryId=10&maxResults=16&q='+encodeURIComponent(q)+'&key='+apiKey)).json();
-    if(r.error){ toast('Lỗi API: '+r.error.message); return; }
-    homeResults={q, items:r.items.map(v=>({type:'video',id:v.id.videoId,title:decode(v.snippet.title)}))};
-    openHome();
-  }catch(e){ toast('Không tìm được – kiểm tra mạng / key'); }
-}
+function searchYT(q){ return playSearch(q); }
 $('#yGo').onclick=()=>{
   const s=$('#yIn').value.trim(); if(!s) return;
   const it=parseYT(s);
@@ -896,14 +1303,48 @@ $('#yAdd').onclick=()=>{
   addItem(it,false); $('#yIn').value='';
 };
 $('#yIn').onkeydown=e=>{ if(e.key==='Enter') $('#yGo').click(); };
-$('#yKey').onclick=()=>{
-  const k=prompt('Dán YouTube Data API v3 key (miễn phí, tạo ở Google Cloud Console). Để trống để xóa:', apiKey);
-  if(k!==null){
-    apiKey=k.trim(); store.set('ykey',apiKey); store.set('trend',null); trendItems=[];
-    toast(apiKey?'Đã lưu key':'Đã xóa key');
-    if(apiKey) openHome(); else if($('#home').classList.contains('open')) renderHome();
-  }
+$('#yPlay').onclick=()=>{
+  if(!list[cur]){ restoreYT(); return; }
+  try{ player.getPlayerState()===1 ? player.pauseVideo() : player.playVideo(); }catch(e){}
 };
+$('#yPaste').onclick=async()=>{
+  try{
+    const it=parseYT(await navigator.clipboard.readText());
+    if(it) addItem(it,true); else toast('Chưa có link YouTube trong bộ nhớ tạm – hãy sao chép link trước');
+  }catch(e){ toast('Trình duyệt không cho đọc bộ nhớ tạm – hãy dán vào ô rồi bấm Phát'); }
+};
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SR){
+  $('#yMic').style.display='';
+  $('#yMic').onclick=()=>{
+    try{
+      const r=new SR(); r.lang='vi-VN'; r.maxAlternatives=1;
+      r.onresult=e=>{ const q=e.results[0][0].transcript; $('#yIn').value=q; playSearch(q); };
+      r.onerror=()=>toast('Không nghe được – thử lại');
+      r.start(); toast('🎤 Đang nghe… hãy nói tên bài hát hoặc ca sĩ');
+    }catch(e){ toast('Thiết bị không hỗ trợ nhận giọng nói'); }
+  };
+}
+if(SR){
+  $('#mMic').style.display='';
+  $('#mMic').onclick=()=>{
+    try{
+      const r=new SR(); r.lang='vi-VN'; r.maxAlternatives=1;
+      r.onresult=e=>{ const q=e.results[0][0].transcript, m=q.match(/^(chỉ đường|dẫn đường|đường|đi)\s+(đến|tới|đi)?\s*(.+)/i); $('#mIn').value=m?m[3]:q; if(m){ setChip(''); showDestinations(m[3]); } else mapSearch(q); };
+      r.onerror=()=>toast('Không nghe được – thử lại');
+      r.start(); toast('🎤 Hãy nói nơi cần đến');
+    }catch(e){ toast('Thiết bị không hỗ trợ nhận giọng nói'); }
+  };
+}
+// Phím media (tai nghe / vô-lăng / Bluetooth), nếu trình duyệt cho phép
+function setupMedia(){
+  if(!('mediaSession' in navigator)) return;
+  const set=(a,f)=>{ try{ navigator.mediaSession.setActionHandler(a,f); }catch(e){} };
+  set('play',()=>{ try{ player.playVideo(); }catch(e){} });
+  set('pause',()=>{ try{ player.pauseVideo(); }catch(e){} });
+  set('nexttrack',()=>$('#yNext').click());
+  set('previoustrack',()=>$('#yPrev').click());
+}
 $('#yHome').onclick=()=>{ $('#home').classList.contains('open') ? closeHome() : openHome(); };
 
 /* ================= KHỞI ĐỘNG ================= */
