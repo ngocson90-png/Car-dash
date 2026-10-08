@@ -75,7 +75,9 @@ input::placeholder{color:var(--muted)}
 
 /* youtube */
 .player-wrap{flex:1;min-height:110px;border-radius:12px;overflow:hidden;background:#000;position:relative}
-.player-wrap iframe{width:100%;height:100%;border:0}
+.player-wrap video{width:100%;height:100%;border:0;background:#000;outline:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:24px;height:24px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 10px}
 #ytMsg{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:14px;font-size:14px;line-height:1.5;background:rgba(0,0,0,.82);z-index:2;flex-direction:column;gap:8px}
 #ytMsg a{color:var(--accent)}
 /* trang chủ YouTube (lưới bài hát bấm là phát) */
@@ -233,7 +235,7 @@ body[data-theme=light] #chg,body[data-theme=light] #mRes{background:#fff;color:#
 <div id="fx"></div>
 
 <div id="bar">
-  <button data-p="yt" class="on">▶ YouTube</button>
+  <button data-p="yt" class="on">▶ Nhạc</button>
   <button data-p="map" class="on">🗺 Bản đồ</button>
   <button data-p="clock">🕒 Đồng hồ</button>
   <button data-p="weather">⛅ Thời tiết</button>
@@ -245,9 +247,9 @@ body[data-theme=light] #chg,body[data-theme=light] #mRes{background:#fff;color:#
 
 <div id="stage" data-layout="auto">
 
-  <!-- YOUTUBE -->
+  <!-- YOUTUBE (Ad-Free) -->
   <section class="panel" id="p-yt">
-    <div class="yt-main"><div class="player-wrap"><div id="player"></div><div id="ytMsg"></div><div id="home"></div></div><div id="queue"></div></div>
+    <div class="yt-main"><div class="player-wrap"><video id="player" controls playsinline></video><div id="ytMsg"></div><div id="home"></div></div><div id="queue"></div></div>
     <div class="row yctl">
       <button id="yHome" title="Trang chủ">🏠</button>
       <button id="yPrev" title="Bài trước">⏮</button>
@@ -353,14 +355,13 @@ applyLayout();
 
 /* toàn màn hình & giữ sáng */
 $('#bFull').onclick=()=>{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.(); };
-/* ===== Giữ màn hình luôn sáng (tự động, không cần bấm) ===== */
 let wake=null;
 async function keepAwake(){
   try{ if(!wake && navigator.wakeLock && document.visibilityState==='visible'){ wake=await navigator.wakeLock.request('screen'); wake.onrelease=()=>{ wake=null; }; } }catch(e){}
 }
 keepAwake(); document.addEventListener('pointerdown',keepAwake); document.addEventListener('visibilitychange',keepAwake);
 
-/* ===== Giao diện Sáng / Tối / Tự động (theo giờ: 6h–18h sáng, còn lại tối) ===== */
+/* Giao diện Sáng / Tối / Tự động */
 const THEMES=['auto','light','dark'], THEME_LABEL={auto:'🌗 Tự động',light:'☀️ Sáng',dark:'🌙 Tối'};
 let themePref=store.get('theme','auto');
 function effTheme(){ if(themePref!=='auto') return themePref; const h=new Date().getHours(); return (h>=6&&h<18)?'light':'dark'; }
@@ -385,7 +386,7 @@ function tick(){
   $('#sHand').style.transform=`rotate(${d.getSeconds()*6}deg)`;
 }
 
-/* ---- Đồng hồ kim ---- */
+/* Đồng hồ kim */
 (function buildAnalog(){
   const NS='http://www.w3.org/2000/svg'; let s='<circle class="face" r="96"/>';
   for(let i=0;i<60;i++){
@@ -398,14 +399,11 @@ function tick(){
   $('#analog').innerHTML=s;
 })();
 let clockMode=store.get('clockMode','digital');
-function applyClockMode(){
-  $('#p-clock').dataset.mode=clockMode;
-  $('#clockMode').textContent = clockMode==='digital' ? '🕒 Kim' : '🔢 Số';
-}
+function applyClockMode(){ $('#p-clock').dataset.mode=clockMode; $('#clockMode').textContent = clockMode==='digital' ? '🕒 Kim' : '🔢 Số'; }
 $('#clockMode').onclick=e=>{ e.stopPropagation(); clockMode=clockMode==='digital'?'analog':'digital'; store.set('clockMode',clockMode); applyClockMode(); };
 applyClockMode();
 
-/* ---- Lịch âm Việt Nam (thuật toán Hồ Ngọc Đức, múi giờ UTC+7) ---- */
+/* Lịch âm (Hồ Ngọc Đức) */
 const INT=Math.floor;
 function jdFromDate(dd,mm,yy){
   const a=INT((14-mm)/12), y=yy+4800-a, m=mm+12*a-3;
@@ -435,47 +433,32 @@ function sunLongitude(jdn){
   let L=(L0+DL)*dr; L-=Math.PI*2*INT(L/(Math.PI*2));
   return L;
 }
-const TZ=7;
-const sunLong=d=>INT(sunLongitude(d-0.5-TZ/24)/Math.PI*6);
-const newMoonDay=k=>INT(newMoon(k)+0.5+TZ/24);
+const TZ=7, sunLong=d=>INT(sunLongitude(d-0.5-TZ/24)/Math.PI*6), newMoonDay=k=>INT(newMoon(k)+0.5+TZ/24);
 function lunarMonth11(yy){
   const off=jdFromDate(31,12,yy)-2415021, k=INT(off/29.530588853);
-  let nm=newMoonDay(k);
-  if(sunLong(nm)>=9) nm=newMoonDay(k-1);
-  return nm;
+  let nm=newMoonDay(k); if(sunLong(nm)>=9) nm=newMoonDay(k-1); return nm;
 }
 function leapOffset(a11){
   const k=INT((a11-2415021.076998695)/29.530588853+0.5);
   let last=0,i=1,arc=sunLong(newMoonDay(k+i));
-  do{ last=arc; i++; arc=sunLong(newMoonDay(k+i)); }while(arc!==last && i<14);
-  return i-1;
+  do{ last=arc; i++; arc=sunLong(newMoonDay(k+i)); }while(arc!==last && i<14); return i-1;
 }
 function solar2lunar(dd,mm,yy){
-  const dayNumber=jdFromDate(dd,mm,yy);
-  const k=INT((dayNumber-2415021.076998695)/29.530588853);
-  let monthStart=newMoonDay(k+1);
-  if(monthStart>dayNumber) monthStart=newMoonDay(k);
+  const dayNumber=jdFromDate(dd,mm,yy), k=INT((dayNumber-2415021.076998695)/29.530588853);
+  let monthStart=newMoonDay(k+1); if(monthStart>dayNumber) monthStart=newMoonDay(k);
   let a11=lunarMonth11(yy), b11=a11, lunarYear;
-  if(a11>=monthStart){ lunarYear=yy; a11=lunarMonth11(yy-1); }
-  else { lunarYear=yy+1; b11=lunarMonth11(yy+1); }
+  if(a11>=monthStart){ lunarYear=yy; a11=lunarMonth11(yy-1); } else { lunarYear=yy+1; b11=lunarMonth11(yy+1); }
   const lunarDay=dayNumber-monthStart+1, diff=INT((monthStart-a11)/29);
   let leap=0, lunarMonth=diff+11;
-  if(b11-a11>365){
-    const ld=leapOffset(a11);
-    if(diff>=ld){ lunarMonth=diff+10; if(diff===ld) leap=1; }
-  }
-  if(lunarMonth>12) lunarMonth-=12;
-  if(lunarMonth>=11 && diff<4) lunarYear-=1;
+  if(b11-a11>365){ const ld=leapOffset(a11); if(diff>=ld){ lunarMonth=diff+10; if(diff===ld) leap=1; } }
+  if(lunarMonth>12) lunarMonth-=12; if(lunarMonth>=11 && diff<4) lunarYear-=1;
   return {day:lunarDay,month:lunarMonth,year:lunarYear,leap,jd:dayNumber};
 }
-const CAN=['Giáp','Ất','Bính','Đinh','Mậu','Kỷ','Canh','Tân','Nhâm','Quý'];
-const CHI=['Tý','Sửu','Dần','Mão','Thìn','Tỵ','Ngọ','Mùi','Thân','Dậu','Tuất','Hợi'];
+const CAN=['Giáp','Ất','Bính','Đinh','Mậu','Kỷ','Canh','Tân','Nhâm','Quý'], CHI=['Tý','Sửu','Dần','Mão','Thìn','Tỵ','Ngọ','Mùi','Thân','Dậu','Tuất','Hợi'];
 function renderLunar(d){
   try{
-    const l=solar2lunar(d.getDate(),d.getMonth()+1,d.getFullYear());
-    const yearName=CAN[(l.year+6)%10]+' '+CHI[(l.year+8)%12];
-    const dayName =CAN[(l.jd+9)%10]+' '+CHI[(l.jd+1)%12];
-    const monName =CAN[(l.year*12+l.month+3)%10]+' '+CHI[(l.month+1)%12];
+    const l=solar2lunar(d.getDate(),d.getMonth()+1,d.getFullYear()), yearName=CAN[(l.year+6)%10]+' '+CHI[(l.year+8)%12];
+    const dayName =CAN[(l.jd+9)%10]+' '+CHI[(l.jd+1)%12], monName =CAN[(l.year*12+l.month+3)%10]+' '+CHI[(l.month+1)%12];
     let tag=''; if(l.day===1) tag=' · Mùng một'; else if(l.day===15) tag=' · Rằm';
     $('#lunar').innerHTML=`Âm lịch: <b>${l.day}/${l.month}${l.leap?' (nhuận)':''}</b>${tag}<small>Ngày ${dayName} · tháng ${monName} · năm ${yearName}</small>`;
   }catch(e){ $('#lunar').textContent=''; }
@@ -483,7 +466,7 @@ function renderLunar(d){
 $('#p-clock').onclick=()=>{ if(clockMode!=='digital') return; h12=!h12; store.set('h12',h12); tick(); };
 setInterval(tick,1000); tick();
 
-/* ================= THỜI TIẾT (Open-Meteo, miễn phí, không cần key) ================= */
+/* ================= THỜI TIẾT ================= */
 function wx(code,isDay=1){
   const m={
     0:['Quang đãng', isDay?'☀️':'🌙', isDay?'clear-day':'clear-night'],
@@ -499,24 +482,16 @@ function wx(code,isDay=1){
     80:['Mưa rào nhẹ','🌦️','rain'],81:['Mưa rào','🌧️','rain'],82:['Mưa rào rất to','🌧️','rain'],
     85:['Tuyết rào','🌨️','snow'],86:['Tuyết rào dày','❄️','snow'],
     95:['Dông','⛈️','storm'],96:['Dông kèm mưa đá','⛈️','storm'],99:['Dông mưa đá lớn','⛈️','storm']
-  };
-  return m[code] || ['—','🌡️','cloud-day'];
+  }; return m[code] || ['—','🌡️','cloud-day'];
 }
-let loc = store.get('loc', null);   // {lat, lon, name}
-function setSky(sky){
-  document.body.dataset.sky = sky;
-  const fx=$('#fx'); fx.className = (sky==='rain'||sky==='storm') ? 'rain' : sky==='snow' ? 'snow' : '';
-}
+let loc = store.get('loc', null);
+function setSky(sky){ document.body.dataset.sky = sky; const fx=$('#fx'); fx.className = (sky==='rain'||sky==='storm') ? 'rain' : sky==='snow' ? 'snow' : ''; }
 function hourSky(){ const h=new Date().getHours(); setSky(h>=6&&h<18?'clear-day':'clear-night'); }
 
 async function loadWeather(){
   if(!loc) return;
   $('#wLoc').textContent='📍 '+loc.name;
-  const u='https://api.open-meteo.com/v1/forecast?latitude='+loc.lat+'&longitude='+loc.lon
-    +'&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m'
-    +'&hourly=temperature_2m,precipitation_probability,weather_code,is_day'
-    +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset'
-    +'&timezone=auto&forecast_days=6&wind_speed_unit=kmh';
+  const u='https://api.open-meteo.com/v1/forecast?latitude='+loc.lat+'&longitude='+loc.lon+'&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset&timezone=auto&forecast_days=6&wind_speed_unit=kmh';
   try{
     const d=await (await fetch(u)).json(), c=d.current;
     const [txt,ico,sky]=wx(c.weather_code,c.is_day);
@@ -524,82 +499,59 @@ async function loadWeather(){
     const sr=d.daily.sunrise[0].slice(11,16), ss=d.daily.sunset[0].slice(11,16);
     $('#wMeta').innerHTML=`<span>🌡 Cảm giác ${Math.round(c.apparent_temperature)}°</span><span>💧 ${c.relative_humidity_2m}%</span><span>💨 ${Math.round(c.wind_speed_10m)} km/h</span><span>🌅 ${sr}</span><span>🌇 ${ss}</span>`;
     setSky(sky);
-    // theo giờ
     const hs=$('#wHour'); hs.innerHTML='';
     let i=d.hourly.time.findIndex(t=>t>=c.time); if(i<0) i=0;
     for(let k=i;k<i+16 && k<d.hourly.time.length;k+=2){
       const e=wx(d.hourly.weather_code[k],d.hourly.is_day[k])[1];
       hs.insertAdjacentHTML('beforeend',`<div class="cell">${d.hourly.time[k].slice(11,13)}h<div class="e">${e}</div><b>${Math.round(d.hourly.temperature_2m[k])}°</b>☔${d.hourly.precipitation_probability[k]??0}%</div>`);
     }
-    // theo ngày
     const ds=$('#wDay'); ds.innerHTML='';
     for(let k=1;k<d.daily.time.length;k++){
       const dt=new Date(d.daily.time[k]+'T00:00');
       ds.insertAdjacentHTML('beforeend',`<div class="cell">${dt.toLocaleDateString('vi-VN',{weekday:'short'})}<div class="e">${wx(d.daily.weather_code[k])[1]}</div><b>${Math.round(d.daily.temperature_2m_max[k])}°</b>${Math.round(d.daily.temperature_2m_min[k])}°<br>☔${d.daily.precipitation_probability_max[k]??0}%</div>`);
     }
-  }catch(e){ $('#wDesc').textContent='Không tải được thời tiết (kiểm tra mạng)'; }
+  }catch(e){ $('#wDesc').textContent='Không tải được thời tiết'; }
 }
 async function nameFor(lat,lon){
-  try{
-    const r=await (await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=vi`)).json();
-    return r.locality || r.city || r.principalSubdivision || 'Vị trí của bạn';
-  }catch(e){ return 'Vị trí của bạn'; }
+  try{ const r=await (await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=vi`)).json(); return r.locality || r.city || r.principalSubdivision || 'Vị trí của bạn'; }catch(e){ return 'Vị trí của bạn'; }
 }
 function useGps(silent){
   if(!navigator.geolocation){ if(!silent) toast('Thiết bị không hỗ trợ định vị'); return Promise.resolve(false); }
   return new Promise(res=>navigator.geolocation.getCurrentPosition(async p=>{
     const lat=+p.coords.latitude.toFixed(4), lon=+p.coords.longitude.toFixed(4);
     loc={lat,lon,name:await nameFor(lat,lon)}; store.set('loc',loc); loadWeather(); res(true);
-  },()=>{ if(!silent) toast('Không lấy được vị trí – hãy cho phép quyền định vị'); res(false); },{timeout:10000}));
+  },()=>{ if(!silent) toast('Không lấy được vị trí'); res(false); },{timeout:10000}));
 }
 $('#wLoc').onclick=()=>{ const r=$('#locRow'); r.style.display=r.style.display==='flex'?'none':'flex'; };
-$('#wRef').onclick=loadWeather;
-$('#locGps').onclick=()=>useGps(false);
+$('#wRef').onclick=loadWeather; $('#locGps').onclick=()=>useGps(false);
 async function searchLoc(){
   const q=$('#locIn').value.trim(); if(!q) return;
   try{
-    const r=await (await fetch('https://geocoding-api.open-meteo.com/v1/search?count=6&language=vi&name='+encodeURIComponent(q))).json();
-    const box=$('#locRes'); box.innerHTML='';
+    const r=await (await fetch('https://geocoding-api.open-meteo.com/v1/search?count=6&language=vi&name='+encodeURIComponent(q))).json(), box=$('#locRes'); box.innerHTML='';
     if(!r.results){ box.textContent='Không tìm thấy'; return; }
-    r.results.forEach(x=>{
-      const b=document.createElement('button');
-      b.textContent=[x.name,x.admin1,x.country].filter(Boolean).join(', ');
-      b.onclick=()=>{ loc={lat:x.latitude,lon:x.longitude,name:x.name}; store.set('loc',loc); box.innerHTML=''; $('#locRow').style.display='none'; loadWeather(); };
-      box.appendChild(b);
-    });
+    r.results.forEach(x=>{ const b=document.createElement('button'); b.textContent=[x.name,x.admin1,x.country].filter(Boolean).join(', ');
+      b.onclick=()=>{ loc={lat:x.latitude,lon:x.longitude,name:x.name}; store.set('loc',loc); box.innerHTML=''; $('#locRow').style.display='none'; loadWeather(); }; box.appendChild(b); });
   }catch(e){ toast('Lỗi tìm địa điểm'); }
 }
 $('#locGo').onclick=searchLoc; $('#locIn').onkeydown=e=>{ if(e.key==='Enter') searchLoc(); };
 setInterval(loadWeather, 15*60*1000);
 
-/* ================= BẢN ĐỒ: Google Maps (mặc định, nhúng, không cần key) + OpenStreetMap (dự phòng) ================= */
+/* ================= BẢN ĐỒ ================= */
 let engine = store.get('mapEngine','google'), mapSat = store.get('mapSat',false);
 let lastPos=null, follow=true, gState={mode:'me',q:''}, gShownPos=null, gLastLoad=0, gPausedUntil=0, gWarned=false;
 let lmap=null, tileLayer=null, meMarker=null, meCircle=null, destMarker=null, routeLine=null, chgLayer=null, dest=null;
-const TILES={
-  v:{url:'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',opt:{subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap · © CARTO'}},
-  s:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',opt:{maxZoom:19,attribution:'Tiles © Esri'}}
-};
+const TILES={ v:{url:'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',opt:{subdomains:'abcd',maxZoom:19}}, s:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',opt:{maxZoom:19}} };
 const NOM='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=vi&q=';
-function distM(a,b){
-  const R=6371e3,r=Math.PI/180,dLa=(b.lat-a.lat)*r,dLo=(b.lon-a.lon)*r;
-  const x=Math.sin(dLa/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)**2;
-  return 2*R*Math.asin(Math.sqrt(x));
-}
+function distM(a,b){ const R=6371e3,r=Math.PI/180,dLa=(b.lat-a.lat)*r,dLo=(b.lon-a.lon)*r,x=Math.sin(dLa/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)**2; return 2*R*Math.asin(Math.sqrt(x)); }
 const hereStr=()=> lastPos ? lastPos.lat+','+lastPos.lon : (loc ? loc.lat+','+loc.lon : '21.0285,105.8542');
 
-/* ---------- GPS dùng chung ---------- */
 function startGeo(){
   if(!navigator.geolocation) return;
   navigator.geolocation.watchPosition(p=>{
     lastPos={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy};
-    if(lmap) osmUpdateMe(p.coords.accuracy);
-    gFollow();
-  },err=>{ if(err.code===1 && !startGeo.warned){ startGeo.warned=true; toast('Hãy cho phép quyền định vị để bản đồ hiện vị trí của bạn'); } },
-  {enableHighAccuracy:true,maximumAge:5000,timeout:30000});
+    if(lmap) osmUpdateMe(p.coords.accuracy); gFollow();
+  },err=>{ if(err.code===1 && !startGeo.warned){ startGeo.warned=true; toast('Hãy cho phép quyền định vị để bản đồ hiện vị trí của bạn'); } }, {enableHighAccuracy:true,maximumAge:5000,timeout:30000});
 }
-
-/* ---------- GOOGLE MAPS (iframe nhúng) ---------- */
 function gUrl(){
   const base='https://maps.google.com/maps?hl=vi&output=embed&t='+(mapSat?'k':'m'), here=hereStr();
   switch(gState.mode){
@@ -611,573 +563,26 @@ function gUrl(){
 }
 function gLoad(url){
   const wrap=$('#gwrap'); wrap.classList.toggle('sat',mapSat);
-  const f=document.createElement('iframe'); f.className='gframe'; f.setAttribute('allowfullscreen',''); f.referrerPolicy='no-referrer-when-downgrade';
-  f.style.visibility='hidden';
+  const f=document.createElement('iframe'); f.className='gframe'; f.setAttribute('allowfullscreen',''); f.referrerPolicy='no-referrer-when-downgrade'; f.style.visibility='hidden';
   const show=()=>{ f.style.visibility='visible'; wrap.querySelectorAll('iframe').forEach(o=>{ if(o!==f) o.remove(); }); };
-  f.onload=show; setTimeout(show,8000);              // tải xong mới đổi khung, tránh nháy trắng
-  f.src=url; wrap.appendChild(f);
-  gLastLoad=Date.now(); gShownPos=lastPos?{lat:lastPos.lat,lon:lastPos.lon}:null;
-  $('#mMe').classList.toggle('on',gState.mode==='me');
+  f.onload=show; setTimeout(show,8000); f.src=url; wrap.appendChild(f);
+  gLastLoad=Date.now(); gShownPos=lastPos?{lat:lastPos.lat,lon:lastPos.lon}:null; $('#mMe').classList.toggle('on',gState.mode==='me');
 }
 function gFollow(){
   if(engine!=='google'||!follow||!lastPos) return;
   if(Date.now()<gPausedUntil) return;
-  if(!gShownPos){ gLoad(gUrl()); return; }           // có GPS lần đầu: nhảy về vị trí thật
+  if(!gShownPos){ gLoad(gUrl()); return; }
   const m=gState.mode; if(m==='search'||m==='chargers') return;
   const d=distM(gShownPos,lastPos), minD=m==='route'?200:40, minT=m==='route'?60e3:12e3;
   if(d>minD && Date.now()-gLastLoad>minT){ if(m==='route') gState.from=hereStr(); gLoad(gUrl()); }
 }
-// Chạm vào bản đồ Google => tạm dừng tự di chuyển 60 giây để bạn kéo xem thoải mái
-window.addEventListener('blur',()=>setTimeout(()=>{
-  const a=document.activeElement;
-  if(engine==='google' && a && a.classList && a.classList.contains('gframe')){
-    gPausedUntil=Date.now()+60e3; $('#mMe').classList.remove('on');
-    if(!gWarned){ gWarned=true; toast('Tạm dừng tự theo vị trí 60 giây – bấm 📍 để theo lại ngay'); }
-  }
-},0));
+window.addEventListener('blur',()=>setTimeout(()=>{ const a=document.activeElement; if(engine==='google' && a && a.classList && a.classList.contains('gframe')){ gPausedUntil=Date.now()+60e3; $('#mMe').classList.remove('on'); } },0));
 
-/* ---------- OPENSTREETMAP (Leaflet) ---------- */
-function setTiles(){
-  if(!lmap) return;
-  if(tileLayer) lmap.removeLayer(tileLayer);
-  const t=TILES[mapSat?'s':'v']; tileLayer=L.tileLayer(t.url,t.opt).addTo(lmap);
-}
+function setTiles(){ if(!lmap) return; if(tileLayer) lmap.removeLayer(tileLayer); const t=TILES[mapSat?'s':'v']; tileLayer=L.tileLayer(t.url,t.opt).addTo(lmap); }
 function ensureLeaflet(){
-  if(lmap) return true;
-  if(typeof L==='undefined'){ toast('Không tải được bản đồ OSM'); return false; }
+  if(lmap) return true; if(typeof L==='undefined'){ toast('Không tải được bản đồ OSM'); return false; }
   const v=store.get('mview',null), c=v?[v.lat,v.lng]:(lastPos?[lastPos.lat,lastPos.lon]:(loc?[loc.lat,loc.lon]:[21.0285,105.8542]));
-  lmap=L.map('map',{zoomControl:false}).setView(c,v?v.z:14); L.control.zoom({position:'bottomleft'}).addTo(lmap);
-  setTiles();
+  lmap=L.map('map',{zoomControl:false}).setView(c,v?v.z:14); L.control.zoom({position:'bottomleft'}).addTo(lmap); setTiles();
   lmap.on('dragstart',()=>{ follow=false; $('#mMe').classList.remove('on'); });
   lmap.on('moveend',()=>{ const k=lmap.getCenter(); store.set('mview',{lat:k.lat,lng:k.lng,z:lmap.getZoom()}); });
-  lmap.on('contextmenu',e=>osmSetDest({lat:e.latlng.lat,lon:e.latlng.lng,name:'Điểm đã chọn'}));
-  new ResizeObserver(()=>lmap.invalidateSize()).observe($('#map'));
-  if(lastPos){ osmUpdateMe(lastPos.acc||20); lmap.setView([lastPos.lat,lastPos.lon],16); }
-  return true;
-}
-function osmUpdateMe(acc){
-  if(!lmap||!lastPos) return;
-  const ll=[lastPos.lat,lastPos.lon];
-  if(!meMarker){
-    meCircle=L.circle(ll,{radius:acc,color:'#2f80ed',weight:1,fillOpacity:.12}).addTo(lmap);
-    meMarker=L.circleMarker(ll,{radius:9,color:'#fff',weight:3,fillColor:'#2f80ed',fillOpacity:1}).addTo(lmap);
-  }else{ meMarker.setLatLng(ll); meCircle.setLatLng(ll).setRadius(acc); }
-  if(engine==='osm' && follow){
-    if(!osmUpdateMe.first){ osmUpdateMe.first=true; lmap.setView(ll,Math.max(lmap.getZoom(),16)); } else lmap.panTo(ll,{animate:true});
-  }
-}
-function osmSetDest(d){
-  dest=d; if(destMarker) lmap.removeLayer(destMarker);
-  destMarker=L.circleMarker([d.lat,d.lon],{radius:10,color:'#fff',weight:3,fillColor:'#e53935',fillOpacity:1}).addTo(lmap)
-    .bindPopup(d.name.split(',').slice(0,2).join(',')).openPopup();
-  follow=false; $('#mMe').classList.remove('on'); lmap.setView([d.lat,d.lon],Math.max(lmap.getZoom(),15));
-}
-async function osmRouteTo(d){
-  if(!lastPos){ toast('Chưa có vị trí hiện tại – hãy cho phép định vị'); return; }
-  try{
-    const r=await (await fetch('https://router.project-osrm.org/route/v1/driving/'+lastPos.lon+','+lastPos.lat+';'+d.lon+','+d.lat+'?overview=full&geometries=geojson')).json();
-    if(r.code!=='Ok'){ toast('Không tìm được đường đi'); return; }
-    const rt=r.routes[0]; if(routeLine) lmap.removeLayer(routeLine);
-    routeLine=L.geoJSON(rt.geometry,{style:{color:'#2f80ed',weight:6,opacity:.85}}).addTo(lmap);
-    lmap.fitBounds(routeLine.getBounds(),{padding:[30,30]}); follow=false; $('#mMe').classList.remove('on');
-    const min=Math.round(rt.duration/60), tm=min>=60?Math.floor(min/60)+' giờ '+(min%60)+' phút':min+' phút';
-    const info=$('#mInfo'); info.textContent='🚗 '+(rt.distance/1000).toFixed(1)+' km · '+tm+'  ✕'; info.style.display='block';
-  }catch(e){ toast('Lỗi tìm đường – kiểm tra mạng'); }
-}
-function osmClear(){
-  if(routeLine){ lmap.removeLayer(routeLine); routeLine=null; }
-  if(destMarker){ lmap.removeLayer(destMarker); destMarker=null; }
-  dest=null; $('#mInfo').style.display='none';
-}
-async function osmSearch(q){
-  try{
-    const r=await (await fetch(NOM+encodeURIComponent(q))).json(), box=$('#mRes'); box.innerHTML='';
-    if(!r.length){ toast('Không tìm thấy địa điểm'); box.style.display='none'; return; }
-    r.forEach(x=>{ const b=document.createElement('button'); b.textContent=x.display_name;
-      b.onclick=()=>{ box.style.display='none'; osmSetDest({lat:+x.lat,lon:+x.lon,name:x.display_name}); }; box.appendChild(b); });
-    box.style.display='flex';
-  }catch(e){ toast('Lỗi tìm địa điểm – kiểm tra mạng'); }
-}
-
-/* ---------- TRẠM SẠC VINFAST (dữ liệu OpenStreetMap, không cần key) ---------- */
-const VIN=/vinfast|v-green|vgreen|vin\s?fast/i;
-async function fetchChargers(){
-  if(!lastPos) return null;
-  const key=Math.round(lastPos.lat*50)+','+Math.round(lastPos.lon*50), c=store.get('chg',null);
-  if(c && c.key===key && Date.now()-c.t<6*3600e3) return c.items;
-  const q='[out:json][timeout:25];(node["amenity"="charging_station"](around:25000,'+lastPos.lat+','+lastPos.lon+');way["amenity"="charging_station"](around:25000,'+lastPos.lat+','+lastPos.lon+'););out center 150;';
-  const post=u=>fetch(u,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(q)}).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); });
-  const j=await Promise.any(['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'].map(post));
-  const items=(j.elements||[]).map(e=>{
-    const t=e.tags||{}, la=e.lat??(e.center&&e.center.lat), lo=e.lon??(e.center&&e.center.lon);
-    return {lat:la,lon:lo,name:t.name||t.operator||t.brand||'Trạm sạc',tag:[t.name,t.operator,t.brand,t.network].join(' '),cap:t.capacity||''};
-  }).filter(x=>x.lat!=null && VIN.test(x.tag)).map(x=>({...x,d:distM(lastPos,{lat:x.lat,lon:x.lon})})).sort((a,b)=>a.d-b.d).slice(0,8);
-  store.set('chg',{key,t:Date.now(),items}); return items;
-}
-function chgGo(x){
-  $('#chg').style.display='none'; setChip('');
-  if(engine==='google'){ gState={mode:'route',q:x.lat+','+x.lon,from:hereStr()}; gLoad(gUrl()); showInfo('➜ Đến: '+x.name); }
-  else if(ensureLeaflet()){ osmSetDest({lat:x.lat,lon:x.lon,name:x.name}); osmRouteTo({lat:x.lat,lon:x.lon}); }
-}
-async function showChargers(){
-  if(!lastPos){ toast('Chưa có vị trí hiện tại – hãy cho phép định vị'); return; }
-  setChip('CHG'); showInfo('');
-  if(engine==='google'){ gState={mode:'chargers',q:''}; gLoad(gUrl()); }
-  const box=$('#chg'); box.innerHTML='<div class="sgrab"></div><div class="hint">⚡ Đang tìm trạm sạc VinFast gần bạn…</div>'; box.style.display='flex';
-  const close=()=>{ box.style.display='none'; setChip(''); if(chgLayer&&lmap){ lmap.removeLayer(chgLayer); chgLayer=null; } };
-  try{
-    const items=await fetchChargers();
-    box.innerHTML='<div class="sgrab"></div>';
-    const hd=document.createElement('div'); hd.className='shd';
-    const t=document.createElement('b'); t.textContent='⚡ Trạm sạc VinFast gần bạn';
-    const x=document.createElement('button'); x.className='sx'; x.textContent='✕'; x.onclick=close; hd.append(t,x); box.appendChild(hd);
-    if(!items.length){
-      const p=document.createElement('div'); p.className='hint';
-      p.textContent='Dữ liệu OpenStreetMap chưa ghi nhận trạm VinFast trong 25 km quanh bạn.'+(engine==='google'?' Bản đồ Google phía trên đang tìm "Trạm sạc VinFast" – hãy xem các ghim.':'');
-      box.appendChild(p); return;
-    }
-    items.forEach(it=>{
-      const r=document.createElement('div'); r.className='crow';
-      const tx=document.createElement('div'); tx.className='ct';
-      const n=document.createElement('b'); n.textContent=it.name;
-      const d=document.createElement('span'); d.textContent=(it.d<1000?Math.round(it.d)+' m':(it.d/1000).toFixed(1)+' km')+(it.cap?' · '+it.cap+' cổng':'');
-      tx.append(n,d);
-      const g=document.createElement('button'); g.className='cgo'; g.textContent='➜'; g.title='Chỉ đường';
-      g.onclick=e=>{ e.stopPropagation(); chgGo(it); }; r.onclick=()=>chgGo(it);
-      r.append(tx,g); box.appendChild(r);
-    });
-    if(engine==='osm' && ensureLeaflet()){
-      if(chgLayer) lmap.removeLayer(chgLayer);
-      chgLayer=L.layerGroup(items.map(it=>L.marker([it.lat,it.lon],{icon:L.divIcon({className:'chgpin',html:'⚡',iconSize:[30,30]})}).bindPopup(it.name).on('click',()=>osmSetDest({lat:it.lat,lon:it.lon,name:it.name})))).addTo(lmap);
-    }
-  }catch(e){ box.innerHTML='<div class="sgrab"></div><div class="hint">Chưa tải được danh sách trạm sạc (máy chủ bản đồ bận).'+(engine==='google'?' Bản đồ Google phía trên vẫn đang tìm trạm sạc VinFast.':'')+'</div>'; }
-}
-
-/* ---------- NÚT BẤM (giao diện giống Google Maps trên điện thoại) ---------- */
-const PLACES=[['⚡ Trạm sạc VinFast','CHG'],['⛽ Cây xăng','Cây xăng'],['☕ Cà phê','Quán cà phê'],['🍜 Quán ăn','Quán ăn'],['🅿️ Bãi đỗ xe','Bãi đỗ xe'],['🏥 Bệnh viện','Bệnh viện'],['🛒 Siêu thị','Siêu thị'],['🏧 ATM','ATM']];
-function setChip(k){ document.querySelectorAll('#mChips .pchip').forEach(c=>c.classList.toggle('on',c.dataset.k===k)); }
-function showInfo(t){ const i=$('#mInfo'); if(t){ i.textContent=t+'  ✕'; i.style.display='block'; } else i.style.display='none'; }
-function mapSearch(q,chip){
-  q=(q||'').trim(); if(!q) return;
-  $('#mIn').value=q; $('#mClr').style.display=''; $('#chg').style.display='none'; $('#mRes').style.display='none'; setChip(chip||''); showInfo('');
-  if(engine==='google'){ gState={mode:'search',q}; gLoad(gUrl()); } else if(ensureLeaflet()) osmSearch(q);
-}
-function mapRoute(){
-  const q=$('#mIn').value.trim() || (gState.mode==='search'?gState.q:'');
-  if(!q){ toast('Nhập hoặc nói nơi cần đến, rồi bấm ➜'); $('#mIn').focus(); return; }
-  if(!lastPos){ toast('Chưa có vị trí hiện tại – hãy cho phép định vị'); return; }
-  $('#chg').style.display='none'; setChip('');
-  if(engine==='google'){ gState={mode:'route',q,from:hereStr()}; gLoad(gUrl()); showInfo('➜ Đến: '+q); }
-  else if(ensureLeaflet()){
-    (async()=>{
-      try{ let d=dest; if(!d){ const r=await (await fetch(NOM+encodeURIComponent(q))).json(); if(!r[0]){ toast('Không tìm thấy địa điểm'); return; } d={lat:+r[0].lat,lon:+r[0].lon,name:r[0].display_name}; osmSetDest(d); }
-        osmRouteTo(d); }catch(e){ toast('Lỗi tìm đường – kiểm tra mạng'); }
-    })();
-  }
-}
-function mapMe(){
-  follow=true; gPausedUntil=0; $('#mMe').classList.add('on'); $('#chg').style.display='none'; setChip(''); showInfo('');
-  if(engine==='google'){ gState={mode:'me',q:''}; gLoad(gUrl()); }
-  else if(ensureLeaflet()){ if(lastPos) lmap.setView([lastPos.lat,lastPos.lon],Math.max(lmap.getZoom(),16)); else toast('Chưa lấy được vị trí – hãy cho phép quyền định vị'); }
-}
-function applyEngine(){
-  $('#gwrap').style.display=engine==='google'?'block':'none';
-  $('#map').style.display=engine==='osm'?'block':'none';
-  if(engine==='google'){ gLoad(gUrl()); } else if(ensureLeaflet()) setTimeout(()=>lmap.invalidateSize(),60);
-}
-function refreshLyr(){
-  document.querySelectorAll('#lyr [data-l]').forEach(b=>b.classList.toggle('on',(b.dataset.l==='k')===mapSat));
-  document.querySelectorAll('#lyr [data-e]').forEach(b=>b.classList.toggle('on',b.dataset.e===engine));
-}
-// thanh gợi ý nhanh
-PLACES.forEach(([label,q])=>{
-  const b=document.createElement('button'); b.className='pchip'; b.dataset.k=q; b.textContent=label;
-  b.onclick=()=>{ q==='CHG' ? showChargers() : mapSearch(q,q); };
-  $('#mChips').appendChild(b);
-});
-$('#mGo').onclick=()=>mapSearch($('#mIn').value);
-$('#mIn').onkeydown=e=>{ if(e.key==='Enter'){ mapSearch($('#mIn').value); $('#mIn').blur(); } };
-$('#mIn').oninput=()=>{ $('#mClr').style.display=$('#mIn').value?'':'none'; };
-$('#mClr').onclick=()=>{ $('#mIn').value=''; $('#mClr').style.display='none'; if(gState.mode==='search'||gState.mode==='chargers') mapMe(); };
-$('#mRoute').onclick=mapRoute;
-$('#mMe').onclick=mapMe;
-$('#mLyr').onclick=()=>{ const l=$('#lyr'); l.style.display=l.style.display==='flex'?'none':'flex'; refreshLyr(); };
-document.querySelectorAll('#lyr [data-l]').forEach(b=>b.onclick=()=>{ mapSat=b.dataset.l==='k'; store.set('mapSat',mapSat); engine==='google'?gLoad(gUrl()):setTiles(); refreshLyr(); });
-document.querySelectorAll('#lyr [data-e]').forEach(b=>b.onclick=()=>{ engine=b.dataset.e; store.set('mapEngine',engine); applyEngine(); refreshLyr(); $('#lyr').style.display='none'; });
-$('#mInfo').onclick=()=>{ osmClear(); mapMe(); };
-$('#mMe').classList.add('on');
-startGeo(); applyEngine();
-
-/* ================= YOUTUBE (IFrame API, miễn phí) ================= */
-let list = store.get('ylist', []), cur = store.get('ycur', -1), player=null, ready=false, pending=null;
-let autoplay = store.get('autoplay', true), homeResults = null, trendItems = [];
-
-/* ---- Trang chủ: lưới bài hát, bấm là phát ---- */
-const DEFAULTS=[
-  {type:'video',id:'jfKfPfyJRdk',title:'Lofi Girl – lofi hip hop radio (24/7)'},
-  {type:'video',id:'4xDzrJKXOOY',title:'Synthwave radio – beats to chill/game to (24/7)'}
-];
-const CHIPS=['Nhạc trẻ','Nhạc Bolero','Lofi chill','Nhạc EDM','Nhạc không lời','Nhạc vàng','Nhạc xe hơi'];
-function mkTile(it,onclick,isCur){
-  const d=document.createElement('div'); d.className='tile'+(isCur?' cur':'');
-  const img=document.createElement('img'); img.loading='lazy'; img.alt='';
-  img.src = it.type==='video' ? 'https://i.ytimg.com/vi/'+it.id+'/mqdefault.jpg'
-    : 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 9"><rect width="16" height="9" fill="#333"/><text x="8" y="5.6" font-size="4" text-anchor="middle" fill="#fff">Playlist</text></svg>');
-  const t=document.createElement('div'); t.textContent=it.title||it.id;
-  d.append(img,t); d.onclick=onclick; return d;
-}
-function homeSection(title, items, pick, curTest){
-  if(!items||!items.length) return;
-  const h=$('#home'), h4=document.createElement('h4'); h4.textContent=title; h.appendChild(h4);
-  const g=document.createElement('div'); g.className='grid';
-  items.forEach((it,i)=>g.appendChild(mkTile(it,()=>pick(it,i),curTest?curTest(it,i):false)));
-  h.appendChild(g);
-}
-function renderHome(){
-  const h=$('#home'); h.innerHTML='';
-  const top=document.createElement('div'); top.id='homeTop';
-  const b=document.createElement('b'); b.textContent='🏠 Trang chủ';
-  const btns=document.createElement('div'); btns.className='row';
-  const ap=document.createElement('button'); ap.textContent='Tự phát bài cuối khi mở: '+(autoplay?'Bật':'Tắt');
-  ap.onclick=()=>{ autoplay=!autoplay; store.set('autoplay',autoplay); renderHome(); };
-  const x=document.createElement('button'); x.textContent='✕'; x.onclick=closeHome;
-  const cl=document.createElement('button'); cl.textContent='Xóa danh sách';
-  cl.onclick=()=>{ if(!confirm('Xóa toàn bộ danh sách phát?')) return; list=[]; cur=-1; plIds=[]; save(); renderList(); renderHome(); try{ player.stopVideo(); }catch(e){} };
-  btns.append(ap,cl,x); top.append(b,btns); h.appendChild(top);
-
-  const c=document.createElement('div'); c.className='chips';
-  CHIPS.forEach(k=>{ const bt=document.createElement('button'); bt.textContent='▶ '+k; bt.onclick=()=>playSearch(k); c.appendChild(bt); });
-  h.appendChild(c);
-  const p=document.createElement('div'); p.className='hint';
-  p.textContent='Chạm 1 thể loại để phát ngay. Hoặc bấm 🎤 nói tên bài, hoặc 📋 để phát link vừa sao chép.';
-  h.appendChild(p);
-  if(homeResults) homeSection('Kết quả: '+homeResults.q, homeResults.items, it=>addItem({...it},true));
-  homeSection('Nghe gần đây', list, (it,i)=>play(i), (it,i)=>i===cur);
-  homeSection('Thịnh hành (Việt Nam)', trendItems, it=>addItem({...it},true));
-  homeSection('Gợi ý', DEFAULTS, it=>addItem({...it},true));
-}
-function openHome(){ renderHome(); $('#home').classList.add('open'); refreshTrend(); }
-function closeHome(){ $('#home').classList.remove('open'); }
-async function loadTrend(){
-  const c=store.get('trend',null);
-  if(c && c.items && c.items.length && Date.now()-c.t<3600e3) return c.items;
-  let items=[];
-  try{ items=await kTrending(); }catch(e){ if(c&&c.items) items=c.items; }   // máy chủ bận -> dùng bản lưu cũ
-  if(items.length) store.set('trend',{t:Date.now(),items});
-  return items;
-}
-async function refreshTrend(){
-  try{
-    trendItems=await loadTrend();
-    if($('#home').classList.contains('open')) renderHome();
-  }catch(e){ toast('Không tải được nhạc thịnh hành'); }
-}
-
-/* ---- Tìm kiếm / thịnh hành KHÔNG cần API key: hỏi song song nhiều máy chủ công cộng, máy nào trả lời trước thì dùng ---- */
-const PIPED=['https://pipedapi.kavin.rocks','https://pipedapi.adminforge.de','https://api.piped.private.coffee'];
-const INVID=['https://inv.nadeko.net','https://yewtu.be','https://invidious.nerdvpn.de'];
-function fetchJ(url,ms=8000){
-  const c=new AbortController(), t=setTimeout(()=>c.abort(),ms);
-  return fetch(url,{signal:c.signal}).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); }).finally(()=>clearTimeout(t));
-}
-function fromPiped(j){
-  const a=Array.isArray(j)?j:(j&&j.items)||[];
-  return a.filter(x=>x.url&&x.url.includes('/watch?v=')&&!x.isShort).map(x=>({type:'video',id:x.url.split('v=')[1].slice(0,11),title:x.title}));
-}
-function fromInv(a){
-  return (Array.isArray(a)?a:[]).filter(x=>x.videoId&&(!x.type||x.type==='video')&&!(x.lengthSeconds>0&&x.lengthSeconds<65)).map(x=>({type:'video',id:x.videoId,title:x.title}));
-}
-function anyBackend(pPath,iPath){
-  const tasks=[...PIPED.map(b=>fetchJ(b+pPath).then(fromPiped)),...INVID.map(b=>fetchJ(b+iPath).then(fromInv))]
-    .map(t=>t.then(r=>{ if(!r.length) throw new Error('empty'); return r; }));
-  return Promise.any(tasks);
-}
-function kSearch(q){ const e=encodeURIComponent(q); return anyBackend('/search?q='+e+'&filter=videos','/api/v1/search?q='+e+'&type=video&region=VN'); }
-async function kTrending(){
-  try{ return await anyBackend('/trending?region=VN','/api/v1/trending?region=VN&type=music'); }
-  catch(e){ return await kSearch('nhạc trẻ hay nhất'); }
-}
-async function cachedSearch(q){
-  const key=q.trim().toLowerCase(), all=store.get('scache',{}), hit=all[key];
-  if(hit && Date.now()-hit.t<12*3600e3) return hit.items;
-  try{
-    const items=await kSearch(q);
-    all[key]={t:Date.now(),items};
-    const ks=Object.keys(all); if(ks.length>15) ks.sort((a,b)=>all[a].t-all[b].t).slice(0,ks.length-15).forEach(k=>delete all[k]);
-    store.set('scache',all); return items;
-  }catch(e){ if(hit) return hit.items; throw e; }   // máy chủ bận: dùng kết quả cũ nếu có
-}
-let searching=false;
-async function playSearch(q){
-  q=(q||'').trim(); if(!q||searching) return;
-  searching=true; toast('Đang tìm: '+q+' …');
-  try{
-    const items=(await cachedSearch(q)).slice(0,25);
-    list=items; cur=-1; plIds=[]; save(); renderList(); closeHome(); play(0);
-    $('#yIn').value='';
-  }catch(e){ toast('Chưa tìm được (máy chủ tìm kiếm đang bận). Thử lại sau ít giây, hoặc dùng 📋 để phát link đã sao chép.'); }
-  searching=false;
-}
-function parseYT(s){
-  s=s.trim();
-  try{
-    const u=new URL(s), list=u.searchParams.get('list');
-    let v=u.searchParams.get('v');
-    if(!v && u.hostname.includes('youtu.be')) v=u.pathname.slice(1);
-    if(!v){ const m=u.pathname.match(/\/(shorts|embed|live)\/([\w-]{11})/); if(m) v=m[2]; }
-    if(v) return {type:'video',id:v.slice(0,11)};
-    if(list) return {type:'playlist',id:list};
-  }catch(e){}
-  if(/^[\w-]{11}$/.test(s)) return {type:'video',id:s};
-  if(/^(PL|UU|OL|RD|FL)[\w-]{10,}$/.test(s)) return {type:'playlist',id:s};
-  return null;
-}
-function decode(t){ const e=document.createElement('textarea'); e.innerHTML=t; return e.value; }
-
-function renderList(){
-  const box=$('#ytList'); box.innerHTML='';
-  if(!list.length){ box.innerHTML=''; renderQueue(); return; }
-  list.forEach((it,i)=>{
-    const d=document.createElement('div'); d.className='item'+(i===cur?' cur':'');
-    const s=document.createElement('span'); s.textContent=(it.type==='playlist'?'📃 ':'🎵 ')+(it.title||it.id); s.onclick=()=>play(i);
-    const x=document.createElement('button'); x.textContent='✕';
-    x.onclick=()=>{ list.splice(i,1); if(cur>=i) cur--; save(); renderList(); };
-    d.append(s,x); box.appendChild(d);
-  });
-  renderQueue();
-}
-function save(){ store.set('ylist',list); store.set('ycur',cur); emptyHint(); }
-
-function ytMsg(html,hint){ const m=$('#ytMsg'); m.dataset.hint=hint?'1':''; if(html){ m.innerHTML=html; m.style.display='flex'; } else m.style.display='none'; }
-function ytOpenLink(){
-  const it=list[cur]; if(!it) return '';
-  const u = it.type==='playlist' ? 'https://www.youtube.com/playlist?list='+it.id : 'https://www.youtube.com/watch?v='+it.id;
-  return `<a href="${u}" target="_blank" rel="noopener">Mở trên YouTube ↗</a>`;
-}
-function emptyHint(){ if($('#ytMsg').dataset.hint) ytMsg(''); }
-
-let plIds=[], titleCache=store.get('titles',{});
-async function fillTitles(ids){
-  let n=0;
-  for(const id of ids){
-    if(titleCache[id]) continue;
-    if(n++>=40) break;
-    try{ const r=await (await fetch('https://noembed.com/embed?url='+encodeURIComponent('https://www.youtube.com/watch?v='+id))).json(); titleCache[id]=r.title||'YouTube video'; }
-    catch(e){ titleCache[id]='YouTube video'; }
-    if(n%5===0){ store.set('titles',titleCache); renderQueue(); }
-  }
-  store.set('titles',titleCache); renderQueue();
-}
-function renderQueue(){
-  const q=$('#queue'); if(!q) return; q.innerHTML='';
-  const it=list[cur]; let items, pick, curIdx;
-  if(it && it.type==='playlist' && plIds.length){
-    items=plIds.map(id=>({type:'video',id,title:titleCache[id]}));
-    pick=(x,i)=>{ try{ player.playVideoAt(i); }catch(e){} };
-    try{ curIdx=player.getPlaylistIndex(); }catch(e){ curIdx=-1; }
-  }else{ items=list; pick=(x,i)=>play(i); curIdx=cur; }
-  items.forEach((x,i)=>{
-    const t=mkTile(x,()=>pick(x,i),i===curIdx); q.appendChild(t);
-    if(i===curIdx) requestAnimationFrame(()=>{ try{ t.scrollIntoView({block:'nearest',inline:'nearest'}); }catch(e){} });
-  });
-}
-async function seedList(){
-  let items=[];
-  try{ items=(await loadTrend()).slice(0,25); }catch(e){}
-  if(!items.length) items=DEFAULTS.map(x=>({...x}));
-  list=items; cur=0; save(); renderList();
-}
-
-function loadYT(){
-  if(location.protocol==='file:'){
-    ytMsg('⚠ Bạn đang mở file trực tiếp từ máy (file://), YouTube sẽ không phát.<br>Hãy đưa file lên hosting/GitHub Pages (https) hoặc chạy bằng <code>localhost</code>.');
-    $('#ytMsg').dataset.keep='1';
-  }
-  const s=document.createElement('script'); s.src='https://www.youtube.com/iframe_api';
-  s.onerror=()=>ytMsg('Không tải được YouTube API. Kiểm tra mạng hoặc trình chặn quảng cáo / DNS đang chặn <code>youtube.com</code>.');
-  document.head.appendChild(s);
-  setTimeout(()=>{ if(!ready && !(window.YT && YT.Player)) ytMsg('YouTube tải quá lâu. Kiểm tra mạng hoặc trình chặn quảng cáo rồi tải lại trang.'); },10000);
-}
-window.onYouTubeIframeAPIReady=()=>{
-  const pv={playsinline:1,rel:0,modestbranding:1};
-  if(/^https?:$/.test(location.protocol)) pv.origin=location.origin;
-  player=new YT.Player('player',{
-    width:'100%',height:'100%',
-    playerVars:pv,
-    events:{
-      onReady:()=>{
-        ready=true; setupMedia();
-        if(pending!==null){ const i=pending; pending=null; play(i); }
-        else restoreYT();
-      },
-      onStateChange:e=>{
-        if(e.data===YT.PlayerState.ENDED) nextItem();
-        if(e.data===YT.PlayerState.PLAYING){
-          ytMsg('');
-          const it=list[cur];
-          if(it && it.type==='playlist'){
-            try{ const ids=player.getPlaylist(); if(ids && ids.length && ids.join()!==plIds.join()){ plIds=ids; fillTitles(ids); } }catch(err){}
-          }
-          renderQueue();
-        }
-      },
-      onError:e=>{
-        const c=e.data;
-        const why={2:'Link / ID video không hợp lệ.',5:'Trình phát HTML5 gặp lỗi.',100:'Video đã bị xóa hoặc để riêng tư.',
-          101:'Chủ video tắt nhúng nên không phát được ở đây.',150:'Chủ video tắt nhúng nên không phát được ở đây.',
-          153:'Thiếu thông tin nguồn (referrer). Hãy mở trang qua https/hosting thật, không mở file trực tiếp, và đừng đặt header <code>Referrer-Policy: no-referrer</code>.'}[c]||'Lỗi không xác định.';
-        ytMsg(`⚠ Lỗi ${c}: ${why}<br>${ytOpenLink()}`);
-        if([100,101,150].includes(c) && list.length>1) setTimeout(()=>{ ytMsg(''); nextItem(); },2500);
-      }
-    }
-  });
-};
-async function restoreYT(){
-  let it=list[cur];
-  if(!it){
-    if(!autoplay){ openHome(); return; }
-    await seedList(); it=list[cur]; if(!it) return;     // chưa có gì: tự nạp nhạc thịnh hành / gợi ý
-  }
-  const pos=store.get('ypos',null), same=pos&&pos.id===it.id;
-  const t=same?pos.t:0, idx=same?(pos.idx||0):0;
-  plIds=[];
-  try{
-    if(autoplay){
-      // Trình duyệt thường chỉ cho tự phát khi tắt tiếng; chạm màn hình lần đầu sẽ bật tiếng
-      player.mute(); closeHome();
-      if(it.type==='playlist') player.loadPlaylist({list:it.id,listType:'playlist',index:idx,startSeconds:t});
-      else player.loadVideoById({videoId:it.id,startSeconds:t});
-      toast('Đang tự phát (tắt tiếng) – chạm vào màn hình để bật tiếng');
-      document.addEventListener('pointerdown',()=>{ try{ player.unMute(); player.setVolume(100); }catch(e){} },{once:true});
-    }else{
-      if(it.type==='playlist') player.cuePlaylist({list:it.id,listType:'playlist',index:idx,startSeconds:t});
-      else player.cueVideoById({videoId:it.id,startSeconds:t});
-      toast('Đã mở lại bài đang nghe – chạm ▶ để phát tiếp');
-    }
-  }catch(e){}
-}
-setInterval(()=>{
-  if(!ready||!player||!list[cur]) return;
-  try{
-    const st=player.getPlayerState();
-    if(st===1||st===2){
-      const o={id:list[cur].id,t:Math.floor(player.getCurrentTime()||0)};
-      if(list[cur].type==='playlist') o.idx=player.getPlaylistIndex();
-      store.set('ypos',o);
-    }
-  }catch(e){}
-},5000);
-function play(i){
-  if(i<0||i>=list.length) return;
-  cur=i; plIds=[]; save(); renderList(); ytMsg(''); closeHome();
-  if(!ready){ pending=i; return; }
-  const it=list[i];
-  if(it.type==='playlist') player.loadPlaylist({list:it.id,listType:'playlist',index:0});
-  else player.loadVideoById(it.id);
-}
-let advancing=false;
-async function nextItem(){
-  if(!list.length||advancing) return; advancing=true;
-  try{
-    if(cur>=list.length-1){   // hết danh sách: nạp thêm bài liên quan để nhạc không bị dừng
-      const it=list[cur], base=(it&&(it.title||titleCache[it.id]))||'nhạc trẻ hay nhất';
-      try{
-        const have=new Set(list.map(x=>x.id));
-        const add=(await cachedSearch(base)).filter(x=>!have.has(x.id)).slice(0,15);
-        if(add.length){ list.push(...add); save(); renderList(); }
-      }catch(e){}
-    }
-    play((cur+1)%list.length);
-  }finally{ advancing=false; }
-}
-$('#yNext').onclick=()=>{
-  const it=list[cur];
-  if(it && it.type==='playlist' && ready) player.nextVideo(); else nextItem();
-};
-$('#yPrev').onclick=()=>{
-  const it=list[cur];
-  if(it && it.type==='playlist' && ready) player.previousVideo(); else if(list.length) play((cur-1+list.length)%list.length);
-};
-
-async function fetchTitle(it){
-  const url = it.type==='playlist' ? 'https://www.youtube.com/playlist?list='+it.id : 'https://www.youtube.com/watch?v='+it.id;
-  try{
-    const r=await (await fetch('https://noembed.com/embed?url='+encodeURIComponent(url))).json();
-    it.title = r.title || (it.type==='playlist'?'Playlist '+it.id:it.id);
-  }catch(e){ it.title = it.type==='playlist'?'Playlist '+it.id:it.id; }
-  save(); renderList();
-}
-function addItem(it, andPlay){
-  let idx=list.findIndex(x=>x.id===it.id);
-  if(idx<0){ list.push(it); idx=list.length-1; if(!it.title) fetchTitle(it); }
-  save(); renderList();
-  if(andPlay) play(idx);
-}
-function searchYT(q){ return playSearch(q); }
-$('#yGo').onclick=()=>{
-  const s=$('#yIn').value.trim(); if(!s) return;
-  const it=parseYT(s);
-  if(it){ addItem(it,true); $('#yIn').value=''; $('#ytResults').innerHTML=''; } else searchYT(s);
-};
-$('#yAdd').onclick=()=>{
-  const it=parseYT($('#yIn').value); if(!it){ toast('Link / ID không hợp lệ'); return; }
-  addItem(it,false); $('#yIn').value='';
-};
-$('#yIn').onkeydown=e=>{ if(e.key==='Enter') $('#yGo').click(); };
-$('#yPlay').onclick=()=>{
-  if(!list[cur]){ restoreYT(); return; }
-  try{ player.getPlayerState()===1 ? player.pauseVideo() : player.playVideo(); }catch(e){}
-};
-$('#yPaste').onclick=async()=>{
-  try{
-    const it=parseYT(await navigator.clipboard.readText());
-    if(it) addItem(it,true); else toast('Chưa có link YouTube trong bộ nhớ tạm – hãy sao chép link trước');
-  }catch(e){ toast('Trình duyệt không cho đọc bộ nhớ tạm – hãy dán vào ô rồi bấm Phát'); }
-};
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-if(SR){
-  $('#yMic').style.display='';
-  $('#yMic').onclick=()=>{
-    try{
-      const r=new SR(); r.lang='vi-VN'; r.maxAlternatives=1;
-      r.onresult=e=>{ const q=e.results[0][0].transcript; $('#yIn').value=q; playSearch(q); };
-      r.onerror=()=>toast('Không nghe được – thử lại');
-      r.start(); toast('🎤 Đang nghe… hãy nói tên bài hát hoặc ca sĩ');
-    }catch(e){ toast('Thiết bị không hỗ trợ nhận giọng nói'); }
-  };
-}
-if(SR){
-  $('#mMic').style.display='';
-  $('#mMic').onclick=()=>{
-    try{
-      const r=new SR(); r.lang='vi-VN'; r.maxAlternatives=1;
-      r.onresult=e=>{ const q=e.results[0][0].transcript; $('#mIn').value=q; mapSearch(q); };
-      r.onerror=()=>toast('Không nghe được – thử lại');
-      r.start(); toast('🎤 Hãy nói nơi cần đến');
-    }catch(e){ toast('Thiết bị không hỗ trợ nhận giọng nói'); }
-  };
-}
-// Phím media (tai nghe / vô-lăng / Bluetooth), nếu trình duyệt cho phép
-function setupMedia(){
-  if(!('mediaSession' in navigator)) return;
-  const set=(a,f)=>{ try{ navigator.mediaSession.setActionHandler(a,f); }catch(e){} };
-  set('play',()=>{ try{ player.playVideo(); }catch(e){} });
-  set('pause',()=>{ try{ player.pauseVideo(); }catch(e){} });
-  set('nexttrack',()=>$('#yNext').click());
-  set('previoustrack',()=>$('#yPrev').click());
-}
-$('#yHome').onclick=()=>{ $('#home').classList.contains('open') ? closeHome() : openHome(); };
-
-/* ================= KHỞI ĐỘNG ================= */
-renderList(); emptyHint(); loadYT();
-if(!list[cur] && !autoplay) openHome();   // tự phát tắt + chưa có bài -> hiện Trang chủ
-hourSky();
-(async()=>{
-  if(!loc){
-    const ok = await useGps(true);
-    if(!ok){ loc={lat:21.0285,lon:105.8542,name:'Hà Nội'}; store.set('loc',loc); loadWeather(); }
-  } else loadWeather();
-})();
-</script>
-</body>
-</html>
+  lmap.on('contextmenu',e=>osmSetDest({lat:e.latlng.lat,lon:e.latlng.lng,name:'Điểm
