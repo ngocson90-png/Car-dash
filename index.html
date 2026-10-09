@@ -1,697 +1,654 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Car Dashboard OS</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>CarDeck — Dashboard xe</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
 <style>
   :root{
-    --bg:#0b1220; --card:#16213a; --card2:#22325a; --text:#ffffff; --muted:#d3deec;
-    --accent:#7dd3fc; --btn:#2563eb; --warn:#b45309; --green:#6ee7b7; --red:#fca5a5; --yellow:#fde047; --yt:#ff5a5a; --border:#44588a;
-    --c-sun:#fde047; --c-partly:#fcd34d; --c-cloud:#d3deec; --c-rain:#7dd3fc; --c-snow:#e0f2fe; --c-bolt:#fde047;
+    --bg:#0b1020; --panel:#121a30; --panel2:#18223f; --line:#26335a;
+    --text:#e8ecf8; --muted:#8c98bd; --accent:#4fd1c5; --accent2:#7c9cff; --danger:#ff6b6b;
+    --split:62%;
   }
-  body.light{
-    --bg:#e3eaf5; --card:#ffffff; --card2:#e6edf8; --text:#050b18; --muted:#273449;
-    --accent:#1d4ed8; --btn:#1d4ed8; --warn:#92400e; --green:#047857; --red:#b91c1c; --yellow:#8a3b05; --yt:#b91c1c; --border:#9fb0cc;
-    --c-sun:#b45309; --c-partly:#b45309; --c-cloud:#475569; --c-rain:#1d4ed8; --c-snow:#0369a1; --c-bolt:#8a5a00;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
-  html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--text);
-    font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;transition:background .3s,color .3s}
-  button{font-family:inherit;color:inherit;cursor:pointer;border:none}
-  .ic{width:1em;height:1em;vertical-align:-.14em;flex-shrink:0}
-
-  #pages{display:flex;width:200%;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);touch-action:pan-y}
-  .page{width:50%;height:100%;padding:1.6vmin;position:relative}
-
-  /* ---------- PAGE 1 ---------- */
-  #grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1.6vmin;height:100%}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:3vmin;padding:2.4vmin;
-    display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden;position:relative}
-  .label{font-size:2.3vmin;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;
-    display:flex;align-items:center;gap:1vmin;flex-shrink:0}
-
-  #clock-card{align-items:center;justify-content:center;text-align:center}
-  #time{font-size:min(17vmin,20vw);font-weight:800;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
-  #time .sep{color:var(--accent)}
-  #time small{font-size:.35em;color:var(--muted);margin-left:.15em;font-weight:700}
-  #date{font-size:3.2vmin;font-weight:700;color:var(--muted);margin-top:1.4vmin;text-transform:uppercase;letter-spacing:.08em}
-  #lunar-today{font-size:3vmin;font-weight:700;color:var(--yellow);margin-top:.8vmin}
-
-  /* weather */
-  #weather-card .now{display:flex;align-items:center;justify-content:center;gap:3vmin;flex:0 0 auto;margin:1vmin 0}
-  #w-icon{font-size:11vmin;color:var(--c-rain);display:flex}
-  #w-temp{font-size:13vmin;font-weight:800;line-height:1}
-  #w-temp span{font-size:.4em;color:var(--muted)}
-  #w-desc{text-align:center;font-size:2.8vmin;font-weight:700;color:var(--accent)}
-  #w-loc{text-align:center;font-size:2.1vmin;color:var(--muted);margin-top:.4vmin}
-  #w-extra{display:flex;justify-content:center;gap:3vmin;font-size:2.3vmin;color:var(--muted);margin-top:.8vmin}
-  #forecast{display:grid;grid-template-columns:repeat(5,1fr);gap:.9vmin;margin-top:auto;padding-top:1vmin}
-  .fc{background:var(--card2);border-radius:1.6vmin;padding:.8vmin .4vmin;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.2vmin}
-  .fc b{font-size:1.9vmin}.fc em{font-style:normal;font-size:1.7vmin;color:var(--muted)}
-  .fc .ic{font-size:3.2vmin;margin:.2vmin 0}.fc div{font-size:1.8vmin;font-weight:700}.fc div s{text-decoration:none;color:var(--muted);font-weight:400}
-
-  /* timer */
-  #timer-card .head{display:flex;justify-content:space-between;align-items:center}
-  #t-status{font-size:2vmin;font-weight:800;background:var(--card2);color:var(--muted);padding:.6vmin 1.6vmin;border-radius:1vmin}
-  .ring-wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative;margin:.6vmin 0}
-  .ring-wrap svg{height:100%;max-height:24vmin;aspect-ratio:1;transform:rotate(-90deg)}
-  #ring{transition:stroke-dashoffset 1s linear}
-  #cd{position:absolute;font-size:5.6vmin;font-weight:800;font-variant-numeric:tabular-nums}
-  .tbtns{display:grid;grid-template-columns:repeat(4,1fr);gap:1vmin;margin-bottom:1vmin}
-  .tbtns button{background:var(--card2);border:1px solid var(--border);border-radius:1.6vmin;padding:1.4vmin 0;font-size:2.4vmin;font-weight:800}
-  .tbtns button:active{transform:scale(.95)}
-  .tbtns .rst{color:var(--red)}
-  #t-main{background:var(--btn);color:#fff;border-radius:2vmin;padding:1.9vmin;font-size:2.7vmin;font-weight:800;display:flex;align-items:center;justify-content:center;gap:1.2vmin}
-  #t-main:active{transform:scale(.98)}
-
-  /* calendar */
-  #cal-card{padding:2vmin}
-  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1vmin}
-  .cal-head button{width:5.6vmin;height:5.6vmin;border-radius:1.4vmin;background:var(--card2);border:1px solid var(--border);font-size:2.6vmin;display:flex;align-items:center;justify-content:center}
-  #cal-title{font-size:2.9vmin;font-weight:800;text-align:center;line-height:1.15}
-  #cal-title small{display:block;font-size:1.9vmin;color:var(--yellow);font-weight:700}
-  .dow,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:.6vmin;text-align:center}
-  .dow div{font-size:2vmin;font-weight:800;color:var(--muted);padding:.4vmin 0}
-  .dow div:first-child{color:var(--red)}
-  .days{flex:1;min-height:0;grid-auto-rows:1fr}
-  .day{border-radius:1.2vmin;background:var(--card2);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;min-height:0}
-  .day b{font-size:2.9vmin;font-weight:800}
-  .day span{font-size:1.9vmin;font-weight:600;color:var(--muted)}
-  .day.sun b{color:var(--red)}
-  .day.first span{color:var(--yellow);font-weight:800}
-  .day.empty{background:transparent}
-  .day.today{background:var(--btn);color:#fff}
-  .day.today b,.day.today span{color:#fff}
-
-  /* buttons inside clock card */
-  .fab{position:absolute;z-index:20;width:7vmin;height:7vmin;border-radius:50%;background:var(--card2);border:1px solid var(--border);
-    display:flex;align-items:center;justify-content:center;font-size:3.4vmin}
-  .fab:active{transform:scale(.92)}
-  #theme-btn{top:2vmin;right:2vmin;color:var(--yellow)}
-  #next-btn{bottom:2vmin;right:2vmin;color:var(--yt)}
-  #dots{position:absolute;bottom:.5vmin;left:50%;transform:translateX(-50%);display:flex;gap:1vmin;z-index:25}
-  #dots i{width:1.2vmin;height:1.2vmin;border-radius:50%;background:var(--muted);opacity:.5;transition:.3s}
-  #dots i.on{background:var(--accent);opacity:1;width:3vmin;border-radius:1vmin}
-
-  /* ---------- PAGE 2 YOUTUBE ---------- */
-  #page2{display:flex;flex-direction:column;gap:1.4vmin}
-  .yt-bar{display:flex;gap:1.2vmin;align-items:center;flex-shrink:0}
-  .yt-bar .back{width:7vmin;height:7vmin;border-radius:2vmin;background:var(--card);border:1px solid var(--border);font-size:3.2vmin;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-  .yt-input{flex:1;display:flex;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:5vmin;padding:0 2.4vmin;height:7vmin}
-  .yt-input:focus-within{border-color:var(--accent)}
-  .yt-input input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:2.8vmin;min-width:0;user-select:text}
-  .yt-input button{background:none;font-size:3.2vmin;color:var(--muted);padding:0 1vmin;display:flex}
-  #yt-body{flex:1;min-height:0;display:flex;gap:1.4vmin}
-  #yt-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:1vmin}
-  #player-box{flex:1;min-height:0;background:#000;border-radius:2.4vmin;overflow:hidden;position:relative;border:1px solid var(--border)}
-  #player-box iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-  #yt-msg{font-size:2vmin;color:var(--yellow);display:none;line-height:1.35}
-  #yt-side{width:34%;max-width:420px;overflow-y:auto;display:flex;flex-direction:column;gap:1vmin;touch-action:pan-y}
-  .res{display:flex;gap:1vmin;background:var(--card);border:1px solid var(--border);border-radius:1.8vmin;padding:.9vmin;cursor:pointer;align-items:center}
-  .res:active{transform:scale(.98)}
-  .res img{width:36%;border-radius:1.2vmin;flex-shrink:0;aspect-ratio:16/9;object-fit:cover;background:#000}
-  .res div{font-size:2vmin;font-weight:700;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
-  .res.preset{padding:1.6vmin 1.8vmin;font-size:2.3vmin;font-weight:700;gap:1.2vmin}
-  .res.preset .ic{color:var(--yt);font-size:3.4vmin}
-  .side-title{font-size:2vmin;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.1em;padding:.4vmin .6vmin}
-  .res.cur{outline:2px solid var(--yellow)}
-  /* trang chủ YouTube */
-  #home{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;gap:1.2vmin;padding:1.8vmin;background:var(--bg);overflow:auto;text-align:left;touch-action:pan-y}
-  #home.open{display:flex}
-  #home h4{margin:1vmin 0 0;font-size:2vmin;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:800}
-  #home .hint{font-size:2.1vmin;color:var(--muted);line-height:1.5}
-  #homeTop{display:flex;gap:1vmin;align-items:center;justify-content:space-between;font-size:3vmin;font-weight:800;flex-wrap:wrap}
-  #home button{background:var(--card);border:1px solid var(--border);border-radius:1.6vmin;padding:1.2vmin 2vmin;font-size:2.2vmin;font-weight:700}
-  .chips{display:flex;gap:1vmin;flex-wrap:wrap}
-  .chips button{flex:1 1 18vmin;padding:1.8vmin 2vmin!important;font-size:2.5vmin!important}
-  #home .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(24vmin,1fr));gap:1.2vmin}
-  .tile{cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:1.6vmin;overflow:hidden;font-size:2vmin;line-height:1.3;color:var(--text)}
-  .tile:active{transform:scale(.98)}
-  .tile img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#222}
-  .tile div{padding:.8vmin 1vmin;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  #edge{position:absolute;left:0;top:10vmin;bottom:0;width:4.5vmin;z-index:15;
-    background:linear-gradient(90deg,rgba(59,130,246,.35),transparent);border-radius:0 2vmin 2vmin 0;touch-action:none}
-
-  @media (max-aspect-ratio:1/1){
-    #grid{grid-template-columns:1fr;grid-template-rows:repeat(4,1fr)}
-    #yt-body{flex-direction:column}#yt-side{width:100%;max-width:none;flex-direction:row;overflow-x:auto;overflow-y:hidden;height:20vmin;flex:0 0 auto}
-    .res{min-width:48vw}
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+  header{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:#0e1530}
+  .brand{font-weight:800;letter-spacing:.14em;font-size:15px}
+  .brand b{color:var(--accent)}
+  .spacer{flex:1}
+  .btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14px;cursor:pointer}
+  .btn:hover{border-color:var(--accent2)}
+  .btn.primary{background:var(--accent);color:#04201d;border-color:var(--accent);font-weight:700}
+  main{flex:1;display:flex;min-height:0}
+  main.swap{flex-direction:row-reverse}
+  .left{width:var(--split);display:flex;flex-direction:column;min-width:0;border-right:1px solid var(--line);padding:12px;gap:10px}
+  main.swap .left{border-right:0;border-left:1px solid var(--line)}
+  .right{flex:1;min-width:0;padding:12px;display:grid;gap:12px;align-content:start;overflow:auto}
+  .searchbar{display:flex;gap:8px}
+  .searchbar input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font-size:15px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer;font-size:14px}
+  .chip.on{background:var(--accent2);color:#0a1030;border-color:var(--accent2);font-weight:700}
+  .stage{background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/9;max-height:46vh;width:100%;position:relative;border:1px solid var(--line)}
+  .stage .ph{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:var(--muted);padding:20px}
+  .stage .ph h2{margin:0 0 6px;color:var(--text)}
+  #frameHost,#frameHost iframe{width:100%;height:100%;position:absolute;inset:0;border:0}
+  .notice{position:absolute;left:10px;bottom:10px;right:70px;font-size:13px;color:#cfd6ee;background:#000a;padding:6px 10px;border-radius:8px;pointer-events:none;z-index:2}
+  .notice:empty{display:none}
+  .notice.error{color:#ffb3b3}
+  .playbtn{position:absolute;right:10px;bottom:10px;z-index:3}
+  .playbtn[hidden]{display:none}
+  .nowplaying{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .results{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;align-content:start;padding-bottom:6px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;text-align:left;color:inherit;padding:0}
+  .card:hover{border-color:var(--accent)}
+  .card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#222}
+  .card div{padding:8px 10px;font-size:13px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .view{display:flex;flex-direction:column;gap:10px;flex:1;min-height:0}
+  .view[hidden]{display:none}
+  .tabs{display:flex;gap:8px}
+  #tvVideo{position:absolute;inset:0;width:100%;height:100%;background:#000}
+  .card.chan{padding:12px 10px;font-size:14px}
+  .card.chan div{padding:0;-webkit-line-clamp:2}
+  #tvList{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+  .card.chan.on{border-color:var(--accent);background:var(--panel2)}
+  details.src{font-size:13px;color:var(--muted)}
+  details.src input{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;color:var(--text);margin:6px 0}
+  .msg{grid-column:1/-1;color:var(--muted);font-size:14px;padding:6px 2px;line-height:1.5}
+  .widget{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+  .widget h3{margin:0 0 8px;font-size:12px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .clock{font-size:46px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+  .date{color:var(--muted);margin-top:4px;font-size:14px}
+  .speed{font-size:64px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:var(--accent)}
+  .speed small{font-size:16px;color:var(--muted);font-weight:500;margin-left:6px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  .kv{color:var(--muted);font-size:14px}
+  .kv b{color:var(--text);font-size:18px}
+  select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 8px;font-size:14px}
+  .temp{font-size:40px;font-weight:800}
+  dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:14px;max-width:460px;width:92%}
+  dialog::backdrop{background:#000a}
+  dialog input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px;color:var(--text);margin:8px 0}
+  dialog p{color:var(--muted);font-size:13px;line-height:1.5;margin:6px 0}
+  @media (max-width:820px){
+    main,main.swap{flex-direction:column;overflow:auto}
+    .left{width:100%!important;border:0}
+    .stage{max-height:none}
+    body{overflow:auto}
   }
 </style>
 </head>
 <body>
+<header>
+  <div class="brand">CAR<b>DECK</b></div>
+  <div class="spacer"></div>
+  <button class="btn" id="btnSwap" title="Đổi bên">⇄</button>
+  <button class="btn" id="btnFit" title="Đổi tỉ lệ chia">Fit 62%</button>
+  <button class="btn" id="btnFull" title="Toàn màn hình video">⛶</button>
+  <button class="btn" id="btnSettings" title="Cài đặt">⚙</button>
+</header>
 
-<div id="pages">
-  <!-- ================= PAGE 1 ================= -->
-  <section class="page" id="page1">
-    <div id="grid">
-      <div class="card" id="clock-card">
-        <button class="fab" id="theme-btn" onclick="toggleTheme()" title="Đổi giao diện"><i data-ic="theme"></i></button>
-        <button class="fab" id="next-btn" onclick="goPage(1)" title="YouTube"><i data-ic="youtube"></i></button>
-        <div id="time">00<span class="sep">:</span>00</div>
-        <div id="date">...</div>
-        <div id="lunar-today"></div>
-      </div>
+<main id="main">
+  <section class="left" id="leftPane">
+    <div class="tabs">
+      <button class="chip on" id="tabYT" type="button">YouTube</button>
+      <button class="chip" id="tabTV" type="button">TV</button>
+    </div>
+    <div class="view" id="ytView">
+    <form class="searchbar" id="searchForm">
+      <input id="q" placeholder="Tìm video hoặc dán link YouTube…" autocomplete="off">
+      <button class="btn primary" type="submit">Tìm</button>
+    </form>
+    <div class="chips" id="chips"></div>
+    <div class="stage" id="stage">
+      <div class="ph" id="ph"><div><h2>Hôm nay nghe gì?</h2><div>Chọn danh mục, tìm kiếm hoặc dán link YouTube để phát ngay tại đây.</div></div></div>
+      <div id="frameHost"></div>
+      <div class="notice" id="notice"></div>
+      <button class="btn playbtn" id="playBtn" type="button" hidden>▶</button>
+    </div>
+    <div class="nowplaying" id="now"></div>
+    <div class="results" id="results"></div>
+    </div>
 
-      <div class="card" id="weather-card">
-        <div class="label"><i data-ic="partly"></i> Thời tiết</div>
-        <div class="now"><div id="w-icon"></div><div id="w-temp">--<span>°C</span></div></div>
-        <div id="w-desc">Đang lấy vị trí...</div>
-        <div id="w-loc"><i data-ic="pin"></i> <span id="w-loc-name">...</span></div>
-        <div id="w-extra"></div>
-        <div id="forecast"></div>
+    <div class="view" id="tvView" hidden>
+      <div class="stage" id="tvStage">
+        <video id="tvVideo" controls playsinline></video>
+        <div class="notice" id="tvNotice"></div>
       </div>
-
-      <div class="card" id="timer-card">
-        <div class="head">
-          <div class="label"><i data-ic="bell"></i> Báo thức / Hẹn giờ</div>
-          <div id="t-status">SẴN SÀNG</div>
-        </div>
-        <div class="ring-wrap">
-          <svg viewBox="0 0 160 160">
-            <circle cx="80" cy="80" r="70" stroke="var(--card2)" stroke-width="10" fill="none"/>
-            <circle id="ring" cx="80" cy="80" r="70" stroke="var(--accent)" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="440"/>
-          </svg>
-          <div id="cd">00:00:00</div>
-        </div>
-        <div class="tbtns">
-          <button onclick="addTime(15)">+15p</button>
-          <button onclick="addTime(30)">+30p</button>
-          <button onclick="addTime(60)">+1g</button>
-          <button class="rst" onclick="resetTimer()">Xóa</button>
-        </div>
-        <button id="t-main" onclick="mainBtn()"></button>
+      <div class="nowplaying" id="tvNow"></div>
+      <div class="searchbar">
+        <button class="btn" type="button" id="tvPrev" title="Kênh trước">◀</button>
+        <button class="btn" type="button" id="tvNext" title="Kênh sau">▶</button>
+        <button class="btn" type="button" id="tvReload">Tải lại danh sách VTV</button>
       </div>
-
-      <div class="card" id="cal-card">
-        <div class="cal-head">
-          <button onclick="shiftMonth(-1)"><i data-ic="left"></i></button>
-          <div id="cal-title" onclick="goToday()"></div>
-          <button onclick="shiftMonth(1)"><i data-ic="right"></i></button>
-        </div>
-        <div class="dow"><div>CN</div><div>T2</div><div>T3</div><div>T4</div><div>T5</div><div>T6</div><div>T7</div></div>
-        <div class="days" id="days"></div>
-      </div>
+      <div class="results" id="tvList"></div>
+      <details class="src">
+        <summary>Nguồn danh sách kênh</summary>
+        <input id="tvSrc" placeholder="Link playlist .m3u" autocomplete="off">
+        <button class="btn" type="button" id="tvSaveSrc">Lưu &amp; tải lại</button>
+      </details>
     </div>
   </section>
 
-  <!-- ================= PAGE 2 ================= -->
-  <section class="page" id="page2">
-    <div class="yt-bar">
-      <button class="back" onclick="goPage(0)" title="Quay lại"><i data-ic="left"></i></button>
-      <button class="back" onclick="toggleHome()" title="Trang chủ YouTube"><i data-ic="home"></i></button>
-      <div class="yt-input">
-        <input id="q" type="text" placeholder="Tìm bài hát hoặc dán link YouTube..." onkeydown="if(event.key==='Enter')doSearch()">
-        <button onclick="doSearch()"><i data-ic="search"></i></button>
-      </div>
+  <section class="right">
+    <div class="widget">
+      <h3>Giờ</h3>
+      <div class="clock" id="clock">--:--</div>
+      <div class="date" id="date"></div>
     </div>
-    <div id="yt-body">
-      <div id="yt-main">
-        <div id="yt-msg"></div>
-        <div id="player-box"><iframe id="yt" title="YouTube" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe><div id="home"></div></div>
-      </div>
-      <div id="yt-side"></div>
-    </div>
-    <div id="edge"></div>
-  </section>
-</div>
 
-<div id="dots"><i class="on"></i><i></i></div>
+    <div class="widget">
+      <h3>Chuyến đi · GPS</h3>
+      <div class="speed"><span id="spd">—</span><small>km/h</small></div>
+      <div class="row">
+        <div class="kv">Quãng đường <b id="dist">0.00</b> km</div>
+        <div class="kv">Thời gian <b id="trip">00:00</b></div>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="gpsToggle">Bật GPS</button>
+        <button class="btn" id="gpsReset">Đặt lại</button>
+      </div>
+      <p class="kv" style="margin:8px 0 0">Ước tính từ GPS của thiết bị, có thể lệch vài km/h.</p>
+    </div>
+
+    <div class="widget">
+      <h3>Thời tiết</h3>
+      <div class="row" style="margin:0 0 8px">
+        <select id="city"></select>
+        <button class="btn" id="wxHere">Vị trí của tôi</button>
+      </div>
+      <div class="temp" id="wxTemp">—</div>
+      <div class="kv" id="wxInfo">Đang tải…</div>
+      <p class="kv" style="margin:8px 0 0">Dữ liệu: Open-Meteo (miễn phí).</p>
+    </div>
+  </section>
+</main>
+
+<dialog id="dlg">
+  <form method="dialog">
+    <h3 style="margin-top:0">Cài đặt</h3>
+    <label>YouTube Data API key</label>
+    <input id="apiKey" placeholder="AIza…" autocomplete="off">
+    <p>Cần key để tìm kiếm và duyệt danh mục. Tạo miễn phí trong Google Cloud Console (bật “YouTube Data API v3”). Nên giới hạn key theo HTTP referrer của domain bạn. Key chỉ lưu trong trình duyệt này.</p>
+    <p>Không có key vẫn dùng được: dán link video/playlist vào ô tìm kiếm, hoặc mở lại mục “Gần đây”.</p>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn" value="cancel">Đóng</button>
+      <button class="btn primary" id="saveKey" value="ok">Lưu</button>
+    </div>
+  </form>
+</dialog>
 
 <script>
-/* ================= Icons (SVG nội bộ, không cần mạng) ================= */
-const ICONS={
-  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
-  cloud:'<path d="M7 19a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5 4.8 4.8 0 0 1 17.5 19z"/>',
-  partly:'<path d="M12 2v1.5M4.6 4.6l1 1M2 10h1.5M19.4 4.6l-1 1"/><circle cx="12" cy="9" r="3"/><path d="M7.5 20a3.5 3.5 0 0 1-.3-7A4.7 4.7 0 0 1 16.4 13 3.5 3.5 0 0 1 16 20z"/>',
-  rain:'<path d="M7 14a4 4 0 0 1-.5-7.97A6 6 0 0 1 18 5.5 4.5 4.5 0 0 1 17.5 14z"/><path d="M8 17l-1 4M12 17l-1 4M16 17l-1 4"/>',
-  bolt:'<path d="M7 13a4 4 0 0 1-.5-7.97A6 6 0 0 1 18 4.5 4.5 4.5 0 0 1 17.5 13z"/><path d="M12.5 11l-2.5 5h4l-2.5 5"/>',
-  fog:'<path d="M4 8h16M6 12h12M4 16h16M7 20h10"/>',
-  snow:'<path d="M12 3v18M4.5 7.5l15 9M4.5 16.5l15-9"/>',
-  drop:'<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
-  wind:'<path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8"/>',
-  pin:'<path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>',
-  bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/>',
-  play:'<path d="M7 4l13 8-13 8z" fill="currentColor"/>',
-  pause:'<path d="M7 4h4v16H7zM13 4h4v16h-4z" fill="currentColor"/>',
-  left:'<path d="M15 5l-7 7 7 7"/>',
-  right:'<path d="M9 5l7 7-7 7"/>',
-  search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
-  youtube:'<rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z" fill="currentColor"/>',
-  theme:'<circle cx="12" cy="12" r="9"/><path d="M12 3v18a9 9 0 0 0 0-18z" fill="currentColor"/>',
-  warn:'<path d="M12 3l10 18H2zM12 10v5M12 18v.5"/>',
-  home:'<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>'
-};
-const svg=(n)=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]||''}</svg>`;
-function hydrateIcons(root=document){ root.querySelectorAll('i[data-ic]').forEach(el=>{ el.outerHTML=svg(el.dataset.ic); }); }
-hydrateIcons();
-
-const $ = id => document.getElementById(id);
-const store = {
-  get(k,d){ try{ const v=localStorage.getItem(k); return v===null?d:v }catch(e){ return d } },
-  set(k,v){ try{ localStorage.setItem(k,v) }catch(e){} }
-};
-
-/* ================= Pages / swipe ================= */
-let page = 0;
-function goPage(n){
-  page = n;
-  $('pages').style.transform = `translateX(${-50*n}%)`;
-  document.querySelectorAll('#dots i').forEach((d,i)=>d.classList.toggle('on',i===n));
-  if(n===1) initYT();
-}
-(function swipe(){
-  let sx=0, sy=0, active=false;
-  const start=(x,y)=>{sx=x;sy=y;active=true};
-  const end=(x,y)=>{
-    if(!active) return; active=false;
-    const dx=x-sx, dy=y-sy;
-    if(Math.abs(dx)>70 && Math.abs(dx)>Math.abs(dy)*1.3){
-      if(dx<0 && page===0) goPage(1);
-      else if(dx>0 && page===1) goPage(0);
-    }
+(function(){
+  const $ = s => document.querySelector(s);
+  const store = {
+    get(k, d){ try{ const v = localStorage.getItem(k); return v===null? d : JSON.parse(v); }catch(e){ return d; } },
+    set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
   };
-  const root=$('pages');
-  root.addEventListener('touchstart',e=>start(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
-  root.addEventListener('touchend',e=>end(e.changedTouches[0].clientX,e.changedTouches[0].clientY),{passive:true});
-  let md=false;
-  root.addEventListener('mousedown',e=>{md=true;start(e.clientX,e.clientY)});
-  window.addEventListener('mouseup',e=>{ if(md){md=false;end(e.clientX,e.clientY)} });
-  window.addEventListener('keydown',e=>{
-    if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
-    if(e.key==='ArrowRight'&&page===0) goPage(1);
-    if(e.key==='ArrowLeft'&&page===1) goPage(0);
-  });
-})();
 
-/* ================= Theme ================= */
-function toggleTheme(){
-  document.body.classList.toggle('light');
-  store.set('theme', document.body.classList.contains('light')?'light':'dark');
-}
-if(store.get('theme','dark')==='light') document.body.classList.add('light');
-
-/* ================= Âm lịch (Hồ Ngọc Đức, UTC+7) ================= */
-const PI=Math.PI, TZ=7, INT=Math.floor;
-function jdFromDate(dd,mm,yy){
-  const a=INT((14-mm)/12), y=yy+4800-a, m=mm+12*a-3;
-  return dd+INT((153*m+2)/5)+365*y+INT(y/4)-INT(y/100)+INT(y/400)-32045;
-}
-function NewMoon(k){
-  const T=k/1236.85,T2=T*T,T3=T2*T,dr=PI/180;
-  let Jd1=2415020.75933+29.53058868*k+0.0001178*T2-0.000000155*T3;
-  Jd1+=0.00033*Math.sin((166.56+132.87*T-0.009173*T2)*dr);
-  const M=359.2242+29.10535608*k-0.0000333*T2-0.00000347*T3;
-  const Mpr=306.0253+385.81691806*k+0.0107306*T2+0.00001236*T3;
-  const F=21.2964+390.67050646*k-0.0016528*T2-0.00000239*T3;
-  let C1=(0.1734-0.000393*T)*Math.sin(M*dr)+0.0021*Math.sin(2*dr*M);
-  C1-=0.4068*Math.sin(Mpr*dr)+0.0161*Math.sin(dr*2*Mpr);
-  C1-=0.0004*Math.sin(dr*3*Mpr);
-  C1+=0.0104*Math.sin(dr*2*F)-0.0051*Math.sin(dr*(M+Mpr));
-  C1-=0.0074*Math.sin(dr*(M-Mpr))-0.0004*Math.sin(dr*(2*F+M));
-  C1-=0.0004*Math.sin(dr*(2*F-M))+0.0006*Math.sin(dr*(2*F+Mpr));
-  C1+=0.0010*Math.sin(dr*(2*F-Mpr))+0.0005*Math.sin(dr*(2*Mpr+M));
-  const dt=T<-11?0.001+0.000839*T+0.0002261*T2-0.00000845*T3-0.000000081*T*T3:-0.000278+0.000265*T+0.000262*T2;
-  return Jd1+C1-dt;
-}
-function SunLongitude(jdn){
-  const T=(jdn-2451545.0)/36525,T2=T*T,dr=PI/180;
-  const M=357.52910+35999.05030*T-0.0001559*T2-0.00000048*T*T2;
-  const L0=280.46645+36000.76983*T+0.0003032*T2;
-  let DL=(1.914600-0.004817*T-0.000014*T2)*Math.sin(dr*M);
-  DL+=(0.019993-0.000101*T)*Math.sin(dr*2*M)+0.000290*Math.sin(dr*3*M);
-  let L=(L0+DL)*dr; L-=PI*2*INT(L/(PI*2)); return L;
-}
-const getNewMoonDay=k=>INT(NewMoon(k)+0.5+TZ/24);
-const getSunLongitude=d=>INT(SunLongitude(d-0.5-TZ/24)/PI*6);
-function getLunarMonth11(yy){
-  const off=jdFromDate(31,12,yy)-2415021, k=INT(off/29.530588853);
-  let nm=getNewMoonDay(k);
-  if(getSunLongitude(nm)>=9) nm=getNewMoonDay(k-1);
-  return nm;
-}
-function getLeapMonthOffset(a11){
-  const k=INT((a11-2415021.076998695)/29.530588853+0.5);
-  let last=0,i=1,arc=getSunLongitude(getNewMoonDay(k+i));
-  do{ last=arc; i++; arc=getSunLongitude(getNewMoonDay(k+i)); }while(arc!==last&&i<14);
-  return i-1;
-}
-function solar2lunar(dd,mm,yy){
-  const dayNumber=jdFromDate(dd,mm,yy);
-  const k=INT((dayNumber-2415021.076998695)/29.530588853);
-  let monthStart=getNewMoonDay(k+1);
-  if(monthStart>dayNumber) monthStart=getNewMoonDay(k);
-  let a11=getLunarMonth11(yy), b11=a11, lunarYear;
-  if(a11>=monthStart){ lunarYear=yy; a11=getLunarMonth11(yy-1); }
-  else { lunarYear=yy+1; b11=getLunarMonth11(yy+1); }
-  const lunarDay=dayNumber-monthStart+1;
-  const diff=INT((monthStart-a11)/29);
-  let lunarLeap=0, lunarMonth=diff+11;
-  if(b11-a11>365){
-    const leap=getLeapMonthOffset(a11);
-    if(diff>=leap){ lunarMonth=diff+10; if(diff===leap) lunarLeap=1; }
+  /* ---------- Clock ---------- */
+  function tick(){
+    const d = new Date();
+    $('#clock').textContent = d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
+    $('#date').textContent = d.toLocaleDateString('vi-VN',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
   }
-  if(lunarMonth>12) lunarMonth-=12;
-  if(lunarMonth>=11&&diff<4) lunarYear-=1;
-  return {d:lunarDay,m:lunarMonth,y:lunarYear,leap:lunarLeap};
-}
-const CAN=['Giáp','Ất','Bính','Đinh','Mậu','Kỷ','Canh','Tân','Nhâm','Quý'];
-const CHI=['Tý','Sửu','Dần','Mão','Thìn','Tỵ','Ngọ','Mùi','Thân','Dậu','Tuất','Hợi'];
-const canChiYear=y=>CAN[(y+6)%10]+' '+CHI[(y+8)%12];
+  tick(); setInterval(tick, 10000);
 
-/* ================= Clock ================= */
-const DOW_VN=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
-function updateClock(){
-  const n=new Date();
-  const p=v=>String(v).padStart(2,'0');
-  $('time').innerHTML=`${p(n.getHours())}<span class="sep">:</span>${p(n.getMinutes())}<small>${p(n.getSeconds())}</small>`;
-  $('date').textContent=`${DOW_VN[n.getDay()]}, ${n.getDate()}/${n.getMonth()+1}/${n.getFullYear()}`;
-  const l=solar2lunar(n.getDate(),n.getMonth()+1,n.getFullYear());
-  $('lunar-today').textContent=`Âm lịch: ${l.d}/${l.m}${l.leap?' (nhuận)':''} • ${canChiYear(l.y)}`;
-}
-setInterval(updateClock,1000); updateClock();
-
-/* ================= Calendar ================= */
-let cm=new Date().getMonth(), cy=new Date().getFullYear();
-function shiftMonth(n){ cm+=n; if(cm>11){cm=0;cy++} if(cm<0){cm=11;cy--} renderCal(); }
-function goToday(){ const t=new Date(); cm=t.getMonth(); cy=t.getFullYear(); renderCal(); }
-function renderCal(){
-  const first=new Date(cy,cm,1).getDay(), dim=new Date(cy,cm+1,0).getDate(), t=new Date();
-  const lm=solar2lunar(15,cm+1,cy);
-  $('cal-title').innerHTML=`THÁNG ${cm+1} / ${cy}<small>Âm lịch: tháng ${lm.m}${lm.leap?' nhuận':''} năm ${canChiYear(lm.y)}</small>`;
-  let html='';
-  for(let i=0;i<first;i++) html+='<div class="day empty"></div>';
-  for(let d=1;d<=dim;d++){
-    const l=solar2lunar(d,cm+1,cy), wd=(first+d-1)%7;
-    const isToday=d===t.getDate()&&cm===t.getMonth()&&cy===t.getFullYear();
-    const cls=['day']; if(wd===0) cls.push('sun'); if(l.d===1) cls.push('first'); if(isToday) cls.push('today');
-    html+=`<div class="${cls.join(' ')}"><b>${d}</b><span>${l.d===1?l.d+'/'+l.m:l.d}</span></div>`;
+  /* ---------- Layout controls ---------- */
+  const splits = [62, 50, 70];
+  let si = Math.max(0, splits.indexOf(store.get('split', 62)));
+  function applySplit(){
+    document.documentElement.style.setProperty('--split', splits[si] + '%');
+    $('#btnFit').textContent = 'Fit ' + splits[si] + '%';
   }
-  $('days').innerHTML=html;
-  $('days').style.gridTemplateRows=`repeat(${Math.ceil((first+dim)/7)},1fr)`;
-}
-renderCal();
+  applySplit();
+  $('#btnFit').onclick = () => { si = (si + 1) % splits.length; store.set('split', splits[si]); applySplit(); };
+  if(store.get('swap', false)) $('#main').classList.add('swap');
+  $('#btnSwap').onclick = () => { const on = $('#main').classList.toggle('swap'); store.set('swap', on); };
+  $('#btnFull').onclick = () => {
+    const el = $('#tvView').hidden ? $('#stage') : $('#tvStage');
+    if(document.fullscreenElement) document.exitFullscreen();
+    else if(el.requestFullscreen) el.requestFullscreen();
+  };
 
-/* ================= Thời tiết theo vị trí thực ================= */
-function fetchJSON(url,ms=10000){
-  const c=new AbortController(); const t=setTimeout(()=>c.abort(),ms);
-  return fetch(url,{signal:c.signal}).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).finally(()=>clearTimeout(t));
-}
-function gpsPosition(){
-  return new Promise((res,rej)=>{
-    if(!navigator.geolocation) return rej(new Error('no geo'));
-    navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lon:p.coords.longitude}),rej,{timeout:8000,maximumAge:5*60*1000,enableHighAccuracy:false});
-  });
-}
-async function ipPosition(){
-  try{ const j=await fetchJSON('https://ipwho.is/',7000); if(j.success!==false&&j.latitude) return {lat:j.latitude,lon:j.longitude,name:[j.city,j.region].filter(Boolean).join(', ')}; }catch(e){}
-  const j=await fetchJSON('https://ipapi.co/json/',7000);
-  return {lat:j.latitude,lon:j.longitude,name:[j.city,j.region].filter(Boolean).join(', ')};
-}
-async function placeName(lat,lon){
-  try{
-    const j=await fetchJSON(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=vi`,7000);
-    return [j.locality||j.city,j.principalSubdivision].filter(Boolean).join(', ');
-  }catch(e){ return ''; }
-}
-async function getLocation(){
-  try{
-    const p=await gpsPosition(); p.name=await placeName(p.lat,p.lon); p.src='GPS';
-    store.set('loc',JSON.stringify(p)); return p;
-  }catch(e){}
-  try{
-    const p=await ipPosition(); p.src='IP';
-    if(!p.name) p.name=await placeName(p.lat,p.lon);
-    store.set('loc',JSON.stringify(p)); return p;
-  }catch(e){}
-  try{ const c=JSON.parse(store.get('loc','')); if(c&&c.lat) return c; }catch(e){}
-  return {lat:21.30,lon:105.66,name:'Bình Xuyên, Phú Thọ',src:'mặc định'};
-}
-function wmo(c){
-  if(c===0) return ['sun','var(--c-sun)','Trời quang'];
-  if(c<=2) return ['partly','var(--c-partly)','Ít mây'];
-  if(c===3) return ['cloud','var(--c-cloud)','Nhiều mây'];
-  if(c<=48) return ['fog','var(--c-cloud)','Sương mù'];
-  if(c<=57) return ['rain','var(--c-rain)','Mưa phùn'];
-  if(c<=67) return ['rain','var(--c-rain)','Mưa'];
-  if(c<=77) return ['snow','var(--c-snow)','Tuyết'];
-  if(c<=82) return ['rain','var(--c-rain)','Mưa rào'];
-  return ['bolt','var(--c-bolt)','Dông'];
-}
-const DOW_S=['CN','T2','T3','T4','T5','T6','T7'];
-async function loadWeather(){
-  try{
-    const loc=await getLocation();
-    $('w-loc-name').textContent=(loc.name||`${loc.lat.toFixed(2)}, ${loc.lon.toFixed(2)}`)+(loc.src?` (${loc.src})`:'');
-    const j=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`+
-      `&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m`+
-      `&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=10&timezone=auto`);
-    const c=j.current, [ic,col,desc]=wmo(c.weather_code);
-    $('w-icon').innerHTML=svg(ic); $('w-icon').style.color=col;
-    $('w-temp').innerHTML=`${Math.round(c.temperature_2m)}<span>°C</span>`;
-    $('w-desc').textContent=desc;
-    $('w-extra').innerHTML=`<span>${svg('drop')} ${c.relative_humidity_2m}%</span><span>${svg('wind')} ${Math.round(c.wind_speed_10m)} km/h</span>`;
-    let h='';
-    j.daily.time.slice(0,10).forEach((ds,i)=>{
-      const d=new Date(ds+'T00:00:00'), [ic2,col2]=wmo(j.daily.weather_code[i]);
-      h+=`<div class="fc"><b>${i===0?'Nay':DOW_S[d.getDay()]}</b><em>${d.getDate()}/${d.getMonth()+1}</em>
-        <span style="color:${col2};display:flex">${svg(ic2)}</span><div>${Math.round(j.daily.temperature_2m_max[i])}° <s>${Math.round(j.daily.temperature_2m_min[i])}°</s></div></div>`;
+  /* ---------- YouTube player (official IFrame API) ---------- */
+  const YT_ERR = {
+    2:   'Video ID hoặc tham số không hợp lệ. Hãy kiểm tra liên kết.',
+    5:   'Trình duyệt này không phát được video bằng HTML5. Thử lại hoặc mở YouTube gốc.',
+    100: 'Video không tồn tại, đã bị xóa hoặc chuyển sang riêng tư.',
+    101: 'Chủ sở hữu không cho phép nhúng video này. Hãy mở YouTube gốc.',
+    150: 'Chủ sở hữu không cho phép nhúng video này. Hãy mở YouTube gốc.',
+    153: 'YouTube thiếu HTTP Referer. Hãy mở trang qua HTTPS hoặc localhost, không mở file trực tiếp.'
+  };
+
+  let apiPromise = null;
+  function loadAPI(){
+    if(window.YT && window.YT.Player) return Promise.resolve(window.YT);
+    if(apiPromise) return apiPromise;
+    apiPromise = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      const timer = setTimeout(() => { s.remove(); reject(new Error('Không tải được YouTube Player API sau 15 giây. Kiểm tra mạng hoặc trình chặn nội dung.')); }, 15000);
+      window.onYouTubeIframeAPIReady = () => { clearTimeout(timer); resolve(window.YT); };
+      s.src = 'https://www.youtube.com/iframe_api';
+      s.onerror = () => { clearTimeout(timer); reject(new Error('Không tải được YouTube Player API.')); };
+      document.head.appendChild(s);
+    }).catch(err => { apiPromise = null; throw err; });
+    return apiPromise;
+  }
+
+  class TubePlayer{
+    constructor(host, notice, playBtn){
+      this.host = host; this.notice = notice; this.playBtn = playBtn;
+      this.player = null; this.gen = 0; this.failed = false; this.timer = null;
+      this.playBtn.addEventListener('click', () => {
+        if(!this.player || this.failed) return;
+        this.say('Đang yêu cầu phát… Nếu chưa phát, chạm ▶ trong khung YouTube.');
+        this.watch(this.gen);
+        try{ this.player.playVideo(); }catch(e){ this.say('Chạm ▶ trong khung YouTube để phát.', true); }
+      });
+    }
+    say(t, err){ this.notice.textContent = t || ''; this.notice.classList.toggle('error', !!err); }
+    watch(token){
+      clearTimeout(this.timer);
+      this.timer = setTimeout(() => {
+        if(token !== this.gen || this.failed) return;
+        this.say('Chưa nhận được tín hiệu phát sau 15 giây. Có thể do mạng hoặc trình duyệt chặn tự phát — chạm ▶ trong khung.', true);
+      }, 15000);
+    }
+    close(){
+      this.gen++; clearTimeout(this.timer);
+      if(this.player){ try{ this.player.destroy(); }catch(e){} }
+      this.player = null; this.failed = false;
+      this.host.replaceChildren(); this.host.hidden = false; this.playBtn.hidden = true;
+    }
+    // opts: { id } hoặc { list }, kèm autoplay, time
+    async open(opts){
+      this.close();
+      const token = this.gen;
+      this.say('Đang tải trình phát YouTube…');
+      if(opts.id && !/^[\w-]{11}$/.test(opts.id)){ this.say(YT_ERR[2] + ' (Mã 2)', true); return; }
+      if(!/^https?:$/.test(location.protocol)){ this.say(YT_ERR[153] + ' (Mã 153)', true); return; }
+      try{
+        const YT = await loadAPI();
+        if(token !== this.gen) return;
+        const iframe = document.createElement('iframe');
+        iframe.title = 'YouTube player';
+        iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+        iframe.allowFullscreen = true;
+        iframe.referrerPolicy = 'strict-origin-when-cross-origin'; // đặt trước khi gán src
+        const q = new URLSearchParams({
+          enablejsapi:'1', origin: location.origin, playsinline:'1', rel:'0',
+          autoplay: opts.autoplay === false ? '0' : '1',
+          start: String(Math.max(0, Math.floor(Number(opts.time) || 0)))
+        });
+        let path = 'embed/' + opts.id;
+        if(opts.list){ path = 'embed/videoseries'; q.set('list', opts.list); }
+        iframe.src = 'https://www.youtube.com/' + path + '?' + q;
+        this.host.appendChild(iframe);
+        const live = () => token === this.gen && !this.failed;
+        this.watch(token);
+        this.player = new YT.Player(iframe, { events: {
+          onReady: e => {
+            if(!live()) return;
+            this.playBtn.hidden = false;
+            this.say(opts.autoplay === false ? 'Video đã sẵn sàng.' : 'Đang phát video…');
+            if(opts.autoplay !== false){ try{ e.target.playVideo(); }catch(_){ this.say('Chạm ▶ để bắt đầu phát.'); } }
+          },
+          onStateChange: e => {
+            if(!live()) return;
+            if(e.data === 1 || e.data === 2 || e.data === 0){
+              clearTimeout(this.timer);
+              this.say(e.data === 1 ? '' : e.data === 2 ? 'Đã tạm dừng. Chạm ▶ để tiếp tục.' : 'Video đã kết thúc.');
+            }else if(e.data === 3){ this.say('Đang tải video…'); this.watch(token); }
+          },
+          onError: e => {
+            if(!live()) return;
+            this.failed = true; clearTimeout(this.timer);
+            this.host.hidden = true; this.playBtn.hidden = true;
+            this.say((YT_ERR[e.data] || 'YouTube không thể phát video này trong trình duyệt hiện tại.') + ' (Mã ' + e.data + ')', true);
+          }
+        }});
+      }catch(err){
+        if(token !== this.gen) return;
+        clearTimeout(this.timer);
+        this.say(err.message || 'Không tạo được trình phát. Thử lại hoặc mở YouTube gốc.', true);
+      }
+    }
+  }
+
+  const tube = new TubePlayer($('#frameHost'), $('#notice'), $('#playBtn'));
+
+  function setNow(t){ $('#now').textContent = t || ''; }
+
+  function play(id, title, list){
+    $('#ph').style.display = 'none';
+    tube.open({ id: id, list: list });
+    setNow(title ? '▶ ' + title : '');
+    if(id){ addRecent({id: id, title: title || id}); }
+  }
+
+  /* ---------- Parse link ---------- */
+  function parseLink(s){
+    s = s.trim();
+    try{
+      const u = new URL(s);
+      if(/youtu\.be$/.test(u.hostname)) return {id: u.pathname.slice(1)};
+      if(/youtube\.com$/.test(u.hostname)){
+        if(u.searchParams.get('list') && !u.searchParams.get('v')) return {list: u.searchParams.get('list')};
+        if(u.searchParams.get('v')) return {id: u.searchParams.get('v')};
+        const m = u.pathname.match(/\/(embed|shorts|live)\/([\w-]{11})/);
+        if(m) return {id: m[2]};
+      }
+    }catch(e){}
+    if(/^[\w-]{11}$/.test(s)) return {id: s};
+    return null;
+  }
+
+  /* ---------- Recent ---------- */
+  function getRecent(){ return store.get('recent', []); }
+  function addRecent(v){
+    const r = getRecent().filter(x => x.id !== v.id);
+    r.unshift(v);
+    store.set('recent', r.slice(0, 24));
+  }
+
+  /* ---------- Results rendering ---------- */
+  const results = $('#results');
+  function msg(t){ results.innerHTML = ''; const d = document.createElement('div'); d.className = 'msg'; d.textContent = t; results.appendChild(d); }
+  function render(items){
+    results.innerHTML = '';
+    if(!items.length){ msg('Không có kết quả.'); return; }
+    items.forEach(it => {
+      const b = document.createElement('button');
+      b.className = 'card';
+      const img = document.createElement('img');
+      img.loading = 'lazy'; img.alt = '';
+      img.src = 'https://i.ytimg.com/vi/' + it.id + '/mqdefault.jpg';
+      const d = document.createElement('div');
+      d.textContent = it.title;
+      b.append(img, d);
+      b.onclick = () => play(it.id, it.title);
+      results.appendChild(b);
     });
-    $('forecast').innerHTML=h;
-  }catch(e){
-    $('w-desc').textContent='Không tải được thời tiết — thử lại sau 30 giây';
-    setTimeout(loadWeather,30000);
   }
-}
-loadWeather(); setInterval(loadWeather,10*60*1000);
 
-/* ================= Báo thức / Hẹn giờ ================= */
-let tSec=0,tTotal=0,tInt=null,alarmInt=null,audioCtx=null;
-const FULL=440;
-const fmt=s=>[Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(v=>String(v).padStart(2,'0')).join(':');
-function ensureAudio(){
-  if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-  if(audioCtx.state==='suspended') audioCtx.resume();
-}
-function beep(){
-  ensureAudio();
-  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
-  o.connect(g); g.connect(audioCtx.destination);
-  o.type='sine'; o.frequency.value=880;
-  g.gain.setValueAtTime(1,audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.5);
-  o.start(); o.stop(audioCtx.currentTime+0.5);
-}
-function setBtn(icon,text,bg){ const b=$('t-main'); b.innerHTML=svg(icon)+'<span>'+text+'</span>'; b.style.background=bg; }
-function setStatus(txt,color){ const s=$('t-status'); s.textContent=txt; s.style.color=color||''; }
-function drawTimer(){
-  $('cd').textContent=fmt(tSec);
-  $('ring').style.strokeDashoffset=FULL-(tTotal>0?tSec/tTotal:0)*FULL;
-}
-function addTime(min){
-  if(alarmInt) return;
-  tSec+=min*60; tTotal=tInt?Math.max(tTotal,tSec):tSec;
-  drawTimer(); if(!tInt) setStatus('ĐÃ ĐẶT');
-}
-function resetTimer(){
-  clearInterval(tInt); clearInterval(alarmInt); tInt=alarmInt=null; tSec=tTotal=0; drawTimer();
-  $('ring').style.stroke='var(--accent)'; $('cd').style.color='';
-  setStatus('SẴN SÀNG'); setBtn('play','BẮT ĐẦU','var(--btn)');
-}
-function mainBtn(){
-  ensureAudio();
-  if(alarmInt){ resetTimer(); return; }
-  if(tInt){ clearInterval(tInt); tInt=null; setBtn('play','TIẾP TỤC','var(--warn)'); setStatus('TẠM DỪNG','var(--yellow)'); return; }
-  if(tSec<=0) return;
-  setBtn('pause','TẠM DỪNG','var(--warn)'); setStatus('ĐANG CHẠY','var(--accent)');
-  tInt=setInterval(()=>{ tSec--; drawTimer(); if(tSec<=0){ clearInterval(tInt); tInt=null; fire(); } },1000);
-}
-function fire(){
-  beep(); alarmInt=setInterval(beep,1000);
-  $('ring').style.stroke='var(--red)'; $('cd').style.color='var(--red)';
-  setStatus('HẾT GIỜ!','var(--red)'); setBtn('bell','TẮT BÁO THỨC','#dc2626');
-}
-setBtn('play','BẮT ĐẦU','var(--btn)');
-
-/* ================= YouTube (iframe thuần, không API key) + Trang chủ ================= */
-const onFile=location.protocol==='file:';
-let ytInit=false, queue=[], qIdx=-1, trendItems=[];
-const jget=(k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d }catch(e){ return d } };
-const jset=(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)) }catch(e){} };
-const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-
-const PRESETS=[
-  {id:'jfKfPfyJRdk',title:'Lofi Girl – lofi hip hop radio (24/7)'},
-  {id:'4xDzrJKXOOY',title:'Synthwave radio – beats to chill/game to (24/7)'}
-];
-const CHIPS=['Nhạc trẻ','Nhạc Bolero','Lofi chill','Nhạc EDM','Nhạc không lời','Nhạc vàng','Nhạc xe hơi'];
-const PIPED=['https://pipedapi.kavin.rocks','https://pipedapi.adminforge.de','https://api.piped.private.coffee'];
-const INVID=['https://inv.nadeko.net','https://yewtu.be','https://invidious.nerdvpn.de','https://invidious.f5.si'];
-
-function showMsg(h){ const m=$('yt-msg'); m.style.display=h?'block':'none'; m.innerHTML=h||''; }
-function note(t){ showMsg(t); clearTimeout(note.t); note.t=setTimeout(()=>{ if($('yt-msg').dataset.keep!=='1') showMsg(''); },3500); }
-
-/* ---- tìm kiếm / thịnh hành: hỏi song song nhiều máy chủ công cộng, máy nào trả lời trước thì dùng ---- */
-function fromPiped(j){
-  const a=Array.isArray(j)?j:(j&&j.items)||[];
-  return a.filter(x=>x.url&&x.url.includes('/watch?v=')&&!x.isShort).map(x=>({id:x.url.split('v=')[1].slice(0,11),title:x.title}));
-}
-function fromInv(a){
-  return (Array.isArray(a)?a:[]).filter(x=>x.videoId&&(!x.type||x.type==='video')&&!(x.lengthSeconds>0&&x.lengthSeconds<65)).map(x=>({id:x.videoId,title:x.title}));
-}
-function anyBackend(pPath,iPath){
-  const tasks=[...PIPED.map(b=>fetchJSON(b+pPath,8000).then(fromPiped)),...INVID.map(b=>fetchJSON(b+iPath,8000).then(fromInv))]
-    .map(t=>t.then(r=>{ if(!r.length) throw new Error('empty'); return r; }));
-  return Promise.any(tasks);
-}
-function kSearch(q){ const e=encodeURIComponent(q); return anyBackend('/search?q='+e+'&filter=videos','/api/v1/search?q='+e+'&type=video&region=VN'); }
-async function cachedSearch(q){
-  const key=q.trim().toLowerCase(), all=jget('yscache',{}), hit=all[key];
-  if(hit&&Date.now()-hit.t<12*3600e3) return hit.items;
-  try{
-    const items=await kSearch(q);
-    all[key]={t:Date.now(),items};
-    const ks=Object.keys(all); if(ks.length>15) ks.sort((a,b)=>all[a].t-all[b].t).slice(0,ks.length-15).forEach(k=>delete all[k]);
-    jset('yscache',all); return items;
-  }catch(e){ if(hit) return hit.items; throw e; }
-}
-async function loadTrend(){
-  const c=jget('ytrend',null);
-  if(c&&c.items&&c.items.length&&Date.now()-c.t<3600e3) return c.items;
-  let items=[];
-  try{ items=await anyBackend('/trending?region=VN','/api/v1/trending?region=VN&type=music'); }
-  catch(e){ try{ items=await kSearch('nhạc trẻ hay nhất'); }catch(e2){ if(c&&c.items) items=c.items; } }
-  if(items.length) jset('ytrend',{t:Date.now(),items});
-  return items;
-}
-
-/* ---- phát: bài được chọn + các bài sau nó trong danh sách (iframe tự chuyển bài) ---- */
-function recents(){ return jget('yrecent',[]); }
-function addRecent(it){
-  const r=recents().filter(x=>x.id!==it.id); r.unshift({id:it.id,title:it.title||''}); jset('yrecent',r.slice(0,20));
-}
-async function fillTitle(it){
-  try{
-    const r=await fetchJSON('https://noembed.com/embed?url='+encodeURIComponent('https://www.youtube.com/watch?v='+it.id),6000);
-    if(r&&r.title){ it.title=r.title; addRecent(it); renderSide(); }
-  }catch(e){}
-}
-function playQueue(items,idx){
-  if(!items||!items[idx]) return;
-  queue=items; qIdx=idx;
-  const it=items[idx];
-  addRecent(it); if(!it.title) fillTitle(it);
-  const rest=items.slice(idx+1,idx+26).map(x=>x.id);
-  let src=`https://www.youtube.com/embed/${it.id}?autoplay=1&playsinline=1&rel=0&modestbranding=1`;
-  if(rest.length) src+='&playlist='+rest.join(',')+'&loop=1';
-  $('yt').src=src;
-  closeHome(); showMsg(''); renderSide();
-}
-function playItem(it){
-  if(it.list){
-    $('yt').src=`https://www.youtube.com/embed/videoseries?list=${it.list}&autoplay=1&playsinline=1&rel=0&modestbranding=1`;
-    queue=[]; qIdx=-1; closeHome(); showMsg(''); renderSide();
-  }else playQueue([{id:it.id,title:it.title||''}],0);
-}
-function parseInput(v){
-  v=v.trim(); let m;
-  if((m=v.match(/[?&]list=([\w-]+)/))&&!/[?&]v=/.test(v)) return {list:m[1]};
-  if((m=v.match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/|\/live\/)([\w-]{11})/))) return {id:m[1]};
-  if(/^[\w-]{11}$/.test(v)) return {id:v};
-  return null;
-}
-let searching=false;
-async function searchAndPlay(q){
-  q=(q||'').trim(); if(!q||searching) return;
-  searching=true; note('Đang tìm: '+esc(q)+' …');
-  try{
-    const items=(await cachedSearch(q)).slice(0,25);
-    $('q').value='';
-    playQueue(items,0);
-  }catch(e){
-    showMsg('Chưa tìm được (máy chủ tìm kiếm đang bận). Thử lại sau ít giây, hoặc dán link YouTube vào ô tìm kiếm.');
+  /* ---------- Search (YouTube Data API v3) ---------- */
+  async function search(q){
+    const key = store.get('apiKey', '');
+    if(!key){ msg('Chưa có API key. Bấm ⚙ để nhập key, hoặc dán link YouTube vào ô tìm kiếm.'); return; }
+    msg('Đang tìm…');
+    const url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=16'
+      + '&q=' + encodeURIComponent(q) + '&key=' + encodeURIComponent(key);
+    try{
+      const r = await fetch(url);
+      const j = await r.json();
+      if(j.error){ msg('Lỗi API: ' + (j.error.message || 'không rõ')); return; }
+      render((j.items || []).map(i => ({ id: i.id.videoId, title: i.snippet.title })));
+    }catch(e){ msg('Không kết nối được tới YouTube API.'); }
   }
-  searching=false;
-}
-async function doSearch(){
-  const v=$('q').value.trim(); if(!v) return;
-  $('q').blur();
-  const d=parseInput(v);
-  if(d){ $('q').value=''; playItem(d); return; }
-  await searchAndPlay(v);
-}
 
-/* ---- danh sách bên phải ---- */
-function renderSide(){
-  const box=$('yt-side');
-  if(queue.length>1){
-    let h='<div class="side-title">Đang phát tiếp</div>';
-    queue.forEach((it,i)=>{ h+=`<div class="res${i===qIdx?' cur':''}" data-i="${i}"><img src="https://i.ytimg.com/vi/${it.id}/mqdefault.jpg" alt=""><div>${esc(it.title||it.id)}</div></div>`; });
-    box.innerHTML=h;
-    box.querySelectorAll('.res[data-i]').forEach(el=>el.onclick=()=>playQueue(queue,+el.dataset.i));
-  }else{
-    let h='<div class="side-title">Gợi ý</div>';
-    PRESETS.forEach((p,i)=>{ h+=`<div class="res preset" data-p="${i}">${svg('youtube')}<span>${esc(p.title)}</span></div>`; });
-    h+=`<div class="res preset" data-home="1">${svg('home')}<span>Mở Trang chủ</span></div>`;
-    box.innerHTML=h;
-    box.querySelectorAll('.preset[data-p]').forEach(el=>el.onclick=()=>playQueue(PRESETS,+el.dataset.p));
-    box.querySelector('[data-home]').onclick=openHome;
+  /* ---------- Categories ---------- */
+  const cats = [
+    {name:'Âm nhạc',  q:'nhạc hay nghe trên xe'},
+    {name:'Thư giãn', q:'nhạc thư giãn lofi driving'},
+    {name:'Khám phá', q:'road trip travel vlog'},
+    {name:'Gần đây',  recent:true}
+  ];
+  let curCat = null;
+  const chips = $('#chips');
+  cats.forEach((c, i) => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.textContent = c.name;
+    b.onclick = () => {
+      curCat = i;
+      [...chips.children].forEach((x, j) => x.classList.toggle('on', j === i));
+      if(c.recent){
+        const r = getRecent();
+        r.length ? render(r) : msg('Chưa có video nào được phát gần đây.');
+      } else { search(c.q); }
+    };
+    chips.appendChild(b);
+  });
+
+  $('#searchForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const v = $('#q').value.trim();
+    if(!v) return;
+    const p = parseLink(v);
+    if(p){ play(p.id, '', p.list); return; }
+    [...chips.children].forEach(x => x.classList.remove('on'));
+    search(v);
+  });
+
+  /* ---------- Settings ---------- */
+  $('#btnSettings').onclick = () => { $('#apiKey').value = store.get('apiKey', ''); $('#dlg').showModal(); };
+  $('#saveKey').onclick = () => { store.set('apiKey', $('#apiKey').value.trim()); };
+
+  /* ---------- Weather (Open-Meteo) ---------- */
+  const cities = {
+    'Hà Nội':[21.0285,105.8542], 'TP. Hồ Chí Minh':[10.8231,106.6297], 'Đà Nẵng':[16.0544,108.2022],
+    'Tokyo':[35.6762,139.6503], 'Berlin':[52.52,13.405]
+  };
+  const sel = $('#city');
+  Object.keys(cities).forEach(n => { const o = document.createElement('option'); o.textContent = n; sel.appendChild(o); });
+  sel.value = store.get('city', 'Hà Nội');
+  const wcode = c => c===0?'Trời quang':c<=3?'Có mây':c<=48?'Sương mù':c<=57?'Mưa phùn':c<=67?'Mưa':c<=77?'Tuyết':c<=82?'Mưa rào':c<=99?'Dông':'';
+  async function weather(lat, lon, label){
+    $('#wxInfo').textContent = 'Đang tải…';
+    try{
+      const u = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon
+        + '&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&timezone=auto';
+      const j = await (await fetch(u)).json();
+      const c = j.current;
+      $('#wxTemp').textContent = Math.round(c.temperature_2m) + '°C';
+      $('#wxInfo').textContent = label + ' · ' + wcode(c.weather_code) + ' · Gió ' + Math.round(c.wind_speed_10m) + ' km/h · Ẩm ' + c.relative_humidity_2m + '%';
+    }catch(e){ $('#wxInfo').textContent = 'Không tải được thời tiết.'; }
   }
-}
+  function loadCity(){ const n = sel.value; store.set('city', n); const c = cities[n]; weather(c[0], c[1], n); }
+  sel.onchange = loadCity; loadCity();
+  setInterval(loadCity, 15 * 60 * 1000);
+  $('#wxHere').onclick = () => {
+    if(!navigator.geolocation){ $('#wxInfo').textContent = 'Thiết bị không hỗ trợ định vị.'; return; }
+    navigator.geolocation.getCurrentPosition(
+      p => weather(p.coords.latitude.toFixed(3), p.coords.longitude.toFixed(3), 'Vị trí của bạn'),
+      () => { $('#wxInfo').textContent = 'Bạn chưa cho phép truy cập vị trí.'; }
+    );
+  };
 
-/* ---- Trang chủ ---- */
-function mkTile(it,onclick){
-  const d=document.createElement('div'); d.className='tile';
-  const img=document.createElement('img'); img.loading='lazy'; img.alt=''; img.src='https://i.ytimg.com/vi/'+it.id+'/mqdefault.jpg';
-  const t=document.createElement('div'); t.textContent=it.title||it.id;
-  d.append(img,t); d.onclick=onclick; return d;
-}
-function homeSection(title,items,pick){
-  if(!items||!items.length) return;
-  const h=$('home'), h4=document.createElement('h4'); h4.textContent=title; h.appendChild(h4);
-  const g=document.createElement('div'); g.className='grid';
-  items.forEach((it,i)=>g.appendChild(mkTile(it,()=>pick(items,i))));
-  h.appendChild(g);
-}
-function renderHome(){
-  const h=$('home'); h.innerHTML='';
-  const top=document.createElement('div'); top.id='homeTop';
-  const b=document.createElement('span'); b.innerHTML=svg('youtube')+' YouTube';
-  const x=document.createElement('button'); x.textContent='Đóng'; x.onclick=closeHome;
-  top.append(b,x); h.appendChild(top);
-
-  const c=document.createElement('div'); c.className='chips';
-  CHIPS.forEach(k=>{ const bt=document.createElement('button'); bt.textContent=k; bt.onclick=()=>searchAndPlay(k); c.appendChild(bt); });
-  h.appendChild(c);
-  const p=document.createElement('div'); p.className='hint';
-  p.textContent='Chạm một thể loại để phát ngay, hoặc chọn bài bên dưới. Có thể gõ tên bài / ca sĩ, hoặc dán link YouTube ở ô tìm kiếm phía trên.';
-  h.appendChild(p);
-  homeSection('Nghe gần đây',recents(),playQueue);
-  homeSection('Thịnh hành (Việt Nam)',trendItems,playQueue);
-  homeSection('Gợi ý',PRESETS,playQueue);
-}
-function openHome(){
-  renderHome(); $('home').classList.add('open');
-  loadTrend().then(items=>{ if(items&&items.length){ trendItems=items; if($('home').classList.contains('open')) renderHome(); } }).catch(()=>{});
-}
-function closeHome(){ $('home').classList.remove('open'); }
-function toggleHome(){ $('home').classList.contains('open')?closeHome():openHome(); }
-
-function initYT(){
-  if(ytInit) return; ytInit=true;
-  renderSide();
-  if(onFile){
-    $('yt-msg').dataset.keep='1';
-    showMsg(svg('warn')+' Đang mở file trực tiếp (file://) nên YouTube có thể báo lỗi 153. Hãy mở qua http/https (GitHub Pages, Netlify hoặc localhost).');
+  /* ---------- GPS trip ---------- */
+  let watchId = null, last = null, distKm = 0, tripStart = 0, tripTimer = null;
+  function hav(a, b){
+    const R = 6371, rad = x => x * Math.PI / 180;
+    const dLat = rad(b.latitude - a.latitude), dLon = rad(b.longitude - a.longitude);
+    const h = Math.sin(dLat/2)**2 + Math.cos(rad(a.latitude)) * Math.cos(rad(b.latitude)) * Math.sin(dLon/2)**2;
+    return 2 * R * Math.asin(Math.sqrt(h));
   }
-  openHome();   // mở thẳng Trang chủ khi vào trang YouTube lần đầu
-}
-(function edgeSwipe(){
-  const e=$('edge'); let sx=null;
-  e.addEventListener('touchstart',ev=>{sx=ev.touches[0].clientX},{passive:true});
-  e.addEventListener('touchend',ev=>{ if(sx!==null&&ev.changedTouches[0].clientX-sx>40) goPage(0); sx=null; },{passive:true});
-  e.addEventListener('click',()=>goPage(0));
+  function showTrip(){
+    $('#dist').textContent = distKm.toFixed(2);
+    const s = tripStart ? Math.floor((Date.now() - tripStart) / 1000) : 0;
+    const mm = String(Math.floor(s / 60)).padStart(2, '0'), ss = String(s % 60).padStart(2, '0');
+    $('#trip').textContent = mm + ':' + ss;
+  }
+  function onPos(p){
+    const c = p.coords;
+    const v = (c.speed != null && !isNaN(c.speed)) ? c.speed * 3.6 : null;
+    $('#spd').textContent = v == null ? '—' : Math.round(v);
+    if(last && c.accuracy < 50){
+      const d = hav(last, c);
+      if(d > 0.003) { distKm += d; last = c; }
+    } else if(!last && c.accuracy < 50){ last = c; }
+    showTrip();
+  }
+  $('#gpsToggle').onclick = () => {
+    if(watchId !== null){
+      navigator.geolocation.clearWatch(watchId); watchId = null; clearInterval(tripTimer);
+      $('#gpsToggle').textContent = 'Bật GPS'; $('#spd').textContent = '—'; return;
+    }
+    if(!navigator.geolocation){ alert('Thiết bị không hỗ trợ GPS.'); return; }
+    if(!tripStart) tripStart = Date.now();
+    watchId = navigator.geolocation.watchPosition(onPos,
+      () => { alert('Không lấy được vị trí. Hãy cho phép truy cập vị trí (cần HTTPS).'); },
+      { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 });
+    tripTimer = setInterval(showTrip, 1000);
+    $('#gpsToggle').textContent = 'Tắt GPS';
+  };
+  $('#gpsReset').onclick = () => { distKm = 0; last = null; tripStart = watchId !== null ? Date.now() : 0; showTrip(); };
+
+  /* ---------- TV: chỉ các kênh VTV1, VTV2, VTV3… (HLS) ---------- */
+  const TV_DEFAULT_SRC = 'https://iptv-org.github.io/iptv/countries/vn.m3u';
+  const tvVideo = $('#tvVideo');
+  let tvChannels = [], tvHls = null, tvGen = 0, tvTimer = null, tvCur = null;
+
+  function tvSay(t, err){ const n = $('#tvNotice'); n.textContent = t || ''; n.classList.toggle('error', !!err); }
+
+  // Đọc playlist M3U: dòng #EXTINF:-1 ...,Tên kênh rồi dòng URL ngay sau
+  function parseM3U(text){
+    const out = [], lines = String(text).split(/\r?\n/);
+    let cur = null;
+    for(const raw of lines){
+      const l = raw.trim();
+      if(!l) continue;
+      if(l.startsWith('#EXTINF')){
+        cur = { name: l.slice(l.lastIndexOf(',') + 1).trim() };
+      }else if(l[0] !== '#' && cur){
+        cur.url = l; out.push(cur); cur = null;
+      }
+    }
+    return out;
+  }
+
+  // Chỉ giữ tên bắt đầu bằng VTV + số (VTV1, VTV 2, VTV3 HD…); gộp các nguồn trùng thành 1 kênh
+  function vtvOnly(list){
+    const map = new Map();
+    list.forEach(c => {
+      const m = c.name.match(/^VTV\s*-?\s*(\d{1,2})(?!\d)(.*)$/i);
+      if(!m || !/^https?:\/\//i.test(c.url || '')) return;
+      const num = parseInt(m[1], 10);
+      let rest = m[2].replace(/[\(\[].*?[\)\]]/g, ' ').replace(/\b(F?HD|SD|4K)\b/ig, ' ').replace(/\s+/g, ' ').trim();
+      const name = 'VTV' + num + (rest ? ' ' + rest : '');
+      const key = name.toLowerCase();
+      if(!map.has(key)) map.set(key, { num: num, name: name, urls: [] });
+      const e = map.get(key);
+      if(!e.urls.includes(c.url)) e.urls.push(c.url);
+    });
+    return [...map.values()].sort((a, b) => a.num - b.num || a.name.localeCompare(b.name));
+  }
+
+  function renderTV(){
+    const box = $('#tvList'); box.innerHTML = '';
+    if(!tvChannels.length){
+      const d = document.createElement('div'); d.className = 'msg';
+      d.textContent = 'Chưa có kênh VTV nào. Bấm “Tải lại” hoặc đổi link playlist trong “Nguồn danh sách kênh”.';
+      box.appendChild(d); return;
+    }
+    tvChannels.forEach(c => {
+      const b = document.createElement('button');
+      b.className = 'card chan' + (tvCur && tvCur.name === c.name ? ' on' : '');
+      b.type = 'button';
+      const d = document.createElement('div');
+      d.textContent = c.name;
+      b.appendChild(d);
+      b.onclick = () => tvPlay(c, 0);
+      box.appendChild(b);
+    });
+  }
+
+  async function tvLoad(){
+    const src = store.get('tvSrc', TV_DEFAULT_SRC);
+    tvSay('Đang tải danh sách kênh VTV…');
+    try{
+      const r = await fetch(src, { cache: 'no-store' });
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      tvChannels = vtvOnly(parseM3U(await r.text()));
+      renderTV();
+      tvSay(tvChannels.length ? 'Chọn kênh để xem (' + tvChannels.length + ' kênh VTV).' : 'Playlist không có kênh VTV nào.', !tvChannels.length);
+    }catch(e){
+      tvChannels = []; renderTV();
+      tvSay('Không tải được playlist (' + (e.message || 'lỗi mạng') + '). Kiểm tra link trong “Nguồn danh sách kênh”.', true);
+    }
+  }
+
+  function tvStop(){
+    tvGen++; clearTimeout(tvTimer);
+    tvVideo.onerror = null;
+    if(tvHls){ tvHls.destroy(); tvHls = null; }
+    tvVideo.pause(); tvVideo.removeAttribute('src'); tvVideo.load();
+  }
+
+  function tvPlay(ch, i){
+    tvStop();
+    const token = tvGen, src = ch.urls[i];
+    tvCur = ch; store.set('tvLast', ch.name);
+    $('#tvNow').textContent = '▶ ' + ch.name;
+    renderTV();
+    tvSay('Đang mở ' + ch.name + '…');
+    const mixed = (location.protocol === 'https:' && /^http:/i.test(src)) ? ' Link http bị chặn khi trang chạy HTTPS.' : '';
+    const fail = msg => {
+      if(token !== tvGen) return;
+      if(i + 1 < ch.urls.length){ tvSay('Đổi nguồn cùng kênh…'); tvPlay(ch, i + 1); }
+      else tvSay(msg, true);
+    };
+    tvTimer = setTimeout(() => fail('Các nguồn chưa phản hồi. Thử kênh khác.' + mixed), 18000);
+    tvVideo.onerror = () => fail('Nguồn của kênh chưa phát được.' + mixed);
+    const start = () => {
+      if(token !== tvGen) return;
+      tvVideo.play().catch(e => {
+        if(token !== tvGen || e.name === 'AbortError') return;
+        tvSay(e.name === 'NotAllowedError' ? 'Chạm ▶ trên khung TV để phát.' : 'Không mở được kênh (có thể giới hạn vùng, hết hạn hoặc chặn CORS).', true);
+      });
+    };
+    if(tvVideo.canPlayType('application/vnd.apple.mpegurl')){
+      tvVideo.src = src; start();
+    }else if(window.Hls && Hls.isSupported()){
+      tvHls = new Hls({ maxBufferLength: 20, maxMaxBufferLength: 40 });
+      tvHls.on(Hls.Events.MANIFEST_PARSED, start);
+      tvHls.on(Hls.Events.ERROR, (_, data) => {
+        if(token !== tvGen || !data.fatal) return;
+        if(tvHls){ tvHls.destroy(); tvHls = null; }
+        fail('Không phát được nguồn của kênh này.' + mixed);
+      });
+      tvHls.loadSource(src); tvHls.attachMedia(tvVideo);
+    }else{
+      tvSay('Trình duyệt chưa hỗ trợ HLS. Thử Safari hoặc Chrome/Edge bản mới.', true);
+    }
+  }
+  tvVideo.addEventListener('playing', () => { clearTimeout(tvTimer); if(tvCur) tvSay('Đang phát · ' + tvCur.name); });
+  tvVideo.addEventListener('waiting', () => { if(tvCur && tvHls) tvSay('Đang tải thêm dữ liệu…'); });
+
+  function tvStep(d){
+    if(!tvChannels.length) return;
+    let i = tvCur ? tvChannels.findIndex(c => c.name === tvCur.name) : -1;
+    i = i < 0 ? 0 : (i + d + tvChannels.length) % tvChannels.length;
+    tvPlay(tvChannels[i], 0);
+  }
+  $('#tvPrev').onclick = () => tvStep(-1);
+  $('#tvNext').onclick = () => tvStep(1);
+  $('#tvReload').onclick = () => tvLoad();
+  $('#tvSrc').value = store.get('tvSrc', TV_DEFAULT_SRC);
+  $('#tvSaveSrc').onclick = () => { store.set('tvSrc', $('#tvSrc').value.trim() || TV_DEFAULT_SRC); tvLoad(); };
+
+  /* ---------- Tab YouTube / TV ---------- */
+  function showTab(tv){
+    $('#ytView').hidden = tv; $('#tvView').hidden = !tv;
+    $('#tabYT').classList.toggle('on', !tv); $('#tabTV').classList.toggle('on', tv);
+    store.set('tab', tv ? 'tv' : 'yt');
+    if(tv){
+      tube.close(); $('#ph').style.display = ''; setNow('');
+      if(!tvChannels.length) tvLoad();
+    }else{
+      tvStop(); tvCur = null; $('#tvNow').textContent = '';
+    }
+  }
+  $('#tabYT').onclick = () => showTab(false);
+  $('#tabTV').onclick = () => showTab(true);
+
+  /* ---------- Init ---------- */
+  const r0 = getRecent();
+  if(store.get('tab','yt') === 'tv') showTab(true);
+  if(r0.length) render(r0); else msg('Dán link YouTube vào ô tìm kiếm, hoặc bấm ⚙ nhập API key để tìm kiếm và duyệt danh mục.');
 })();
 </script>
 </body>
