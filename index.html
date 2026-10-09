@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Car Dashboard OS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Lunar Calendar JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.6.12/lunar.min.js"></script>
     
     <style>
@@ -66,16 +65,6 @@
             right: 20px;
             z-index: 50;
         }
-
-        /* Đảm bảo iframe do Youtube API tạo ra sẽ lấp đầy khung */
-        #yt-player-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
     </style>
 </head>
 <body class="dark-mode h-screen w-screen overflow-hidden p-4 box-border relative">
@@ -119,7 +108,7 @@
             <div id="ev-timer-card" class="card rounded-3xl p-6 flex flex-col h-1/2 relative">
                 <div class="flex justify-between items-center mb-2">
                     <div class="text-xs font-bold text-slate-400 uppercase"><i class="fas fa-charging-station mr-2 text-emerald-400"></i> EV Timer</div>
-                    <div class="text-[10px] bg-slate-700 text-slate-300 px-2 py-1 rounded font-bold" id="timer-status">READY</div>
+                    <div class="text-[10px] bg-slate-700 text-slate-300 px-2 py-1 rounded font-bold transition-colors" id="timer-status">READY</div>
                 </div>
                 
                 <div class="flex-grow flex items-center justify-center relative my-2">
@@ -136,9 +125,10 @@
                     <button class="bg-slate-700 hover:bg-slate-600 rounded-lg py-2 text-xs font-bold transition-colors" onclick="addTime(15)">+15m</button>
                     <button class="bg-slate-700 hover:bg-slate-600 rounded-lg py-2 text-xs font-bold transition-colors" onclick="addTime(30)">+30m</button>
                     <button class="bg-slate-700 hover:bg-slate-600 rounded-lg py-2 text-xs font-bold transition-colors" onclick="addTime(60)">+1h</button>
-                    <button class="bg-red-900/50 hover:bg-red-800 text-red-300 rounded-lg py-2 text-xs font-bold transition-colors" onclick="resetTimer()">Reset</button>
+                    <button class="bg-slate-800 hover:bg-red-800 text-red-400 rounded-lg py-2 text-xs font-bold transition-colors border border-red-900/50" onclick="resetTimer()">Reset</button>
                 </div>
-                <button id="start-timer-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 font-bold transition-colors shadow-lg shadow-blue-500/20" onclick="toggleTimer()">
+                <!-- Action Button handled by JS -->
+                <button id="start-timer-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 font-bold transition-all shadow-lg shadow-blue-500/20" onclick="toggleTimer()">
                     <i class="fas fa-play mr-2"></i> START CHARGING
                 </button>
             </div>
@@ -177,37 +167,44 @@
             </div>
         </div>
 
-        <!-- COLUMN 3: YouTube API & Controls -->
-        <div id="col-media" class="flex flex-col gap-4 h-full">
+        <!-- COLUMN 3: YouTube & Controls -->
+        <div id="col-media" class="flex flex-col gap-3 h-full">
             <div id="youtube-card" class="card rounded-3xl flex flex-col overflow-hidden flex-grow relative">
-                <!-- Thanh tìm kiếm YouTube API -->
+                <!-- Thanh tìm kiếm YouTube -->
                 <div id="media-header" class="p-3 bg-slate-800 flex items-center justify-between gap-3 z-10 pr-16">
                     <div class="hidden sm:flex items-center gap-2 text-xs font-bold text-slate-400 uppercase">
                         <i class="fab fa-youtube text-red-500 text-lg"></i> Media
                     </div>
                     <div class="flex flex-1 items-center bg-slate-900 rounded-full px-4 py-2 border border-slate-700 focus-within:border-blue-500 transition-colors">
-                        <input type="text" id="yt-search-input" placeholder="Tìm bài hát, ca sĩ..." class="bg-transparent border-none outline-none text-sm text-white w-full" onkeypress="if(event.key === 'Enter') searchYoutubeAPI()">
-                        <button onclick="searchYoutubeAPI()" class="text-slate-400 hover:text-white cursor-pointer ml-2">
+                        <input type="text" id="yt-search-input" placeholder="Tìm bài hát (ví dụ: lofi chill)..." class="bg-transparent border-none outline-none text-sm text-white w-full" onkeypress="if(event.key === 'Enter') searchYoutube()">
+                        <button onclick="searchYoutube()" class="text-slate-400 hover:text-white cursor-pointer ml-2">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
                 </div>
                 
-                <div class="flex-grow w-full relative bg-black" id="yt-player-container">
-                    <!-- YouTube IFrame API sẽ inject player vào div này (Thay thế thẻ div thành iframe) -->
-                    <div id="youtube-api-player"></div>
+                <div class="flex-grow w-full relative bg-black">
+                    <!-- Standard Iframe -->
+                    <iframe 
+                        id="yt-player" 
+                        class="absolute top-0 left-0 w-full h-full border-0" 
+                        src="https://www.youtube.com/embed/5qap5aO4i9A?autoplay=1&mute=1&controls=1" 
+                        title="YouTube video player" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
                 </div>
             </div>
 
-            <!-- Controls -->
-            <div id="controls-card" class="card rounded-3xl p-4 flex gap-3 h-28">
-                <button onclick="toggleTheme()" class="flex-1 bg-slate-700/50 hover:bg-slate-600 rounded-2xl flex flex-col items-center justify-center transition-colors border border-slate-600/50">
-                    <i class="fas fa-adjust text-xl mb-1 text-yellow-400"></i>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Theme</span>
+            <!-- Compact Controls -->
+            <div id="controls-card" class="card rounded-2xl p-2 flex gap-2 h-12 shrink-0">
+                <button onclick="toggleTheme()" class="flex-1 bg-slate-700/50 hover:bg-slate-600 rounded-xl flex flex-row items-center justify-center transition-colors border border-slate-600/50 gap-2">
+                    <i class="fas fa-adjust text-sm text-yellow-400"></i>
+                    <span class="text-[9px] font-bold uppercase tracking-wider text-slate-300">Theme</span>
                 </button>
-                <button onclick="toggleTheaterMode()" class="flex-1 bg-slate-700/50 hover:bg-blue-600/50 hover:border-blue-500/50 rounded-2xl flex flex-col items-center justify-center transition-colors border border-slate-600/50">
-                    <i class="fas fa-expand text-xl mb-1 text-blue-400"></i>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Expand</span>
+                <button onclick="toggleTheaterMode()" class="flex-1 bg-slate-700/50 hover:bg-blue-600/50 hover:border-blue-500/50 rounded-xl flex flex-row items-center justify-center transition-colors border border-slate-600/50 gap-2">
+                    <i class="fas fa-expand text-sm text-blue-400"></i>
+                    <span class="text-[9px] font-bold uppercase tracking-wider text-slate-300">Expand</span>
                 </button>
             </div>
         </div>
@@ -215,61 +212,14 @@
     </div>
 
     <script>
-        // ==========================================
-        // YOUTUBE IFRAME PLAYER API TÍCH HỢP
-        // ==========================================
-        
-        // 1. Tải script IFrame Player API bất đồng bộ
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        var ytPlayer;
-        
-        // 2. Hàm callback mặc định khi API tải xong
-        function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('youtube-api-player', {
-                height: '100%',
-                width: '100%',
-                playerVars: {
-                    'autoplay': 1,       // Tự động phát
-                    'mute': 1,           // Tắt tiếng ban đầu để trình duyệt cho phép autoplay
-                    'controls': 1,       // Hiện thanh điều khiển
-                    'listType': 'search',// Sử dụng tính năng danh sách phát dạng tìm kiếm
-                    'list': 'lofi chill mix driving' // Từ khóa phát mặc định khi mở app
-                },
-                events: {
-                    'onReady': onPlayerReady
-                }
-            });
-        }
-
-        // 3. Khi player sẵn sàng
-        function onPlayerReady(event) {
-            // Đảm bảo video đang chạy
-            event.target.playVideo();
-        }
-
-        // 4. Hàm tìm kiếm và phát Playlist mới bằng API
-        function searchYoutubeAPI() {
+        // --- YouTube Search Logic ---
+        function searchYoutube() {
             const query = document.getElementById('yt-search-input').value;
-            if (!query || !ytPlayer) return;
-            
-            // Yêu cầu API tải danh sách phát theo từ khóa mới, bắt đầu từ video đầu tiên (index 0)
-            ytPlayer.loadPlaylist({
-                listType: 'search',
-                list: query,
-                index: 0,
-                startSeconds: 0
-            });
+            if (!query) return;
+            const iframe = document.getElementById('yt-player');
+            iframe.src = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(query) + '&autoplay=1';
         }
 
-
-        // ==========================================
-        // CÁC TÍNH NĂNG DASHBOARD KHÁC
-        // ==========================================
-        
         // --- Clock & Date Logic ---
         function updateClock() {
             const now = new Date();
@@ -296,6 +246,75 @@
                 document.body.classList.replace('light-mode', 'dark-mode');
             }
         }
+
+        // --- Web Audio API Beep System ---
+        let audioCtx = null;
+        let alarmInterval = null;
+
+        function playBeep() {
+            // Khởi tạo AudioContext nếu chưa có (cần tương tác người dùng trước đó)
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.type = 'sine'; // Âm thanh Beep điện tử
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime); // Tần số 800Hz
+            
+            gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+            osc.start();
+            
+            // Tắt âm dần trong 0.5s
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+            osc.stop(audioCtx.currentTime + 0.5);
+        }
+
+        function triggerAlarm() {
+            // Phát tiếng bíp ngay lập tức, sau đó lặp lại mỗi giây
+            playBeep();
+            alarmInterval = setInterval(playBeep, 1000);
+
+            // Cập nhật giao diện nút
+            const btn = document.getElementById('start-timer-btn');
+            btn.innerHTML = '<i class="fas fa-bell"></i> STOP ALARM';
+            btn.className = "w-full bg-red-600 hover:bg-red-500 text-white rounded-xl py-3 font-bold transition-all shadow-lg shadow-red-500/20 animate-bounce";
+            btn.onclick = stopAlarm; // Thay đổi sự kiện onclick
+            
+            // Đổi màu vòng đếm sang đỏ
+            document.getElementById('timer-ring').classList.replace('text-blue-500', 'text-red-500');
+            document.getElementById('countdown-display').classList.add('text-red-500');
+            
+            const status = document.getElementById('timer-status');
+            status.innerText = "COMPLETE!";
+            status.className = "text-[10px] bg-red-600/30 text-red-500 px-2 py-1 rounded font-bold animate-pulse";
+        }
+
+        function stopAlarm() {
+            if (alarmInterval) {
+                clearInterval(alarmInterval);
+                alarmInterval = null;
+            }
+            
+            // Trả lại màu sắc
+            document.getElementById('timer-ring').classList.replace('text-red-500', 'text-blue-500');
+            document.getElementById('countdown-display').classList.remove('text-red-500');
+
+            // Reset toàn bộ
+            resetTimer();
+            
+            // Phục hồi nút bấm
+            const btn = document.getElementById('start-timer-btn');
+            btn.className = "w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 font-bold transition-all shadow-lg shadow-blue-500/20";
+            btn.innerHTML = '<i class="fas fa-play mr-2"></i> START CHARGING';
+            btn.onclick = toggleTimer;
+        }
+
 
         // --- EV Timer Logic ---
         let timerSeconds = 0;
@@ -325,16 +344,23 @@
         }
 
         function resetTimer() {
-            clearInterval(timerInterval);
+            if(timerInterval) clearInterval(timerInterval);
+            if(alarmInterval) clearInterval(alarmInterval);
+            
             timerInterval = null;
             timerSeconds = 0;
             updateTimerDisplay();
+            
             document.getElementById('timer-status').innerText = "READY";
-            document.getElementById('timer-status').className = "text-[10px] bg-slate-700 text-slate-300 px-2 py-1 rounded font-bold";
+            document.getElementById('timer-status').className = "text-[10px] bg-slate-700 text-slate-300 px-2 py-1 rounded font-bold transition-colors";
+            
             const btn = document.getElementById('start-timer-btn');
             btn.innerHTML = '<i class="fas fa-play mr-2"></i> START CHARGING';
-            btn.classList.replace('bg-orange-500', 'bg-blue-600');
-            btn.classList.replace('hover:bg-orange-600', 'hover:bg-blue-500');
+            btn.className = "w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 font-bold transition-all shadow-lg shadow-blue-500/20";
+            btn.onclick = toggleTimer;
+            
+            document.getElementById('timer-ring').classList.replace('text-red-500', 'text-blue-500');
+            document.getElementById('countdown-display').classList.remove('text-red-500');
         }
 
         function toggleTimer() {
@@ -342,19 +368,22 @@
             const status = document.getElementById('timer-status');
             
             if (timerInterval) {
+                // Pause
                 clearInterval(timerInterval);
                 timerInterval = null;
                 btn.innerHTML = '<i class="fas fa-play mr-2"></i> RESUME CHARGING';
-                btn.classList.replace('bg-orange-500', 'bg-blue-600');
-                btn.classList.replace('hover:bg-orange-600', 'hover:bg-blue-500');
+                btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white rounded-xl py-3 font-bold transition-all shadow-lg shadow-orange-500/20";
                 status.innerText = "PAUSED";
                 status.className = "text-[10px] bg-yellow-600/30 text-yellow-400 px-2 py-1 rounded font-bold";
             } else {
+                // Start
                 if (timerSeconds <= 0) return; 
                 
+                // Khởi tạo AudioContext từ tương tác người dùng
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
                 btn.innerHTML = '<i class="fas fa-pause mr-2"></i> PAUSE CHARGING';
-                btn.classList.replace('bg-blue-600', 'bg-orange-500');
-                btn.classList.replace('hover:bg-blue-500', 'hover:bg-orange-600');
+                btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white rounded-xl py-3 font-bold transition-all shadow-lg shadow-orange-500/20";
                 status.innerText = "CHARGING...";
                 status.className = "text-[10px] bg-blue-600/30 text-blue-400 px-2 py-1 rounded font-bold animate-pulse";
                 
@@ -362,9 +391,11 @@
                     if (timerSeconds > 0) {
                         timerSeconds--;
                         updateTimerDisplay();
-                    } else {
-                        resetTimer();
-                        alert("EV Charging Complete!");
+                    }
+                    if (timerSeconds <= 0) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                        triggerAlarm();
                     }
                 }, 1000);
             }
