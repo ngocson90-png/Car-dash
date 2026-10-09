@@ -6,13 +6,13 @@
   /* timer */  #timer-card .head{display:flex;justify-content:space-between;align-items:center}  #t-status{font-size:2vmin;font-weight:800;background:var(--card2);color:var(--muted);padding:.6vmin 1.6vmin;border-radius:1vmin}  .ring-wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative;margin:.6vmin 0}  .ring-wrap svg{height:100%;max-height:24vmin;aspect-ratio:1;transform:rotate(-90deg)}  #ring{transition:stroke-dashoffset 1s linear}  #cd{position:absolute;font-size:5.6vmin;font-weight:800;font-variant-numeric:tabular-nums}  .tbtns{display:grid;grid-template-columns:repeat(4,1fr);gap:1vmin;margin-bottom:1vmin}  .tbtns button{background:var(--card2);border:1px solid var(--border);border-radius:1.6vmin;padding:1.4vmin 0;font-size:2.4vmin;font-weight:800}  .tbtns button:active{transform:scale(.95)}  .tbtns .rst{color:var(--red)}  #t-main{background:var(--btn);color:#fff;border-radius:2vmin;padding:1.9vmin;font-size:2.7vmin;font-weight:800;display:flex;align-items:center;justify-content:center;gap:1.2vmin}  #t-main:active{transform:scale(.98)}
   /* calendar */  #cal-card{padding:2vmin}  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1vmin}  .cal-head button{width:5.6vmin;height:5.6vmin;border-radius:1.4vmin;background:var(--card2);border:1px solid var(--border);font-size:2.6vmin;display:flex;align-items:center;justify-content:center}  #cal-title{font-size:2.9vmin;font-weight:800;text-align:center;line-height:1.15}  #cal-title small{display:block;font-size:1.9vmin;color:var(--yellow);font-weight:700}  .dow,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:.6vmin;text-align:center}  .dow div{font-size:2vmin;font-weight:800;color:var(--muted);padding:.4vmin 0}  .dow div:first-child{color:var(--red)}  .days{flex:1;min-height:0;grid-auto-rows:1fr}  .day{border-radius:1.2vmin;background:var(--card2);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;min-height:0}  .day b{font-size:2.9vmin;font-weight:800}  .day span{font-size:1.9vmin;font-weight:600;color:var(--muted)}  .day.sun b{color:var(--red)}  .day.first span{color:var(--yellow);font-weight:800}  .day.empty{background:transparent}  .day.today{background:var(--btn);color:#fff}  .day.today b,.day.today span{color:#fff}
   /* buttons inside clock card */  .fab{position:absolute;z-index:20;width:7vmin;height:7vmin;border-radius:50%;background:var(--card2);border:1px solid var(--border);    display:flex;align-items:center;justify-content:center;font-size:3.4vmin}  .fab:active{transform:scale(.92)}  #theme-btn{top:2vmin;right:2vmin;color:var(--yellow)}  #next-btn{bottom:2vmin;right:2vmin;color:var(--yt)}  #dots{position:absolute;bottom:.5vmin;left:50%;transform:translateX(-50%);display:flex;gap:1vmin;z-index:25}  #dots i{width:1.2vmin;height:1.2vmin;border-radius:50%;background:var(--muted);opacity:.5;transition:.3s}  #dots i.on{background:var(--accent);opacity:1;width:3vmin;border-radius:1vmin}
-  /* ---------- PAGE 2 YOUTUBE ---------- */  #page2{display:flex;flex-direction:column;gap:1.4vmin}  .yt-bar{display:flex;gap:1.2vmin;align-items:center;flex-shrink:0}  .yt-bar .back{width:7vmin;height:7vmin;border-radius:2vmin;background:var(--card);border:1px solid var(--border);font-size:3.2vmin;flex-shrink:0;display:flex;align-items:center;justify-content:center}  .yt-input{flex:1;display:flex;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:5vmin;padding:0 2.4vmin;height:7vmin}  .yt-input:focus-within{border-color:var(--accent)}  .yt-input input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:2.8vmin;min-width:0;user-select:text}  .yt-input button{background:none;font-size:3.2vmin;color:var(--muted);padding:0 1vmin;display:flex}  #yt-body{flex:1;min-height:0;display:flex;gap:1.4vmin}  #yt-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:1vmin}  #player-box{flex:1;min-height:0;background:#000;border-radius:2.4vmin;overflow:hidden;position:relative;border:1px solid var(--border)}  #player-box iframe{position:absolute;inset:0;width:100%;height:100%;border:0}  #yt-msg{font-size:2vmin;color:var(--yellow);display:none;line-height:1.35;padding:1vmin 1.5vmin;background:rgba(0,0,0,0.3);border-radius:1.2vmin;margin-bottom:0.5vmin}  #yt-msg.error{color:var(--red)}  #play-fab{position:absolute;bottom:20px;right:20px;z-index:10;background:var(--btn);color:#fff;border-radius:50%;width:12vmin;height:12vmin;display:flex;align-items:center;justify-content:center;font-size:5vmin;box-shadow:0 4px 12px rgba(0,0,0,0.5)}  #yt-side{width:34%;max-width:420px;overflow-y:auto;display:flex;flex-direction:column;gap:1vmin;touch-action:pan-y}  .res{display:flex;gap:1vmin;background:var(--card);border:1px solid var(--border);border-radius:1.8vmin;padding:.9vmin;cursor:pointer;align-items:center}  .res:active{transform:scale(.98)}  .res img{width:36%;border-radius:1.2vmin;flex-shrink:0;aspect-ratio:16/9;object-fit:cover;background:#000}  .res div{font-size:2vmin;font-weight:700;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}  .res.preset{padding:1.6vmin 1.8vmin;font-size:2.3vmin;font-weight:700;gap:1.2vmin}  .res.preset .ic{color:var(--yt);font-size:3.4vmin}  .side-title{font-size:2vmin;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.1em;padding:.4vmin .6vmin}  .res.cur{outline:2px solid var(--yellow)}  /* trang chủ YouTube */  #home{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;gap:1.2vmin;padding:1.8vmin;background:var(--bg);overflow:auto;text-align:left;touch-action:pan-y}  #home.open{display:flex}  #home h4{margin:1vmin 0 0;font-size:2vmin;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:800}  #home .hint{font-size:2.1vmin;color:var(--muted);line-height:1.5}  #homeTop{display:flex;gap:1vmin;align-items:center;justify-content:space-between;font-size:3vmin;font-weight:800;flex-wrap:wrap}  #home button{background:var(--card);border:1px solid var(--border);border-radius:1.6vmin;padding:1.2vmin 2vmin;font-size:2.2vmin;font-weight:700}  .chips{display:flex;gap:1vmin;flex-wrap:wrap}  .chips button{flex:1 1 18vmin;padding:1.8vmin 2vmin!important;font-size:2.5vmin!important}  #home .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(24vmin,1fr));gap:1.2vmin}  .tile{cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:1.6vmin;overflow:hidden;font-size:2vmin;line-height:1.3;color:var(--text)}  .tile:active{transform:scale(.98)}  .tile img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#222}  .tile div{padding:.8vmin 1vmin;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}  #edge{position:absolute;left:0;top:10vmin;bottom:0;width:4.5vmin;z-index:15;    background:linear-gradient(90deg,rgba(59,130,246,.35),transparent);border-radius:0 2vmin 2vmin 0;touch-action:none}
+  /* ---------- PAGE 2 YOUTUBE ---------- */  #page2{display:flex;flex-direction:column;gap:1.4vmin}  .yt-bar{display:flex;gap:1.2vmin;align-items:center;flex-shrink:0}  .yt-bar .back{width:7vmin;height:7vmin;border-radius:2vmin;background:var(--card);border:1px solid var(--border);font-size:3.2vmin;flex-shrink:0;display:flex;align-items:center;justify-content:center}  .yt-input{flex:1;display:flex;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:5vmin;padding:0 2.4vmin;height:7vmin}  .yt-input:focus-within{border-color:var(--accent)}  .yt-input input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:2.8vmin;min-width:0;user-select:text}  .yt-input button{background:none;font-size:3.2vmin;color:var(--muted);padding:0 1vmin;display:flex}  #yt-body{flex:1;min-height:0;display:flex;gap:1.4vmin}  #yt-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:1vmin}  #player-box{flex:1;min-height:0;background:#000;border-radius:2.4vmin;overflow:hidden;position:relative;border:1px solid var(--border)}  #player-box iframe, #player-box > div{position:absolute;inset:0;width:100%;height:100%;border:0}  #yt-msg{position:absolute;top:10px;left:10px;right:10px;z-index:12;font-size:2.2vmin;color:var(--yellow);background:rgba(0,0,0,0.75);padding:1vmin 1.5vmin;border-radius:1vmin;display:none;line-height:1.35;backdrop-filter:blur(4px)}  #yt-msg.error{color:var(--red)}  #play-fab{position:absolute;bottom:20px;right:20px;z-index:15;background:var(--btn);color:#fff;border-radius:50%;width:12vmin;height:12vmin;display:flex;align-items:center;justify-content:center;font-size:5vmin;box-shadow:0 4px 12px rgba(0,0,0,0.5)}  #yt-side{width:34%;max-width:420px;overflow-y:auto;display:flex;flex-direction:column;gap:1vmin;touch-action:pan-y}  .res{display:flex;gap:1vmin;background:var(--card);border:1px solid var(--border);border-radius:1.8vmin;padding:.9vmin;cursor:pointer;align-items:center}  .res:active{transform:scale(.98)}  .res img{width:36%;border-radius:1.2vmin;flex-shrink:0;aspect-ratio:16/9;object-fit:cover;background:#000}  .res div{font-size:2vmin;font-weight:700;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}  .res.preset{padding:1.6vmin 1.8vmin;font-size:2.3vmin;font-weight:700;gap:1.2vmin}  .res.preset .ic{color:var(--yt);font-size:3.4vmin}  .side-title{font-size:2vmin;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.1em;padding:.4vmin .6vmin}  .res.cur{outline:2px solid var(--yellow)}  /* trang chủ YouTube */  #home{position:absolute;inset:0;z-index:20;display:none;flex-direction:column;gap:1.2vmin;padding:1.8vmin;background:var(--bg);overflow:auto;text-align:left;touch-action:pan-y}  #home.open{display:flex}  #home h4{margin:1vmin 0 0;font-size:2vmin;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:800}  #home .hint{font-size:2.1vmin;color:var(--muted);line-height:1.5}  #homeTop{display:flex;gap:1vmin;align-items:center;justify-content:space-between;font-size:3vmin;font-weight:800;flex-wrap:wrap}  #home button{background:var(--card);border:1px solid var(--border);border-radius:1.6vmin;padding:1.2vmin 2vmin;font-size:2.2vmin;font-weight:700}  .chips{display:flex;gap:1vmin;flex-wrap:wrap}  .chips button{flex:1 1 18vmin;padding:1.8vmin 2vmin!important;font-size:2.5vmin!important}  #home .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(24vmin,1fr));gap:1.2vmin}  .tile{cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:1.6vmin;overflow:hidden;font-size:2vmin;line-height:1.3;color:var(--text)}  .tile:active{transform:scale(.98)}  .tile img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#222}  .tile div{padding:.8vmin 1vmin;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}  #edge{position:absolute;left:0;top:10vmin;bottom:0;width:4.5vmin;z-index:15;    background:linear-gradient(90deg,rgba(59,130,246,.35),transparent);border-radius:0 2vmin 2vmin 0;touch-action:none}
   @media (max-aspect-ratio:1/1){    #grid{grid-template-columns:1fr;grid-template-rows:repeat(4,1fr)}    #yt-body{flex-direction:column}#yt-side{width:100%;max-width:none;flex-direction:row;overflow-x:auto;overflow-y:hidden;height:20vmin;flex:0 0 auto}    .res{min-width:48vw}  }</style></head><body>
 <div id="pages">  <!-- ================= PAGE 1 ================= -->  <section class="page" id="page1">    <div id="grid">      <div class="card" id="clock-card">        <button class="fab" id="theme-btn" onclick="toggleTheme()" title="Đổi giao diện"><i data-ic="theme"></i></button>        <button class="fab" id="next-btn" onclick="goPage(1)" title="YouTube"><i data-ic="youtube"></i></button>        <div id="time">00<span class="sep">:</span>00</div>        <div id="date">...</div>        <div id="lunar-today"></div>      </div>
       <div class="card" id="weather-card">        <div class="label"><i data-ic="partly"></i> Thời tiết</div>        <div class="now"><div id="w-icon"></div><div id="w-temp">--<span>°C</span></div></div>        <div id="w-desc">Đang lấy vị trí...</div>        <div id="w-loc"><i data-ic="pin"></i> <span id="w-loc-name">...</span></div>        <div id="w-extra"></div>        <div id="forecast"></div>      </div>
       <div class="card" id="timer-card">        <div class="head">          <div class="label"><i data-ic="bell"></i> Báo thức / Hẹn giờ</div>          <div id="t-status">SẴN SÀNG</div>        </div>        <div class="ring-wrap">          <svg viewBox="0 0 160 160">            <circle cx="80" cy="80" r="70" stroke="var(--card2)" stroke-width="10" fill="none"/>            <circle id="ring" cx="80" cy="80" r="70" stroke="var(--accent)" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="440"/>          </svg>          <div id="cd">00:00:00</div>        </div>        <div class="tbtns">          <button onclick="addTime(15)">+15p</button>          <button onclick="addTime(30)">+30p</button>          <button onclick="addTime(60)">+1g</button>          <button class="rst" onclick="resetTimer()">Xóa</button>        </div>        <button id="t-main" onclick="mainBtn()"></button>      </div>
       <div class="card" id="cal-card">        <div class="cal-head">          <button onclick="shiftMonth(-1)"><i data-ic="left"></i></button>          <div id="cal-title" onclick="goToday()"></div>          <button onclick="shiftMonth(1)"><i data-ic="right"></i></button>        </div>        <div class="dow"><div>CN</div><div>T2</div><div>T3</div><div>T4</div><div>T5</div><div>T6</div><div>T7</div></div>        <div class="days" id="days"></div>      </div>    </div>  </section>
-  <!-- ================= PAGE 2 ================= -->  <section class="page" id="page2">    <div class="yt-bar">      <button class="back" onclick="goPage(0)" title="Quay lại"><i data-ic="left"></i></button>      <button class="back" onclick="toggleHome()" title="Trang chủ YouTube"><i data-ic="home"></i></button>      <div class="yt-input">        <input id="q" type="text" placeholder="Tìm bài hát hoặc dán link YouTube..." onkeydown="if(event.key==='Enter')doSearch()">        <button onclick="doSearch()"><i data-ic="search"></i></button>      </div>    </div>    <div id="yt-body">      <div id="yt-main">        <div id="yt-msg"></div>        <div id="player-box">          <div id="yt"></div>          <button id="play-fab" hidden><i data-ic="play"></i></button>          <div id="home"></div>        </div>      </div>      <div id="yt-side"></div>    </div>    <div id="edge"></div>  </section></div>
+  <!-- ================= PAGE 2 ================= -->  <section class="page" id="page2">    <div class="yt-bar">      <button class="back" onclick="goPage(0)" title="Quay lại"><i data-ic="left"></i></button>      <button class="back" onclick="toggleHome()" title="Trang chủ YouTube"><i data-ic="home"></i></button>      <div class="yt-input">        <input id="q" type="text" placeholder="Tìm bài hát hoặc dán link YouTube..." onkeydown="if(event.key==='Enter')doSearch()">        <button onclick="doSearch()"><i data-ic="search"></i></button>      </div>    </div>    <div id="yt-body">      <div id="yt-main">        <div id="player-box">          <div id="yt-msg"></div>          <button id="play-fab" hidden><i data-ic="play"></i></button>          <div id="home"></div>        </div>      </div>      <div id="yt-side"></div>    </div>    <div id="edge"></div>  </section></div>
 <div id="dots"><i class="on"></i><i></i></div>
 <script>/* ================= Icons (SVG nội bộ, không cần mạng) ================= */const ICONS={  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',  cloud:'<path d="M7 19a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5 4.8 4.8 0 0 1 17.5 19z"/>',  partly:'<path d="M12 2v1.5M4.6 4.6l1 1M2 10h1.5M19.4 4.6l-1 1"/><circle cx="12" cy="9" r="3"/><path d="M7.5 20a3.5 3.5 0 0 1-.3-7A4.7 4.7 0 0 1 16.4 13 3.5 3.5 0 0 1 16 20z"/>',  rain:'<path d="M7 14a4 4 0 0 1-.5-7.97A6 6 0 0 1 18 5.5 4.5 4.5 0 0 1 17.5 14z"/><path d="M8 17l-1 4M12 17l-1 4M16 17l-1 4"/>',  bolt:'<path d="M7 13a4 4 0 0 1-.5-7.97A6 6 0 0 1 18 4.5 4.5 4.5 0 0 1 17.5 13z"/><path d="M12.5 11l-2.5 5h4l-2.5 5"/>',  fog:'<path d="M4 8h16M6 12h12M4 16h16M7 20h10"/>',  snow:'<path d="M12 3v18M4.5 7.5l15 9M4.5 16.5l15-9"/>',  drop:'<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',  wind:'<path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8"/>',  pin:'<path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>',  bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/>',  play:'<path d="M7 4l13 8-13 8z" fill="currentColor"/>',  pause:'<path d="M7 4h4v16H7zM13 4h4v16h-4z" fill="currentColor"/>',  left:'<path d="M15 5l-7 7 7 7"/>',  right:'<path d="M9 5l7 7-7 7"/>',  search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',  youtube:'<rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z" fill="currentColor"/>',  theme:'<circle cx="12" cy="12" r="9"/><path d="M12 3v18a9 9 0 0 0 0-18z" fill="currentColor"/>',  warn:'<path d="M12 3l10 18H2zM12 10v5M12 18v.5"/>',  home:'<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>'};const svg=(n)=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]||''}</svg>`;function hydrateIcons(root=document){ root.querySelectorAll('i[data-ic]').forEach(el=>{ el.outerHTML=svg(el.dataset.ic); }); }hydrateIcons();
 const $ = id => document.getElementById(id);const store = {  get(k,d){ try{ const v=localStorage.getItem(k); return v===null?d:v }catch(e){ return d } },  set(k,v){ try{ localStorage.setItem(k,v) }catch(e){} }};
@@ -25,7 +25,7 @@ const $ = id => document.getElementById(id);const store = {  get(k,d){ try{ cons
 /* ================= Báo thức / Hẹn giờ ================= */let tSec=0,tTotal=0,tInt=null,alarmInt=null,audioCtx=null;const FULL=440;const fmt=s=>[Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(v=>String(v).padStart(2,'0')).join(':');function ensureAudio(){  if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();  if(audioCtx.state==='suspended') audioCtx.resume();}function beep(){  ensureAudio();  const o=audioCtx.createOscillator(), g=audioCtx.createGain();  o.connect(g); g.connect(audioCtx.destination);  o.type='sine'; o.frequency.value=880;  g.gain.setValueAtTime(1,audioCtx.currentTime);  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.5);  o.start(); o.stop(audioCtx.currentTime+0.5);}function setBtn(icon,text,bg){ const b=$('t-main'); b.innerHTML=svg(icon)+'<span>'+text+'</span>'; b.style.background=bg; }function setStatus(txt,color){ const s=$('t-status'); s.textContent=txt; s.style.color=color||''; }function drawTimer(){  $('cd').textContent=fmt(tSec);$('ring').style.strokeDashoffset=FULL-(tTotal>0?tSec/tTotal:0)*FULL;}function addTime(min){  if(alarmInt) return;  tSec+=min*60; tTotal=tInt?Math.max(tTotal,tSec):tSec;  drawTimer(); if(!tInt) setStatus('ĐÃ ĐẶT');}function resetTimer(){  clearInterval(tInt); clearInterval(alarmInt); tInt=alarmInt=null; tSec=tTotal=0; drawTimer();  $('ring').style.stroke='var(--accent)';$('cd').style.color='';  setStatus('SẴN SÀNG'); setBtn('play','BẮT ĐẦU','var(--btn)');}function mainBtn(){  ensureAudio();  if(alarmInt){ resetTimer(); return; }  if(tInt){ clearInterval(tInt); tInt=null; setBtn('play','TIẾP TỤC','var(--warn)'); setStatus('TẠM DỪNG','var(--yellow)'); return; }  if(tSec<=0) return;  setBtn('pause','TẠM DỪNG','var(--warn)'); setStatus('ĐANG CHẠY','var(--accent)');  tInt=setInterval(()=>{ tSec--; drawTimer(); if(tSec<=0){ clearInterval(tInt); tInt=null; fire(); } },1000);}function fire(){  beep(); alarmInt=setInterval(beep,1000);  $('ring').style.stroke='var(--red)';$('cd').style.color='var(--red)';  setStatus('HẾT GIỜ!','var(--red)'); setBtn('bell','TẮT BÁO THỨC','#dc2626');}setBtn('play','BẮT ĐẦU','var(--btn)');
 
 
-/* ================= YouTube Integration (Official IFrame API) ================= */
+/* ================= Official YouTube IFrame API (CarTubePlayer) ================= */
 (() => {
   'use strict';
   let apiPromise;
@@ -57,7 +57,7 @@ const $ = id => document.getElementById(id);const store = {  get(k,d){ try{ cons
     100: 'Video không tồn tại, đã bị xóa hoặc chuyển sang riêng tư.',
     101: 'Chủ sở hữu không cho phép nhúng video này. Không thể phát video tại đây. Hãy mở YouTube gốc.',
     150: 'Chủ sở hữu không cho phép nhúng video này. Không thể phát video tại đây. Hãy mở YouTube gốc.',
-    153: 'YouTube thiếu HTTP Referer hoặc nhận dạng ứng dụng. Mở trang qua HTTPS; nếu vẫn lỗi trong APTV, thử Safari hoặc YouTube gốc.'
+    153: 'YouTube thiếu HTTP Referer hoặc nhận dạng ứng dụng. Mở trang qua HTTPS; nếu vẫn lỗi, thử Safari hoặc YouTube gốc.'
   };
   window.CarTubePlayer = class {
     constructor(stage, notice, playButton) {
@@ -93,9 +93,10 @@ const $ = id => document.getElementById(id);const store = {  get(k,d){ try{ cons
       clearTimeout(this.timer);
       if (this.player) { try { this.player.destroy(); } catch (_) {} }
       this.player = null;
-      // Giữ nguyên home container bên trong stage
       const homeEl = document.getElementById('home');
       this.stage.replaceChildren();
+      if (this.notice) this.stage.appendChild(this.notice);
+      if (this.playButton) this.stage.appendChild(this.playButton);
       if (homeEl) this.stage.appendChild(homeEl);
       this.stage.hidden = false;
       this.playButton.hidden = true;
@@ -110,7 +111,7 @@ const $ = id => document.getElementById(id);const store = {  get(k,d){ try{ cons
       const token = this.generation;
       this.failed = false;
       this.message('Đang tải trình phát YouTube…');
-      if (!/^[A-Za-z0-9_-]{11}$/.test(id)) {
+      if (!/^[A-Za-z0-9_-]{11}$/.test(id) && !/^[A-Za-z0-9_-]+$/.test(id)) {
         this.message(errors[2] + ' (Mã 2)', true); return;
       }
       if (!/^https?:$/.test(location.protocol)) {
@@ -119,8 +120,6 @@ const $ = id => document.getElementById(id);const store = {  get(k,d){ try{ cons
       try {
         const YT = await loadAPI();
         if (token !== this.generation) return;
-        
-        // Tạo div chứa player để API thay thế bằng iframe
         const playerDiv = document.createElement('div');
         playerDiv.id = 'ytPlayerInstance';
         playerDiv.style.width = '100%';
@@ -130,10 +129,9 @@ const $ = id => document.getElementById(id);const store = {  get(k,d){ try{ cons
         const active = () => token === this.generation && !this.failed;
         this.watchdog(token);
         
-        this.player = new YT.Player(playerDiv, {
+        const playerConfig = {
           height: '100%',
           width: '100%',
-          videoId: id,
           playerVars: {
             'enablejsapi': 1,
             'origin': location.origin,
@@ -174,7 +172,16 @@ const $ = id => document.getElementById(id);const store = {  get(k,d){ try{ cons
               this.message((errors[event.data] || 'YouTube không thể phát video trong trình duyệt này.') + ` (Mã ${event.data})`, true);
             }
           }
-        });
+        };
+
+        if (id.length > 15 || id.startsWith('PL') || id.startsWith('RD') || id.startsWith('UU')) {
+          playerConfig.playerVars.listType = 'playlist';
+          playerConfig.playerVars.list = id;
+        } else {
+          playerConfig.videoId = id;
+        }
+
+        this.player = new YT.Player(playerDiv, playerConfig);
       } catch (error) {
         if (token !== this.generation) return;
         clearTimeout(this.timer);
@@ -184,7 +191,7 @@ const $ = id => document.getElementById(id);const store = {  get(k,d){ try{ cons
   };
 })();
 
-// Khởi tạo Player instance toàn cục
+// Quản lý ứng dụng và kết nối giao diện
 let carPlayer = null;
 const onFile=location.protocol==='file:';let ytInit=false, queue=[], qIdx=-1, trendItems=[];
 const jget=(k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d }catch(e){ return d } };
@@ -199,7 +206,7 @@ const INVID=['https://inv.nadeko.net','https://yewtu.be','https://invidious.nerd
 function showMsg(h){ const m=$('yt-msg'); m.style.display=h?'block':'none'; m.innerHTML=h||''; }
 function note(t){ showMsg(t); clearTimeout(note.t); note.t=setTimeout(()=>{ if($('yt-msg').dataset.keep!=='1') showMsg(''); },3500); }
 
-/* ---- tìm kiếm / thịnh hành ---- */
+/* ---- Tìm kiếm & Thịnh hành ---- */
 function fromPiped(j){  const a=Array.isArray(j)?j:(j&&j.items)||[];  return a.filter(x=>x.url&&x.url.includes('/watch?v=')&&!x.isShort).map(x=>({id:x.url.split('v=')[1].slice(0,11),title:x.title}));}
 function fromInv(a){  return (Array.isArray(a)?a:[]).filter(x=>x.videoId&&(!x.type||x.type==='video')&&!(x.lengthSeconds>0&&x.lengthSeconds<65)).map(x=>({id:x.videoId,title:x.title}));}
 function anyBackend(pPath,iPath){  const tasks=[...PIPED.map(b=>fetchJSON(b+pPath,8000).then(fromPiped)),...INVID.map(b=>fetchJSON(b+iPath,8000).then(fromInv))]    .map(t=>t.then(r=>{ if(!r.length) throw new Error('empty'); return r; }));  return Promise.any(tasks);}
@@ -207,7 +214,7 @@ function kSearch(q){ const e=encodeURIComponent(q); return anyBackend('/search?q
 async function cachedSearch(q){  const key=q.trim().toLowerCase(), all=jget('yscache',{}), hit=all[key];  if(hit&&Date.now()-hit.t<12*3600e3) return hit.items;  try{    const items=await kSearch(q);    all[key]={t:Date.now(),items};    const ks=Object.keys(all); if(ks.length>15) ks.sort((a,b)=>all[a].t-all[b].t).slice(0,ks.length-15).forEach(k=>delete all[k]);    jset('yscache',all); return items;  }catch(e){ if(hit) return hit.items; throw e; }}
 async function loadTrend(){  const c=jget('ytrend',null);  if(c&&c.items&&c.items.length&&Date.now()-c.t<3600e3) return c.items;  let items=[];  try{ items=await anyBackend('/trending?region=VN','/api/v1/trending?region=VN&type=music'); }  catch(e){ try{ items=await kSearch('nhạc trẻ hay nhất'); }catch(e2){ if(c&&c.items) items=c.items; } }  if(items.length) jset('ytrend',{t:Date.now(),items});  return items;}
 
-/* ---- phát nhạc sử dụng CarTubePlayer ---- */
+/* ---- Phát nhạc qua CarTubePlayer ---- */
 function recents(){ return jget('yrecent',[]); }
 function addRecent(it){  const r=recents().filter(x=>x.id!==it.id); r.unshift({id:it.id,title:it.title||''}); jset('yrecent',r.slice(0,20));}
 async function fillTitle(it){  try{    const r=await fetchJSON('https://noembed.com/embed?url='+encodeURIComponent('https://www.youtube.com/watch?v='+it.id),6000);    if(r&&r.title){ it.title=r.title; addRecent(it); renderSide(); }  }catch(e){}}
@@ -223,8 +230,7 @@ function playQueue(items,idx){
 }
 function playItem(it){
   if(it.list){
-    // Nếu là playlist, dùng video đầu tiên hoặc xử lý mở link trực tiếp
-    carPlayer.open(it.list);
+    if(carPlayer) carPlayer.open(it.list);
     queue=[]; qIdx=-1; closeHome(); renderSide();
   } else {
     playQueue([{id:it.id,title:it.title||''}],0);
@@ -258,7 +264,7 @@ async function doSearch(){
   await searchAndPlay(v);
 }
 
-/* ---- danh sách bên phải ---- */
+/* ---- Danh sách bên phải ---- */
 function renderSide(){
   const box=$('yt-side');
   if(queue.length>1){
