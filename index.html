@@ -43,14 +43,14 @@
         
         body.theater-mode #col-left,
         body.theater-mode #col-mid {
-            display: contents;
+            display: contents; /* Ungroup columns */
         }
 
         body.theater-mode #clock-card { grid-column: 1; grid-row: 2; height: 100%; }
         body.theater-mode #weather-card { grid-column: 2; grid-row: 2; height: 100%; }
         body.theater-mode #ev-timer-card { grid-column: 3; grid-row: 2; height: 100%; }
         
-        /* Ẩn các thành phần không cần thiết khi phóng to */
+        /* Hide non-essentials in theater mode */
         body.theater-mode #calendar-card,
         body.theater-mode #forecast-10day,
         body.theater-mode #controls-card {
@@ -65,6 +65,16 @@
             top: 20px;
             right: 20px;
             z-index: 50;
+        }
+
+        /* Đảm bảo iframe do Youtube API tạo ra sẽ lấp đầy khung */
+        #yt-player-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
         }
     </style>
 </head>
@@ -81,8 +91,8 @@
         <div id="col-left" class="flex flex-col gap-4 h-full">
             <!-- Clock -->
             <div id="clock-card" class="card rounded-3xl p-6 flex flex-col justify-center items-center h-1/3">
-                <div class="text-7xl font-bold tracking-tighter" id="time-display">15<span class="text-blue-500">:</span>30</div>
-                <div class="text-sm font-semibold text-slate-400 mt-2 uppercase tracking-widest" id="date-display">FRIDAY, OCT 9, 2026</div>
+                <div class="text-7xl font-bold tracking-tighter" id="time-display">00<span class="text-blue-500">:</span>00</div>
+                <div class="text-sm font-semibold text-slate-400 mt-2 uppercase tracking-widest" id="date-display">LOADING...</div>
             </div>
             
             <!-- Weather -->
@@ -92,7 +102,7 @@
                     <i class="fas fa-cloud-showers-heavy text-5xl text-blue-300 mb-2"></i>
                     <div class="text-5xl font-bold mb-1">27<span class="text-2xl text-slate-400">°C</span></div>
                     <div class="text-sm font-semibold text-blue-400 uppercase">Updated</div>
-                    <div class="text-xs text-slate-500 mt-1"><i class="fas fa-map-marker-alt"></i> Ho Chi Minh City</div>
+                    <div class="text-xs text-slate-500 mt-1"><i class="fas fa-map-marker-alt"></i> Binh Xuyen, Phu Tho</div>
                 </div>
                 
                 <!-- 10-Day Forecast -->
@@ -137,10 +147,9 @@
             <div id="calendar-card" class="card rounded-3xl p-4 flex flex-col h-1/2">
                 <div class="flex justify-between items-center bg-slate-800/50 rounded-xl p-2 mb-3">
                     <button class="w-8 h-8 rounded bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors"><i class="fas fa-chevron-left text-xs"></i></button>
-                    <div class="text-sm font-bold tracking-widest whitespace-nowrap">THÁNG 10 / 2026</div>
+                    <div class="text-sm font-bold tracking-widest whitespace-nowrap" id="cal-month-year">THÁNG 10 / 2026</div>
                     <button class="w-8 h-8 rounded bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors"><i class="fas fa-chevron-right text-xs"></i></button>
                 </div>
-                <!-- Grid Days Header -->
                 <div class="grid grid-cols-7 gap-1 text-center mb-1">
                     <div class="text-[9px] font-bold text-red-400">CN</div>
                     <div class="text-[9px] font-bold text-slate-400">T2</div>
@@ -150,8 +159,8 @@
                     <div class="text-[9px] font-bold text-slate-400">T6</div>
                     <div class="text-[9px] font-bold text-blue-400">T7</div>
                 </div>
-                <!-- Calendar Grid (Demo content) -->
                 <div class="grid grid-cols-7 gap-1 flex-grow content-start">
+                    <!-- Demo Calendar Cells -->
                     <div class="aspect-square flex flex-col items-center justify-center rounded-lg bg-slate-800/30"><span class="text-xs font-bold">1</span><span class="text-[8px] text-slate-500">21</span></div>
                     <div class="aspect-square flex flex-col items-center justify-center rounded-lg bg-slate-800/30"><span class="text-xs font-bold">2</span><span class="text-[8px] text-slate-500">22</span></div>
                     <div class="aspect-square flex flex-col items-center justify-center rounded-lg bg-blue-600 text-white shadow-lg shadow-blue-500/30"><span class="text-xs font-bold">9</span><span class="text-[8px] text-blue-200">29</span></div>
@@ -168,37 +177,29 @@
             </div>
         </div>
 
-        <!-- COLUMN 3: YouTube iframe & Controls -->
+        <!-- COLUMN 3: YouTube API & Controls -->
         <div id="col-media" class="flex flex-col gap-4 h-full">
-            <!-- Youtube Iframe Container -->
             <div id="youtube-card" class="card rounded-3xl flex flex-col overflow-hidden flex-grow relative">
-                <!-- Thanh tìm kiếm tích hợp -->
+                <!-- Thanh tìm kiếm YouTube API -->
                 <div id="media-header" class="p-3 bg-slate-800 flex items-center justify-between gap-3 z-10 pr-16">
                     <div class="hidden sm:flex items-center gap-2 text-xs font-bold text-slate-400 uppercase">
                         <i class="fab fa-youtube text-red-500 text-lg"></i> Media
                     </div>
                     <div class="flex flex-1 items-center bg-slate-900 rounded-full px-4 py-2 border border-slate-700 focus-within:border-blue-500 transition-colors">
-                        <input type="text" id="yt-search-input" placeholder="Tìm bài hát (ví dụ: lofi chill)..." class="bg-transparent border-none outline-none text-sm text-white w-full" onkeypress="if(event.key === 'Enter') searchYoutube()">
-                        <button onclick="searchYoutube()" class="text-slate-400 hover:text-white cursor-pointer ml-2">
+                        <input type="text" id="yt-search-input" placeholder="Tìm bài hát, ca sĩ..." class="bg-transparent border-none outline-none text-sm text-white w-full" onkeypress="if(event.key === 'Enter') searchYoutubeAPI()">
+                        <button onclick="searchYoutubeAPI()" class="text-slate-400 hover:text-white cursor-pointer ml-2">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
                 </div>
                 
-                <div class="flex-grow w-full relative bg-black">
-                    <!-- Sử dụng listType=search để biến kết quả tìm kiếm thành playlist tự nhảy bài -->
-                    <iframe 
-                        id="yt-player" 
-                        class="absolute top-0 left-0 w-full h-full border-0" 
-                        src="https://www.youtube.com/embed?listType=search&list=lofi+chill+mix&autoplay=1&mute=1" 
-                        title="YouTube video player" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowfullscreen>
-                    </iframe>
+                <div class="flex-grow w-full relative bg-black" id="yt-player-container">
+                    <!-- YouTube IFrame API sẽ inject player vào div này (Thay thế thẻ div thành iframe) -->
+                    <div id="youtube-api-player"></div>
                 </div>
             </div>
 
-            <!-- Controls (Theme & Theater Toggle) -->
+            <!-- Controls -->
             <div id="controls-card" class="card rounded-3xl p-4 flex gap-3 h-28">
                 <button onclick="toggleTheme()" class="flex-1 bg-slate-700/50 hover:bg-slate-600 rounded-2xl flex flex-col items-center justify-center transition-colors border border-slate-600/50">
                     <i class="fas fa-adjust text-xl mb-1 text-yellow-400"></i>
@@ -214,21 +215,70 @@
     </div>
 
     <script>
-        // --- YouTube Search Logic ---
-        function searchYoutube() {
-            const query = document.getElementById('yt-search-input').value;
-            if (!query) return;
-            const iframe = document.getElementById('yt-player');
-            // Cập nhật src với từ khóa mới, hệ thống playlist của youtube sẽ tự động phát và chuyển bài
-            iframe.src = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}&autoplay=1`;
+        // ==========================================
+        // YOUTUBE IFRAME PLAYER API TÍCH HỢP
+        // ==========================================
+        
+        // 1. Tải script IFrame Player API bất đồng bộ
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        var ytPlayer;
+        
+        // 2. Hàm callback mặc định khi API tải xong
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('youtube-api-player', {
+                height: '100%',
+                width: '100%',
+                playerVars: {
+                    'autoplay': 1,       // Tự động phát
+                    'mute': 1,           // Tắt tiếng ban đầu để trình duyệt cho phép autoplay
+                    'controls': 1,       // Hiện thanh điều khiển
+                    'listType': 'search',// Sử dụng tính năng danh sách phát dạng tìm kiếm
+                    'list': 'lofi chill mix driving' // Từ khóa phát mặc định khi mở app
+                },
+                events: {
+                    'onReady': onPlayerReady
+                }
+            });
         }
 
-        // --- Clock Logic ---
+        // 3. Khi player sẵn sàng
+        function onPlayerReady(event) {
+            // Đảm bảo video đang chạy
+            event.target.playVideo();
+        }
+
+        // 4. Hàm tìm kiếm và phát Playlist mới bằng API
+        function searchYoutubeAPI() {
+            const query = document.getElementById('yt-search-input').value;
+            if (!query || !ytPlayer) return;
+            
+            // Yêu cầu API tải danh sách phát theo từ khóa mới, bắt đầu từ video đầu tiên (index 0)
+            ytPlayer.loadPlaylist({
+                listType: 'search',
+                list: query,
+                index: 0,
+                startSeconds: 0
+            });
+        }
+
+
+        // ==========================================
+        // CÁC TÍNH NĂNG DASHBOARD KHÁC
+        // ==========================================
+        
+        // --- Clock & Date Logic ---
         function updateClock() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             document.getElementById('time-display').innerHTML = `${hours}<span class="text-blue-500">:</span>${minutes}`;
+            
+            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+            document.getElementById('date-display').innerText = now.toLocaleDateString('en-US', options).toUpperCase();
         }
         setInterval(updateClock, 1000);
         updateClock();
