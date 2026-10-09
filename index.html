@@ -9,163 +9,277 @@
 <style>
   :root{
     --bg:#0b1020; --panel:#121a30; --panel2:#18223f; --line:#26335a;
-    --text:#e8ecf8; --muted:#8c98bd; --accent:#4fd1c5; --accent2:#7c9cff; --danger:#ff6b6b;
-    --split:62%;
+    --text:#e8ecf8; --muted:#8c98bd; --accent:#4fd1c5; --accent2:#7c9cff; --danger:#ff6b6b; --warn:#ffb454;
   }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0}
-  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;overflow:hidden}
-  header{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:#0e1530}
+  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;-webkit-tap-highlight-color:transparent}
+  button{font-family:inherit}
+  header{display:flex;align-items:center;gap:12px;padding:8px 14px;border-bottom:1px solid var(--line);background:#0e1530}
   .brand{font-weight:800;letter-spacing:.14em;font-size:15px}
   .brand b{color:var(--accent)}
+  .ptitle{color:var(--muted);font-size:14px}
   .spacer{flex:1}
+  .hclock{font-weight:700;font-variant-numeric:tabular-nums}
   .btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14px;cursor:pointer}
   .btn:hover{border-color:var(--accent2)}
   .btn.primary{background:var(--accent);color:#04201d;border-color:var(--accent);font-weight:700}
-  main{flex:1;display:flex;min-height:0}
-  main.swap{flex-direction:row-reverse}
-  .left{width:var(--split);display:flex;flex-direction:column;min-width:0;border-right:1px solid var(--line);padding:12px;gap:10px}
-  main.swap .left{border-right:0;border-left:1px solid var(--line)}
-  .right{flex:1;min-width:0;padding:12px;display:grid;gap:12px;align-content:start;overflow:auto}
-  .searchbar{display:flex;gap:8px}
-  .searchbar input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font-size:15px}
-  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .btn.danger{background:var(--danger);color:#2a0606;border-color:var(--danger);font-weight:700}
+
+  /* ---- Pager ---- */
+  .viewport{flex:1;min-height:0;position:relative;overflow:hidden}
+  .track{display:flex;width:300%;height:100%;will-change:transform;transition:transform .28s ease}
+  .page{width:calc(100% / 3);height:100%;overflow-y:auto;overflow-x:hidden;padding:12px;-webkit-overflow-scrolling:touch}
+  .edge{position:absolute;top:0;bottom:0;width:22px;z-index:5}
+  .edge.l{left:0} .edge.r{right:0}
+  nav.dots{display:flex;justify-content:center;gap:8px;padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#0e1530}
   .chip{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer;font-size:14px}
   .chip.on{background:var(--accent2);color:#0a1030;border-color:var(--accent2);font-weight:700}
-  .stage{background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/9;max-height:46vh;width:100%;position:relative;border:1px solid var(--line)}
+
+  /* ---- Trang YouTube / TV ---- */
+  .media{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+  .col-main{min-width:0}
+  .col-side{min-width:0;display:flex;flex-direction:column;gap:10px}
+  .stage{background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/9;width:100%;position:relative;border:1px solid var(--line)}
   .stage .ph{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:var(--muted);padding:20px}
   .stage .ph h2{margin:0 0 6px;color:var(--text)}
-  #frameHost,#frameHost iframe{width:100%;height:100%;position:absolute;inset:0;border:0}
+  .stage iframe,.stage video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
   .notice{position:absolute;left:10px;bottom:10px;right:70px;font-size:13px;color:#cfd6ee;background:#000a;padding:6px 10px;border-radius:8px;pointer-events:none;z-index:2}
   .notice:empty{display:none}
   .notice.error{color:#ffb3b3}
   .playbtn{position:absolute;right:10px;bottom:10px;z-index:3}
   .playbtn[hidden]{display:none}
-  .nowplaying{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .results{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;align-content:start;padding-bottom:6px}
+  .nowplaying{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:8px;min-height:20px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .searchbar{display:flex;gap:8px}
+  .searchbar input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font-size:15px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .origin{font-size:13px;color:var(--accent2);text-decoration:none}
+  .results{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;align-content:start}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;text-align:left;color:inherit;padding:0}
   .card:hover{border-color:var(--accent)}
   .card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#222}
   .card div{padding:8px 10px;font-size:13px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .view{display:flex;flex-direction:column;gap:10px;flex:1;min-height:0}
-  .view[hidden]{display:none}
-  .tabs{display:flex;gap:8px}
-  #tvVideo{position:absolute;inset:0;width:100%;height:100%;background:#000}
-  .card.chan{padding:12px 10px;font-size:14px}
-  .card.chan div{padding:0;-webkit-line-clamp:2}
-  #tvList{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+  .card.chan{padding:0}
+  .card.chan div{padding:14px 10px;font-size:15px;font-weight:600;text-align:center;-webkit-line-clamp:1}
   .card.chan.on{border-color:var(--accent);background:var(--panel2)}
+  #tvList{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
+  .msg{grid-column:1/-1;color:var(--muted);font-size:14px;padding:6px 2px;line-height:1.5}
   details.src{font-size:13px;color:var(--muted)}
   details.src input{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;color:var(--text);margin:6px 0}
-  .msg{grid-column:1/-1;color:var(--muted);font-size:14px;padding:6px 2px;line-height:1.5}
-  .widget{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+  @media (min-width:900px){
+    .page.mp{overflow:hidden}
+    .media{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);height:100%}
+    .col-side .results{flex:1;min-height:0;overflow:auto}
+    .col-side{min-height:0}
+    .col-main .stage{max-height:calc(100% - 40px);margin:0 auto}
+  }
+
+  /* ---- Trang Tiện ích ---- */
+  .tools{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+  .widget{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
   .widget h3{margin:0 0 8px;font-size:12px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
-  .clock{font-size:46px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
-  .date{color:var(--muted);margin-top:4px;font-size:14px}
-  .speed{font-size:64px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:var(--accent)}
-  .speed small{font-size:16px;color:var(--muted);font-weight:500;margin-left:6px}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
-  .kv{color:var(--muted);font-size:14px}
-  .kv b{color:var(--text);font-size:18px}
+  .kv{color:var(--muted);font-size:14px;line-height:1.5}
+  .kv b{color:var(--text)}
+  @media (min-width:640px){
+    .tools{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);grid-template-areas:"clk cal" "wx cal" "bat gps"}
+  }
+  @media (min-width:1000px){
+    .tools{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr);grid-template-areas:"clk cal bat" "wx cal gps"}
+  }
+  .w-clk{grid-area:clk} .w-cal{grid-area:cal} .w-wx{grid-area:wx} .w-bat{grid-area:bat} .w-gps{grid-area:gps}
+  @media (max-width:639px){ .w-clk,.w-cal,.w-wx,.w-bat,.w-gps{grid-area:auto} }
+
+  .clk-t{font-size:56px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+  .clk-t small{font-size:24px;color:var(--muted);font-weight:600;margin-left:6px}
+  .clk-d{color:var(--text);margin-top:8px;font-size:15px}
+  .clk-l{color:var(--accent);margin-top:2px;font-size:14px}
+
   select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 8px;font-size:14px}
-  .temp{font-size:40px;font-weight:800}
+  .wx-t{font-size:44px;font-weight:800;margin-top:8px}
+  .wx-t span{font-size:34px;margin-right:6px}
+
+  .cal-h{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+  .cal-h .ttl{flex:1;text-align:center;font-weight:700}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .cal-wd{text-align:center;font-size:12px;color:var(--muted);padding:2px 0}
+  .cal-wd.sun{color:var(--danger)}
+  .cell{background:var(--panel2);border:1px solid transparent;border-radius:10px;padding:5px 2px;min-height:48px;text-align:center;color:var(--text);cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+  .cell .sd{font-size:16px;font-weight:700;line-height:1.1}
+  .cell .ld{font-size:10.5px;color:var(--muted);line-height:1}
+  .cell.other{opacity:.38}
+  .cell.sun .sd{color:var(--danger)}
+  .cell.today{border-color:var(--accent)}
+  .cell.sel{background:var(--accent2)}
+  .cell.sel .sd,.cell.sel .ld{color:#0a1030}
+  .cell.first .ld{color:var(--warn);font-weight:700}
+  .cell.hol::after{content:"";position:absolute;top:4px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--warn)}
+  .cal-info{margin-top:10px;font-size:14px;line-height:1.5}
+  .cal-info .ev{color:var(--warn)}
+
+  .bar{height:12px;background:var(--panel2);border-radius:999px;overflow:hidden;margin:8px 0}
+  .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .4s}
+  .bat-big{font-size:34px;font-weight:800}
+
+  .speed{font-size:56px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:var(--accent)}
+  .speed small{font-size:16px;color:var(--muted);font-weight:500;margin-left:6px}
+
   dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:14px;max-width:460px;width:92%}
   dialog::backdrop{background:#000a}
   dialog input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px;color:var(--text);margin:8px 0}
   dialog p{color:var(--muted);font-size:13px;line-height:1.5;margin:6px 0}
-  @media (max-width:820px){
-    main,main.swap{flex-direction:column;overflow:auto}
-    .left{width:100%!important;border:0}
-    .stage{max-height:none}
-    body{overflow:auto}
-  }
+
+  #alarm{position:fixed;inset:0;z-index:100;background:#7a1020ee;display:grid;place-content:center;text-align:center;gap:18px;padding:24px;animation:blink 1s infinite}
+  #alarm[hidden]{display:none}
+  #alarm h2{margin:0;font-size:30px}
+  #alarm p{margin:0;font-size:18px}
+  @keyframes blink{50%{background:#a31730ee}}
 </style>
 </head>
 <body>
 <header>
   <div class="brand">CAR<b>DECK</b></div>
+  <div class="ptitle" id="ptitle">YouTube</div>
   <div class="spacer"></div>
-  <button class="btn" id="btnSwap" title="Đổi bên">⇄</button>
-  <button class="btn" id="btnFit" title="Đổi tỉ lệ chia">Fit 62%</button>
-  <button class="btn" id="btnFull" title="Toàn màn hình video">⛶</button>
+  <span class="hclock" id="hclock">--:--</span>
+  <button class="btn" id="btnFull" title="Toàn màn hình">⛶</button>
   <button class="btn" id="btnSettings" title="Cài đặt">⚙</button>
 </header>
 
-<main id="main">
-  <section class="left" id="leftPane">
-    <div class="tabs">
-      <button class="chip on" id="tabYT" type="button">YouTube</button>
-      <button class="chip" id="tabTV" type="button">TV</button>
-    </div>
-    <div class="view" id="ytView">
-    <form class="searchbar" id="searchForm">
-      <input id="q" placeholder="Tìm video hoặc dán link YouTube…" autocomplete="off">
-      <button class="btn primary" type="submit">Tìm</button>
-    </form>
-    <div class="chips" id="chips"></div>
-    <div class="stage" id="stage">
-      <div class="ph" id="ph"><div><h2>Hôm nay nghe gì?</h2><div>Chọn danh mục, tìm kiếm hoặc dán link YouTube để phát ngay tại đây.</div></div></div>
-      <div id="frameHost"></div>
-      <div class="notice" id="notice"></div>
-      <button class="btn playbtn" id="playBtn" type="button" hidden>▶</button>
-    </div>
-    <div class="nowplaying" id="now"></div>
-    <div class="results" id="results"></div>
-    </div>
+<div class="viewport" id="viewport">
+  <div class="track" id="track">
 
-    <div class="view" id="tvView" hidden>
-      <div class="stage" id="tvStage">
-        <video id="tvVideo" controls playsinline></video>
-        <div class="notice" id="tvNotice"></div>
+    <!-- ===== Trang 1: YouTube ===== -->
+    <section class="page mp" id="pgYT">
+      <div class="media">
+        <div class="col-main">
+          <div class="stage" id="ytStage">
+            <div class="ph" id="ytPh"><div><h2>Hôm nay nghe gì?</h2><div>Chọn danh mục, tìm kiếm hoặc dán link YouTube để phát ngay tại đây.</div></div></div>
+            <div id="ytHost"></div>
+            <div class="notice" id="ytNotice"></div>
+            <button class="btn playbtn" id="ytPlay" type="button" hidden>▶</button>
+          </div>
+          <div class="nowplaying" id="ytNow"></div>
+        </div>
+        <div class="col-side">
+          <form class="searchbar" id="searchForm">
+            <input id="q" placeholder="Tìm video hoặc dán link YouTube…" autocomplete="off">
+            <button class="btn primary" type="submit">Tìm</button>
+          </form>
+          <div class="chips" id="chips"></div>
+          <a class="origin" id="ytOpen" href="https://www.youtube.com/" target="_blank" rel="noopener">YouTube gốc ↗</a>
+          <div class="results" id="results"></div>
+        </div>
       </div>
-      <div class="nowplaying" id="tvNow"></div>
-      <div class="searchbar">
-        <button class="btn" type="button" id="tvPrev" title="Kênh trước">◀</button>
-        <button class="btn" type="button" id="tvNext" title="Kênh sau">▶</button>
-        <button class="btn" type="button" id="tvReload">Tải lại danh sách</button>
-      </div>
-      <div class="results" id="tvList"></div>
-      <details class="src">
-        <summary>Nguồn danh sách kênh</summary>
-        <input id="tvSrc" placeholder="Để trống = dùng danh sách VTV có sẵn; hoặc dán link playlist .m3u" autocomplete="off">
-        <button class="btn" type="button" id="tvSaveSrc">Lưu &amp; tải lại</button>
-      </details>
-    </div>
-  </section>
+    </section>
 
-  <section class="right">
-    <div class="widget">
-      <h3>Giờ</h3>
-      <div class="clock" id="clock">--:--</div>
-      <div class="date" id="date"></div>
-    </div>
+    <!-- ===== Trang 2: TV ===== -->
+    <section class="page mp" id="pgTV">
+      <div class="media">
+        <div class="col-main">
+          <div class="stage" id="tvStage">
+            <video id="tvVideo" controls playsinline></video>
+            <div class="notice" id="tvNotice"></div>
+          </div>
+          <div class="nowplaying" id="tvNow"></div>
+        </div>
+        <div class="col-side">
+          <div class="row">
+            <button class="btn" type="button" id="tvPrev" title="Kênh trước">◀</button>
+            <button class="btn" type="button" id="tvNext" title="Kênh sau">▶</button>
+            <button class="btn" type="button" id="tvReload">Tải lại danh sách</button>
+          </div>
+          <div class="results" id="tvList"></div>
+          <details class="src">
+            <summary>Nguồn danh sách kênh</summary>
+            <input id="tvSrc" placeholder="Để trống = dùng danh sách VTV có sẵn; hoặc dán link playlist .m3u" autocomplete="off">
+            <button class="btn" type="button" id="tvSaveSrc">Lưu &amp; tải lại</button>
+          </details>
+        </div>
+      </div>
+    </section>
 
-    <div class="widget">
-      <h3>Chuyến đi · GPS</h3>
-      <div class="speed"><span id="spd">—</span><small>km/h</small></div>
-      <div class="row">
-        <div class="kv">Quãng đường <b id="dist">0.00</b> km</div>
-        <div class="kv">Thời gian <b id="trip">00:00</b></div>
-      </div>
-      <div class="row">
-        <button class="btn primary" id="gpsToggle">Bật GPS</button>
-        <button class="btn" id="gpsReset">Đặt lại</button>
-      </div>
-      <p class="kv" style="margin:8px 0 0">Ước tính từ GPS của thiết bị, có thể lệch vài km/h.</p>
-    </div>
+    <!-- ===== Trang 3: Tiện ích ===== -->
+    <section class="page" id="pgTools">
+      <div class="tools">
+        <div class="widget w-clk">
+          <h3>Đồng hồ</h3>
+          <div class="clk-t"><span id="clkHM">--:--</span><small id="clkS">--</small></div>
+          <div class="clk-d" id="clkDate"></div>
+          <div class="clk-l" id="clkLunar"></div>
+        </div>
 
-    <div class="widget">
-      <h3>Thời tiết</h3>
-      <div class="row" style="margin:0 0 8px">
-        <select id="city"></select>
-        <button class="btn" id="wxHere">Vị trí của tôi</button>
+        <div class="widget w-wx">
+          <h3>Thời tiết</h3>
+          <div class="row">
+            <select id="city"></select>
+            <button class="btn" id="wxHere">Vị trí của tôi</button>
+          </div>
+          <div class="wx-t"><span id="wxIcon">⛅</span><b id="wxTemp">—</b></div>
+          <div class="kv" id="wxInfo">Đang tải…</div>
+          <div class="kv" id="wxMore"></div>
+          <p class="kv" style="margin:8px 0 0;font-size:12px">Dữ liệu: Open-Meteo (miễn phí).</p>
+        </div>
+
+        <div class="widget w-cal">
+          <h3>Lịch tháng · Dương &amp; Âm</h3>
+          <div class="cal-h">
+            <button class="btn" id="calPrev" aria-label="Tháng trước">◀</button>
+            <div class="ttl" id="calTitle"></div>
+            <button class="btn" id="calNext" aria-label="Tháng sau">▶</button>
+            <button class="btn" id="calToday">Hôm nay</button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="cal-info" id="calInfo"></div>
+        </div>
+
+        <div class="widget w-bat">
+          <h3>Báo khi sạc pin</h3>
+          <div class="bat-big" id="batLevel">—</div>
+          <div class="bar"><i id="batBar"></i></div>
+          <div class="kv" id="batState">Đang kiểm tra pin…</div>
+          <div class="row" style="margin-top:10px">
+            <label class="kv" for="batTh">Báo khi đạt</label>
+            <select id="batTh">
+              <option value="80">80%</option><option value="90">90%</option>
+              <option value="95">95%</option><option value="100">100%</option>
+            </select>
+            <button class="btn primary" id="batToggle">Bật báo</button>
+            <button class="btn" id="batTest">Thử chuông</button>
+          </div>
+        </div>
+
+        <div class="widget w-gps">
+          <h3>Chuyến đi · GPS</h3>
+          <div class="speed"><span id="spd">—</span><small>km/h</small></div>
+          <div class="row" style="margin-top:10px">
+            <div class="kv">Quãng đường <b id="dist">0.00</b> km</div>
+            <div class="kv">Thời gian <b id="trip">00:00</b></div>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn primary" id="gpsToggle">Bật GPS</button>
+            <button class="btn" id="gpsReset">Đặt lại</button>
+          </div>
+        </div>
       </div>
-      <div class="temp" id="wxTemp">—</div>
-      <div class="kv" id="wxInfo">Đang tải…</div>
-      <p class="kv" style="margin:8px 0 0">Dữ liệu: Open-Meteo (miễn phí).</p>
-    </div>
-  </section>
-</main>
+    </section>
+
+  </div>
+  <div class="edge l" id="edgeL"></div>
+  <div class="edge r" id="edgeR"></div>
+</div>
+
+<nav class="dots" id="dots">
+  <button class="chip on" data-p="0" type="button">YouTube</button>
+  <button class="chip" data-p="1" type="button">TV</button>
+  <button class="chip" data-p="2" type="button">Tiện ích</button>
+</nav>
+
+<div id="alarm" hidden>
+  <h2>🔋 Báo sạc pin</h2>
+  <p id="alarmText"></p>
+  <button class="btn danger" id="alarmOff" type="button" style="font-size:18px;padding:14px 28px">Tắt báo</button>
+</div>
 
 <dialog id="dlg">
   <form method="dialog">
@@ -173,7 +287,7 @@
     <label>YouTube Data API key</label>
     <input id="apiKey" placeholder="AIza…" autocomplete="off">
     <p>Cần key để tìm kiếm và duyệt danh mục. Tạo miễn phí trong Google Cloud Console (bật “YouTube Data API v3”). Nên giới hạn key theo HTTP referrer của domain bạn. Key chỉ lưu trong trình duyệt này.</p>
-    <p>Không có key vẫn dùng được: dán link video/playlist vào ô tìm kiếm, hoặc mở lại mục “Gần đây”.</p>
+    <p>Không có key vẫn dùng được: dán link video/playlist vào ô tìm kiếm, hoặc mở mục “Gần đây”.</p>
     <div class="row" style="justify-content:flex-end">
       <button class="btn" value="cancel">Đóng</button>
       <button class="btn primary" id="saveKey" value="ok">Lưu</button>
@@ -183,47 +297,174 @@
 
 <script>
 (function(){
+  'use strict';
   const $ = s => document.querySelector(s);
+  const pad = n => String(n).padStart(2, '0');
   const store = {
-    get(k, d){ try{ const v = localStorage.getItem(k); return v===null? d : JSON.parse(v); }catch(e){ return d; } },
-    set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+    get(k, d){ try{ const v = localStorage.getItem('cardeck.' + k); return v === null ? d : JSON.parse(v); }catch(e){ return d; } },
+    set(k, v){ try{ localStorage.setItem('cardeck.' + k, JSON.stringify(v)); }catch(e){} }
   };
 
-  /* ---------- Clock ---------- */
-  function tick(){
-    const d = new Date();
-    $('#clock').textContent = d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
-    $('#date').textContent = d.toLocaleDateString('vi-VN',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
+  /* =====================================================================
+     ÂM LỊCH VIỆT NAM (thuật toán Hồ Ngọc Đức, múi giờ UTC+7)
+     ===================================================================== */
+  const TZ = 7;
+  function jdFromDate(dd, mm, yy){
+    const a = Math.floor((14 - mm) / 12), y = yy + 4800 - a, m = mm + 12 * a - 3;
+    let jd = dd + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+    if(jd < 2299161) jd = dd + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - 32083;
+    return jd;
   }
-  tick(); setInterval(tick, 10000);
+  function newMoon(k){
+    const T = k / 1236.85, T2 = T * T, T3 = T2 * T, dr = Math.PI / 180;
+    let Jd1 = 2415020.75933 + 29.53058868 * k + 0.0001178 * T2 - 0.000000155 * T3;
+    Jd1 += 0.00033 * Math.sin((166.56 + 132.87 * T - 0.009173 * T2) * dr);
+    const M = 359.2242 + 29.10535608 * k - 0.0000333 * T2 - 0.00000347 * T3;
+    const Mpr = 306.0253 + 385.81691806 * k + 0.0107306 * T2 + 0.00001236 * T3;
+    const F = 21.2964 + 390.67050646 * k - 0.0016528 * T2 - 0.00000239 * T3;
+    let C1 = (0.1734 - 0.000393 * T) * Math.sin(M * dr) + 0.0021 * Math.sin(2 * dr * M);
+    C1 -= 0.4068 * Math.sin(Mpr * dr) - 0.0161 * Math.sin(dr * 2 * Mpr);
+    C1 -= 0.0004 * Math.sin(dr * 3 * Mpr);
+    C1 += 0.0104 * Math.sin(dr * 2 * F) - 0.0051 * Math.sin(dr * (M + Mpr));
+    C1 -= 0.0074 * Math.sin(dr * (M - Mpr)) - 0.0004 * Math.sin(dr * (2 * F + M));
+    C1 -= 0.0004 * Math.sin(dr * (2 * F - M)) + 0.0006 * Math.sin(dr * (2 * F + Mpr));
+    C1 += 0.0010 * Math.sin(dr * (2 * F - Mpr)) + 0.0005 * Math.sin(dr * (2 * Mpr + M));
+    const dt = T < -11 ? 0.001 + 0.000839 * T + 0.0002261 * T2 - 0.00000845 * T3 - 0.000000081 * T * T3
+                       : -0.000278 + 0.000265 * T + 0.000262 * T2;
+    return Jd1 + C1 - dt;
+  }
+  function sunLongitude(jdn){
+    const T = (jdn - 2451545.0) / 36525, T2 = T * T, dr = Math.PI / 180;
+    const M = 357.52910 + 35999.05030 * T - 0.0001559 * T2 - 0.00000048 * T * T2;
+    const L0 = 280.46645 + 36000.76983 * T + 0.0003032 * T2;
+    let DL = (1.914600 - 0.004817 * T - 0.000014 * T2) * Math.sin(dr * M);
+    DL += (0.019993 - 0.000101 * T) * Math.sin(dr * 2 * M) + 0.000290 * Math.sin(dr * 3 * M);
+    let L = (L0 + DL) * dr;
+    L -= Math.PI * 2 * Math.floor(L / (Math.PI * 2));
+    return L;
+  }
+  const getSunLongitude = (dayNumber, tz) => Math.floor(sunLongitude(dayNumber - 0.5 - tz / 24.0) / Math.PI * 6);
+  const getNewMoonDay = (k, tz) => Math.floor(newMoon(k) + 0.5 + tz / 24.0);
+  function getLunarMonth11(yy, tz){
+    const off = jdFromDate(31, 12, yy) - 2415021;
+    const k = Math.floor(off / 29.530588853);
+    let nm = getNewMoonDay(k, tz);
+    if(getSunLongitude(nm, tz) >= 9) nm = getNewMoonDay(k - 1, tz);
+    return nm;
+  }
+  function getLeapMonthOffset(a11, tz){
+    const k = Math.floor((a11 - 2415021.076998695) / 29.530588853 + 0.5);
+    let last = 0, i = 1, arc = getSunLongitude(getNewMoonDay(k + i, tz), tz);
+    do{ last = arc; i++; arc = getSunLongitude(getNewMoonDay(k + i, tz), tz); }while(arc !== last && i < 14);
+    return i - 1;
+  }
+  function solar2lunar(dd, mm, yy){
+    const dayNumber = jdFromDate(dd, mm, yy);
+    const k = Math.floor((dayNumber - 2415021.076998695) / 29.530588853);
+    let monthStart = getNewMoonDay(k + 1, TZ);
+    if(monthStart > dayNumber) monthStart = getNewMoonDay(k, TZ);
+    let a11 = getLunarMonth11(yy, TZ), b11 = a11, lunarYear;
+    if(a11 >= monthStart){ lunarYear = yy; a11 = getLunarMonth11(yy - 1, TZ); }
+    else{ lunarYear = yy + 1; b11 = getLunarMonth11(yy + 1, TZ); }
+    const lunarDay = dayNumber - monthStart + 1;
+    const diff = Math.floor((monthStart - a11) / 29);
+    let lunarLeap = 0, lunarMonth = diff + 11;
+    if(b11 - a11 > 365){
+      const leapDiff = getLeapMonthOffset(a11, TZ);
+      if(diff >= leapDiff){
+        lunarMonth = diff + 10;
+        if(diff === leapDiff) lunarLeap = 1;
+      }
+    }
+    if(lunarMonth > 12) lunarMonth -= 12;
+    if(lunarMonth >= 11 && diff < 4) lunarYear -= 1;
+    return [lunarDay, lunarMonth, lunarYear, lunarLeap];
+  }
+  const CAN = ['Giáp','Ất','Bính','Đinh','Mậu','Kỷ','Canh','Tân','Nhâm','Quý'];
+  const CHI = ['Tý','Sửu','Dần','Mão','Thìn','Tỵ','Ngọ','Mùi','Thân','Dậu','Tuất','Hợi'];
+  const canChi = y => CAN[(y + 6) % 10] + ' ' + CHI[(y + 8) % 12];
+  function lunarText(d, m, y){
+    const l = solar2lunar(d, m, y);
+    return l[0] + '/' + l[1] + (l[3] ? ' (nhuận)' : '') + ' năm ' + canChi(l[2]);
+  }
+  const WD = ['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
 
-  /* ---------- Layout controls ---------- */
-  const splits = [62, 50, 70];
-  let si = Math.max(0, splits.indexOf(store.get('split', 62)));
-  function applySplit(){
-    document.documentElement.style.setProperty('--split', splits[si] + '%');
-    $('#btnFit').textContent = 'Fit ' + splits[si] + '%';
+  /* =====================================================================
+     TRANG (vuốt trái / phải)
+     ===================================================================== */
+  const N = 3, TITLES = ['YouTube', 'TV · VTV', 'Tiện ích'];
+  const track = $('#track'), vp = $('#viewport');
+  let page = Math.min(N - 1, Math.max(0, Number(store.get('page', 0)) || 0));
+
+  function go(i, anim){
+    page = Math.min(N - 1, Math.max(0, i));
+    track.style.transition = anim === false ? 'none' : 'transform .28s ease';
+    track.style.transform = 'translate3d(' + (-page * 100 / N) + '%,0,0)';
+    [...$('#dots').children].forEach((b, j) => b.classList.toggle('on', j === page));
+    $('#ptitle').textContent = TITLES[page];
+    store.set('page', page);
+    if(page === 0) tvStop();          // sang trang YouTube: dừng TV
+    if(page === 1) tube.pause();      // sang trang TV: tạm dừng YouTube
+    if(page === 2) refreshTools();
   }
-  applySplit();
-  $('#btnFit').onclick = () => { si = (si + 1) % splits.length; store.set('split', splits[si]); applySplit(); };
-  if(store.get('swap', false)) $('#main').classList.add('swap');
-  $('#btnSwap').onclick = () => { const on = $('#main').classList.toggle('swap'); store.set('swap', on); };
+  [...$('#dots').children].forEach(b => b.onclick = () => go(Number(b.dataset.p)));
+
+  let sx = 0, sy = 0, dx = 0, drag = false, lock = null, t0 = 0;
+  vp.addEventListener('touchstart', e => {
+    if(e.touches.length !== 1){ drag = false; return; }
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; dx = 0; lock = null; t0 = Date.now(); drag = true;
+  }, { passive: true });
+  vp.addEventListener('touchmove', e => {
+    if(!drag) return;
+    const x = e.touches[0].clientX - sx, y = e.touches[0].clientY - sy;
+    if(lock === null){
+      if(Math.abs(x) < 8 && Math.abs(y) < 8) return;
+      lock = Math.abs(x) > Math.abs(y) * 1.2 ? 'h' : 'v';
+      if(lock === 'h') track.style.transition = 'none';
+    }
+    if(lock !== 'h') return;
+    e.preventDefault();
+    let d = x;
+    if((page === 0 && d > 0) || (page === N - 1 && d < 0)) d *= 0.3;   // kéo quá mép: cản lại
+    dx = d;
+    track.style.transform = 'translate3d(calc(' + (-page * 100 / N) + '% + ' + dx + 'px),0,0)';
+  }, { passive: false });
+  function endDrag(){
+    if(!drag) return;
+    drag = false;
+    if(lock === 'h'){
+      const w = vp.clientWidth || 1, dt = Math.max(1, Date.now() - t0);
+      const fast = Math.abs(dx) / dt > 0.4 && Math.abs(dx) > 30;
+      if(Math.abs(dx) > w * 0.2 || fast) go(page + (dx < 0 ? 1 : -1)); else go(page);
+    }
+    lock = null; dx = 0;
+  }
+  vp.addEventListener('touchend', endDrag);
+  vp.addEventListener('touchcancel', endDrag);
+  document.addEventListener('keydown', e => {
+    const t = (e.target && e.target.tagName) || '';
+    if(/INPUT|SELECT|TEXTAREA/.test(t)) return;
+    if(e.key === 'ArrowLeft') go(page - 1);
+    if(e.key === 'ArrowRight') go(page + 1);
+  });
+
   $('#btnFull').onclick = () => {
-    const el = $('#tvView').hidden ? $('#stage') : $('#tvStage');
-    if(document.fullscreenElement) document.exitFullscreen();
-    else if(el.requestFullscreen) el.requestFullscreen();
+    if(document.fullscreenElement){ document.exitFullscreen(); return; }
+    const el = page === 0 ? $('#ytStage') : page === 1 ? $('#tvStage') : document.documentElement;
+    if(el.requestFullscreen) el.requestFullscreen();
   };
 
-  /* ---------- YouTube player (official IFrame API) ---------- */
+  /* =====================================================================
+     TRANG 1 — YOUTUBE (IFrame API chính thức)
+     ===================================================================== */
   const YT_ERR = {
     2:   'Video ID hoặc tham số không hợp lệ. Hãy kiểm tra liên kết.',
     5:   'Trình duyệt này không phát được video bằng HTML5. Thử lại hoặc mở YouTube gốc.',
     100: 'Video không tồn tại, đã bị xóa hoặc chuyển sang riêng tư.',
     101: 'Chủ sở hữu không cho phép nhúng video này. Hãy mở YouTube gốc.',
     150: 'Chủ sở hữu không cho phép nhúng video này. Hãy mở YouTube gốc.',
-    153: 'YouTube thiếu HTTP Referer. Hãy mở trang qua HTTPS hoặc localhost, không mở file trực tiếp.'
+    153: 'YouTube thiếu HTTP Referer. Hãy mở trang qua HTTPS hoặc localhost, không mở file trực tiếp hay khung xem trước.'
   };
-
   let apiPromise = null;
   function loadAPI(){
     if(window.YT && window.YT.Player) return Promise.resolve(window.YT);
@@ -243,7 +484,7 @@
     constructor(host, notice, playBtn){
       this.host = host; this.notice = notice; this.playBtn = playBtn;
       this.player = null; this.gen = 0; this.failed = false; this.timer = null;
-      this.playBtn.addEventListener('click', () => {
+      playBtn.addEventListener('click', () => {
         if(!this.player || this.failed) return;
         this.say('Đang yêu cầu phát… Nếu chưa phát, chạm ▶ trong khung YouTube.');
         this.watch(this.gen);
@@ -258,13 +499,13 @@
         this.say('Chưa nhận được tín hiệu phát sau 15 giây. Có thể do mạng hoặc trình duyệt chặn tự phát — chạm ▶ trong khung.', true);
       }, 15000);
     }
+    pause(){ try{ if(this.player && this.player.pauseVideo) this.player.pauseVideo(); }catch(e){} }
     close(){
       this.gen++; clearTimeout(this.timer);
       if(this.player){ try{ this.player.destroy(); }catch(e){} }
       this.player = null; this.failed = false;
       this.host.replaceChildren(); this.host.hidden = false; this.playBtn.hidden = true;
     }
-    // opts: { id } hoặc { list }, kèm autoplay, time
     async open(opts){
       this.close();
       const token = this.gen;
@@ -278,9 +519,9 @@
         iframe.title = 'YouTube player';
         iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
         iframe.allowFullscreen = true;
-        iframe.referrerPolicy = 'strict-origin-when-cross-origin'; // đặt trước khi gán src
+        iframe.referrerPolicy = 'strict-origin-when-cross-origin';
         const q = new URLSearchParams({
-          enablejsapi:'1', origin: location.origin, playsinline:'1', rel:'0',
+          enablejsapi: '1', origin: location.origin, playsinline: '1', rel: '0',
           autoplay: opts.autoplay === false ? '0' : '1',
           start: String(Math.max(0, Math.floor(Number(opts.time) || 0)))
         });
@@ -318,187 +559,105 @@
       }
     }
   }
+  const tube = new TubePlayer($('#ytHost'), $('#ytNotice'), $('#ytPlay'));
 
-  const tube = new TubePlayer($('#frameHost'), $('#notice'), $('#playBtn'));
-
-  function setNow(t){ $('#now').textContent = t || ''; }
-
-  function play(id, title, list){
-    $('#ph').style.display = 'none';
-    tube.open({ id: id, list: list });
-    setNow(title ? '▶ ' + title : '');
-    if(id){ addRecent({id: id, title: title || id}); }
-  }
-
-  /* ---------- Parse link ---------- */
-  function parseLink(s){
-    s = s.trim();
-    try{
-      const u = new URL(s);
-      if(/youtu\.be$/.test(u.hostname)) return {id: u.pathname.slice(1)};
-      if(/youtube\.com$/.test(u.hostname)){
-        if(u.searchParams.get('list') && !u.searchParams.get('v')) return {list: u.searchParams.get('list')};
-        if(u.searchParams.get('v')) return {id: u.searchParams.get('v')};
-        const m = u.pathname.match(/\/(embed|shorts|live)\/([\w-]{11})/);
-        if(m) return {id: m[2]};
-      }
-    }catch(e){}
-    if(/^[\w-]{11}$/.test(s)) return {id: s};
-    return null;
-  }
-
-  /* ---------- Recent ---------- */
+  const ytNow = t => { $('#ytNow').textContent = t || ''; };
   function getRecent(){ return store.get('recent', []); }
   function addRecent(v){
     const r = getRecent().filter(x => x.id !== v.id);
     r.unshift(v);
     store.set('recent', r.slice(0, 24));
   }
+  function playYT(id, title, list){
+    $('#ytPh').style.display = 'none';
+    tube.open({ id: id, list: list });
+    ytNow(title ? '▶ ' + title : '');
+    $('#ytOpen').href = list ? 'https://www.youtube.com/playlist?list=' + encodeURIComponent(list)
+                             : 'https://www.youtube.com/watch?v=' + encodeURIComponent(id);
+    if(id) addRecent({ id: id, title: title || id });
+  }
+  function parseLink(s){
+    s = s.trim();
+    try{
+      const u = new URL(s);
+      if(/(^|\.)youtu\.be$/.test(u.hostname)) return { id: u.pathname.slice(1) };
+      if(/(^|\.)youtube\.com$/.test(u.hostname)){
+        if(u.searchParams.get('list') && !u.searchParams.get('v')) return { list: u.searchParams.get('list') };
+        if(u.searchParams.get('v')) return { id: u.searchParams.get('v') };
+        const m = u.pathname.match(/\/(embed|shorts|live)\/([\w-]{11})/);
+        if(m) return { id: m[2] };
+      }
+    }catch(e){}
+    if(/^[\w-]{11}$/.test(s)) return { id: s };
+    return null;
+  }
 
-  /* ---------- Results rendering ---------- */
   const results = $('#results');
-  function msg(t){ results.innerHTML = ''; const d = document.createElement('div'); d.className = 'msg'; d.textContent = t; results.appendChild(d); }
-  function render(items){
+  function msg(box, t){ box.innerHTML = ''; const d = document.createElement('div'); d.className = 'msg'; d.textContent = t; box.appendChild(d); }
+  function renderYT(items){
     results.innerHTML = '';
-    if(!items.length){ msg('Không có kết quả.'); return; }
+    if(!items.length){ msg(results, 'Không có kết quả.'); return; }
     items.forEach(it => {
       const b = document.createElement('button');
-      b.className = 'card';
+      b.className = 'card'; b.type = 'button';
       const img = document.createElement('img');
       img.loading = 'lazy'; img.alt = '';
       img.src = 'https://i.ytimg.com/vi/' + it.id + '/mqdefault.jpg';
       const d = document.createElement('div');
       d.textContent = it.title;
       b.append(img, d);
-      b.onclick = () => play(it.id, it.title);
+      b.onclick = () => playYT(it.id, it.title);
       results.appendChild(b);
     });
   }
-
-  /* ---------- Search (YouTube Data API v3) ---------- */
-  async function search(q){
+  async function searchYT(q){
     const key = store.get('apiKey', '');
-    if(!key){ msg('Chưa có API key. Bấm ⚙ để nhập key, hoặc dán link YouTube vào ô tìm kiếm.'); return; }
-    msg('Đang tìm…');
+    if(!key){ msg(results, 'Chưa có API key. Bấm ⚙ để nhập key, hoặc dán link YouTube vào ô tìm kiếm.'); return; }
+    msg(results, 'Đang tìm…');
     const url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=16'
       + '&q=' + encodeURIComponent(q) + '&key=' + encodeURIComponent(key);
     try{
       const r = await fetch(url);
       const j = await r.json();
-      if(j.error){ msg('Lỗi API: ' + (j.error.message || 'không rõ')); return; }
-      render((j.items || []).map(i => ({ id: i.id.videoId, title: i.snippet.title })));
-    }catch(e){ msg('Không kết nối được tới YouTube API.'); }
+      if(j.error){ msg(results, 'Lỗi API: ' + (j.error.message || 'không rõ')); return; }
+      renderYT((j.items || []).map(i => ({ id: i.id.videoId, title: i.snippet.title })));
+    }catch(e){ msg(results, 'Không kết nối được tới YouTube API.'); }
   }
-
-  /* ---------- Categories ---------- */
   const cats = [
-    {name:'Âm nhạc',  q:'nhạc hay nghe trên xe'},
-    {name:'Thư giãn', q:'nhạc thư giãn lofi driving'},
-    {name:'Khám phá', q:'road trip travel vlog'},
-    {name:'Gần đây',  recent:true}
+    { name: 'Âm nhạc',  q: 'nhạc hay nghe trên xe' },
+    { name: 'Thư giãn', q: 'nhạc thư giãn lofi driving' },
+    { name: 'Khám phá', q: 'road trip travel vlog' },
+    { name: 'Gần đây',  recent: true }
   ];
-  let curCat = null;
   const chips = $('#chips');
   cats.forEach((c, i) => {
     const b = document.createElement('button');
-    b.className = 'chip'; b.textContent = c.name;
+    b.className = 'chip'; b.type = 'button'; b.textContent = c.name;
     b.onclick = () => {
-      curCat = i;
       [...chips.children].forEach((x, j) => x.classList.toggle('on', j === i));
       if(c.recent){
         const r = getRecent();
-        r.length ? render(r) : msg('Chưa có video nào được phát gần đây.');
-      } else { search(c.q); }
+        r.length ? renderYT(r) : msg(results, 'Chưa có video nào được phát gần đây.');
+      }else searchYT(c.q);
     };
     chips.appendChild(b);
   });
-
   $('#searchForm').addEventListener('submit', e => {
     e.preventDefault();
     const v = $('#q').value.trim();
     if(!v) return;
     const p = parseLink(v);
-    if(p){ play(p.id, '', p.list); return; }
+    if(p){ playYT(p.id, '', p.list); return; }
     [...chips.children].forEach(x => x.classList.remove('on'));
-    search(v);
+    searchYT(v);
   });
-
-  /* ---------- Settings ---------- */
   $('#btnSettings').onclick = () => { $('#apiKey').value = store.get('apiKey', ''); $('#dlg').showModal(); };
   $('#saveKey').onclick = () => { store.set('apiKey', $('#apiKey').value.trim()); };
 
-  /* ---------- Weather (Open-Meteo) ---------- */
-  const cities = {
-    'Hà Nội':[21.0285,105.8542], 'TP. Hồ Chí Minh':[10.8231,106.6297], 'Đà Nẵng':[16.0544,108.2022],
-    'Tokyo':[35.6762,139.6503], 'Berlin':[52.52,13.405]
-  };
-  const sel = $('#city');
-  Object.keys(cities).forEach(n => { const o = document.createElement('option'); o.textContent = n; sel.appendChild(o); });
-  sel.value = store.get('city', 'Hà Nội');
-  const wcode = c => c===0?'Trời quang':c<=3?'Có mây':c<=48?'Sương mù':c<=57?'Mưa phùn':c<=67?'Mưa':c<=77?'Tuyết':c<=82?'Mưa rào':c<=99?'Dông':'';
-  async function weather(lat, lon, label){
-    $('#wxInfo').textContent = 'Đang tải…';
-    try{
-      const u = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon
-        + '&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&timezone=auto';
-      const j = await (await fetch(u)).json();
-      const c = j.current;
-      $('#wxTemp').textContent = Math.round(c.temperature_2m) + '°C';
-      $('#wxInfo').textContent = label + ' · ' + wcode(c.weather_code) + ' · Gió ' + Math.round(c.wind_speed_10m) + ' km/h · Ẩm ' + c.relative_humidity_2m + '%';
-    }catch(e){ $('#wxInfo').textContent = 'Không tải được thời tiết.'; }
-  }
-  function loadCity(){ const n = sel.value; store.set('city', n); const c = cities[n]; weather(c[0], c[1], n); }
-  sel.onchange = loadCity; loadCity();
-  setInterval(loadCity, 15 * 60 * 1000);
-  $('#wxHere').onclick = () => {
-    if(!navigator.geolocation){ $('#wxInfo').textContent = 'Thiết bị không hỗ trợ định vị.'; return; }
-    navigator.geolocation.getCurrentPosition(
-      p => weather(p.coords.latitude.toFixed(3), p.coords.longitude.toFixed(3), 'Vị trí của bạn'),
-      () => { $('#wxInfo').textContent = 'Bạn chưa cho phép truy cập vị trí.'; }
-    );
-  };
-
-  /* ---------- GPS trip ---------- */
-  let watchId = null, last = null, distKm = 0, tripStart = 0, tripTimer = null;
-  function hav(a, b){
-    const R = 6371, rad = x => x * Math.PI / 180;
-    const dLat = rad(b.latitude - a.latitude), dLon = rad(b.longitude - a.longitude);
-    const h = Math.sin(dLat/2)**2 + Math.cos(rad(a.latitude)) * Math.cos(rad(b.latitude)) * Math.sin(dLon/2)**2;
-    return 2 * R * Math.asin(Math.sqrt(h));
-  }
-  function showTrip(){
-    $('#dist').textContent = distKm.toFixed(2);
-    const s = tripStart ? Math.floor((Date.now() - tripStart) / 1000) : 0;
-    const mm = String(Math.floor(s / 60)).padStart(2, '0'), ss = String(s % 60).padStart(2, '0');
-    $('#trip').textContent = mm + ':' + ss;
-  }
-  function onPos(p){
-    const c = p.coords;
-    const v = (c.speed != null && !isNaN(c.speed)) ? c.speed * 3.6 : null;
-    $('#spd').textContent = v == null ? '—' : Math.round(v);
-    if(last && c.accuracy < 50){
-      const d = hav(last, c);
-      if(d > 0.003) { distKm += d; last = c; }
-    } else if(!last && c.accuracy < 50){ last = c; }
-    showTrip();
-  }
-  $('#gpsToggle').onclick = () => {
-    if(watchId !== null){
-      navigator.geolocation.clearWatch(watchId); watchId = null; clearInterval(tripTimer);
-      $('#gpsToggle').textContent = 'Bật GPS'; $('#spd').textContent = '—'; return;
-    }
-    if(!navigator.geolocation){ alert('Thiết bị không hỗ trợ GPS.'); return; }
-    if(!tripStart) tripStart = Date.now();
-    watchId = navigator.geolocation.watchPosition(onPos,
-      () => { alert('Không lấy được vị trí. Hãy cho phép truy cập vị trí (cần HTTPS).'); },
-      { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 });
-    tripTimer = setInterval(showTrip, 1000);
-    $('#gpsToggle').textContent = 'Tắt GPS';
-  };
-  $('#gpsReset').onclick = () => { distKm = 0; last = null; tripStart = watchId !== null ? Date.now() : 0; showTrip(); };
-
-  /* ---------- TV: chỉ các kênh VTV1, VTV2, VTV3… (HLS) ---------- */
-  // Danh sách VTV có sẵn, lấy từ playlist công khai iptv-org (streams/vn.m3u). Nguồn không bị giới hạn vùng được xếp trước.
+  /* =====================================================================
+     TRANG 2 — TV (HLS): VTV1, 2, 3, 5, 6, 7
+     ===================================================================== */
+  // Danh sách lấy từ playlist công khai iptv-org (streams/vn.m3u). Nguồn không giới hạn vùng xếp trước.
   const TV_BUILTIN = [
  {
   "name": "VTV1",
@@ -560,7 +719,6 @@
 
   function tvSay(t, err){ const n = $('#tvNotice'); n.textContent = t || ''; n.classList.toggle('error', !!err); }
 
-  // Đọc playlist M3U: dòng #EXTINF:-1 ...,Tên kênh rồi dòng URL ngay sau
   function parseM3U(text){
     const out = [], lines = String(text).split(/\r?\n/);
     let cur = null;
@@ -575,31 +733,27 @@
     }
     return out;
   }
-
-  // Chỉ giữ tên bắt đầu bằng VTV + số (VTV1, VTV 2, VTV3 HD…); gộp các nguồn trùng thành 1 kênh
   function vtvOnly(list){
     const map = new Map();
     list.forEach(c => {
       const m = c.name.match(/^VTV\s*-?\s*(\d{1,2})(?!\d)(.*)$/i);
       if(!m || !/^https?:\/\//i.test(c.url || '')) return;
       const num = parseInt(m[1], 10);
-      let rest = m[2].replace(/[\(\[].*?[\)\]]/g, ' ').replace(/\b(F?HD|SD|4K)\b/ig, ' ').replace(/\s+/g, ' ').trim();
-      if(!TV_ALLOWED.includes(num) || rest) return; // chỉ VTV1, 2, 3, 5, 6, 7 (bỏ bản vùng miền)
-      const name = 'VTV' + num + (rest ? ' ' + rest : '');
-      const key = name.toLowerCase();
-      if(!map.has(key)) map.set(key, { num: num, name: name, urls: [] });
-      const e = map.get(key);
+      const rest = m[2].replace(/[\(\[].*?[\)\]]/g, ' ').replace(/\b(F?HD|SD|4K)\b/ig, ' ').replace(/\s+/g, ' ').trim();
+      if(!TV_ALLOWED.includes(num) || rest) return;
+      const name = 'VTV' + num;
+      if(!map.has(name)) map.set(name, { num: num, name: name, urls: [] });
+      const e = map.get(name);
       if(!e.urls.includes(c.url)) e.urls.push(c.url);
     });
-    return [...map.values()].sort((a, b) => a.num - b.num || a.name.localeCompare(b.name));
+    return [...map.values()].sort((a, b) => a.num - b.num);
   }
 
   function renderTV(){
     const box = $('#tvList'); box.innerHTML = '';
     if(!tvChannels.length){
-      const d = document.createElement('div'); d.className = 'msg';
-      d.textContent = 'Chưa có kênh VTV nào. Bấm “Tải lại” hoặc đổi link playlist trong “Nguồn danh sách kênh”.';
-      box.appendChild(d); return;
+      msg(box, 'Chưa có kênh VTV nào. Bấm “Tải lại danh sách” hoặc kiểm tra “Nguồn danh sách kênh”.');
+      return;
     }
     tvChannels.forEach(c => {
       const b = document.createElement('button');
@@ -612,11 +766,10 @@
       box.appendChild(b);
     });
   }
-
   async function tvLoad(){
     const src = (store.get('tvSrc', '') || '').trim();
     if(!src){
-      tvChannels = TV_BUILTIN.map(c => ({ name: c.name, urls: c.urls.slice(), num: parseInt(c.name.replace(/\D/g, ''), 10) || 0 }));
+      tvChannels = TV_BUILTIN.map(c => ({ name: c.name, urls: c.urls.slice() }));
       renderTV();
       tvSay('Chọn kênh để xem (' + tvChannels.length + ' kênh VTV có sẵn).');
       return;
@@ -633,14 +786,12 @@
       tvSay('Không tải được playlist (' + (e.message || 'lỗi mạng') + '). Xóa link để dùng danh sách có sẵn.', true);
     }
   }
-
   function tvStop(){
     tvGen++; clearTimeout(tvTimer);
     tvVideo.onerror = null;
     if(tvHls){ tvHls.destroy(); tvHls = null; }
     tvVideo.pause(); tvVideo.removeAttribute('src'); tvVideo.load();
   }
-
   function tvPlay(ch, i){
     tvStop();
     const token = tvGen, src = ch.urls[i];
@@ -649,10 +800,10 @@
     renderTV();
     tvSay('Đang mở ' + ch.name + '…');
     const mixed = (location.protocol === 'https:' && /^http:/i.test(src)) ? ' Link http bị chặn khi trang chạy HTTPS.' : '';
-    const fail = msg => {
+    const fail = m => {
       if(token !== tvGen) return;
-      if(i + 1 < ch.urls.length){ tvSay('Đổi nguồn cùng kênh…'); tvPlay(ch, i + 1); }
-      else tvSay(msg, true);
+      if(i + 1 < ch.urls.length){ tvSay('Đổi nguồn cùng kênh… (' + (i + 2) + '/' + ch.urls.length + ')'); tvPlay(ch, i + 1); }
+      else tvSay(m, true);
     };
     tvTimer = setTimeout(() => fail('Các nguồn chưa phản hồi. Thử kênh khác.' + mixed), 18000);
     tvVideo.onerror = () => fail('Nguồn của kênh chưa phát được.' + mixed);
@@ -680,7 +831,6 @@
   }
   tvVideo.addEventListener('playing', () => { clearTimeout(tvTimer); if(tvCur) tvSay('Đang phát · ' + tvCur.name); });
   tvVideo.addEventListener('waiting', () => { if(tvCur && tvHls) tvSay('Đang tải thêm dữ liệu…'); });
-
   function tvStep(d){
     if(!tvChannels.length) return;
     let i = tvCur ? tvChannels.findIndex(c => c.name === tvCur.name) : -1;
@@ -693,25 +843,260 @@
   $('#tvSrc').value = store.get('tvSrc', '');
   $('#tvSaveSrc').onclick = () => { store.set('tvSrc', $('#tvSrc').value.trim()); tvLoad(); };
 
-  /* ---------- Tab YouTube / TV ---------- */
-  function showTab(tv){
-    $('#ytView').hidden = tv; $('#tvView').hidden = !tv;
-    $('#tabYT').classList.toggle('on', !tv); $('#tabTV').classList.toggle('on', tv);
-    store.set('tab', tv ? 'tv' : 'yt');
-    if(tv){
-      tube.close(); $('#ph').style.display = ''; setNow('');
-      if(!tvChannels.length) tvLoad();
-    }else{
-      tvStop(); tvCur = null; $('#tvNow').textContent = '';
+  /* =====================================================================
+     TRANG 3 — TIỆN ÍCH
+     ===================================================================== */
+  /* ---- Đồng hồ ---- */
+  let lastDayKey = '';
+  function tick(){
+    const d = new Date();
+    const hm = pad(d.getHours()) + ':' + pad(d.getMinutes());
+    $('#hclock').textContent = hm;
+    $('#clkHM').textContent = hm;
+    $('#clkS').textContent = pad(d.getSeconds());
+    const key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+    if(key !== lastDayKey){
+      lastDayKey = key;
+      $('#clkDate').textContent = WD[d.getDay()] + ', ' + pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+      $('#clkLunar').textContent = 'Âm lịch: ' + lunarText(d.getDate(), d.getMonth() + 1, d.getFullYear());
     }
   }
-  $('#tabYT').onclick = () => showTab(false);
-  $('#tabTV').onclick = () => showTab(true);
+  tick(); setInterval(tick, 1000);
 
-  /* ---------- Init ---------- */
+  /* ---- Thời tiết (Open-Meteo) ---- */
+  const cities = {
+    'Hà Nội': [21.0285, 105.8542], 'Hải Phòng': [20.8449, 106.6881], 'Huế': [16.4637, 107.5909],
+    'Đà Nẵng': [16.0544, 108.2022], 'Nha Trang': [12.2388, 109.1967], 'TP. Hồ Chí Minh': [10.8231, 106.6297],
+    'Cần Thơ': [10.0452, 105.7469]
+  };
+  const sel = $('#city');
+  Object.keys(cities).forEach(n => { const o = document.createElement('option'); o.textContent = n; sel.appendChild(o); });
+  sel.value = store.get('city', 'Hà Nội');
+  if(!sel.value) sel.value = 'Hà Nội';
+  const wDesc = c => c === 0 ? 'Trời quang' : c <= 2 ? 'Ít mây' : c === 3 ? 'Nhiều mây' : c <= 48 ? 'Sương mù' : c <= 57 ? 'Mưa phùn' : c <= 67 ? 'Mưa' : c <= 77 ? 'Tuyết' : c <= 82 ? 'Mưa rào' : 'Dông';
+  const wIcon = c => c === 0 ? '☀️' : c <= 2 ? '🌤️' : c === 3 ? '☁️' : c <= 48 ? '🌫️' : c <= 57 ? '🌦️' : c <= 67 ? '🌧️' : c <= 77 ? '❄️' : c <= 82 ? '🌧️' : '⛈️';
+  async function weather(lat, lon, label){
+    $('#wxInfo').textContent = 'Đang tải…';
+    try{
+      const u = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon
+        + '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m'
+        + '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=1&timezone=auto';
+      const r = await fetch(u);
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json(), c = j.current, dd = j.daily || {};
+      $('#wxIcon').textContent = wIcon(c.weather_code);
+      $('#wxTemp').textContent = Math.round(c.temperature_2m) + '°C';
+      $('#wxInfo').textContent = label + ' · ' + wDesc(c.weather_code);
+      const mm = [];
+      mm.push('Cảm giác ' + Math.round(c.apparent_temperature) + '°C');
+      mm.push('Ẩm ' + c.relative_humidity_2m + '%');
+      mm.push('Gió ' + Math.round(c.wind_speed_10m) + ' km/h');
+      if(dd.temperature_2m_max && dd.temperature_2m_min) mm.push('Hôm nay ' + Math.round(dd.temperature_2m_min[0]) + '–' + Math.round(dd.temperature_2m_max[0]) + '°C');
+      if(dd.precipitation_probability_max && dd.precipitation_probability_max[0] != null) mm.push('Khả năng mưa ' + dd.precipitation_probability_max[0] + '%');
+      $('#wxMore').textContent = mm.join(' · ');
+    }catch(e){ $('#wxInfo').textContent = 'Không tải được thời tiết.'; $('#wxMore').textContent = ''; }
+  }
+  function loadCity(){ const n = sel.value; store.set('city', n); const c = cities[n]; weather(c[0], c[1], n); }
+  sel.onchange = loadCity;
+  setInterval(loadCity, 15 * 60 * 1000);
+  $('#wxHere').onclick = () => {
+    if(!navigator.geolocation){ $('#wxInfo').textContent = 'Thiết bị không hỗ trợ định vị.'; return; }
+    navigator.geolocation.getCurrentPosition(
+      p => weather(p.coords.latitude.toFixed(3), p.coords.longitude.toFixed(3), 'Vị trí của bạn'),
+      () => { $('#wxInfo').textContent = 'Bạn chưa cho phép truy cập vị trí.'; }
+    );
+  };
+
+  /* ---- Lịch tháng dương + âm ---- */
+  const SOLAR_HOL = { '1-1': 'Tết Dương lịch', '8-3': 'Quốc tế Phụ nữ', '30-4': 'Giải phóng miền Nam', '1-5': 'Quốc tế Lao động',
+                      '2-9': 'Quốc khánh', '20-10': 'Ngày Phụ nữ Việt Nam', '20-11': 'Ngày Nhà giáo Việt Nam', '25-12': 'Giáng sinh' };
+  const LUNAR_HOL = { '1-1': 'Tết Nguyên Đán', '15-1': 'Rằm tháng Giêng', '3-3': 'Tết Hàn Thực', '10-3': 'Giỗ Tổ Hùng Vương',
+                      '15-4': 'Phật Đản', '5-5': 'Tết Đoan Ngọ', '15-7': 'Vu Lan', '15-8': 'Tết Trung Thu', '23-12': 'Ông Táo chầu trời' };
+  const now0 = new Date();
+  let calY = now0.getFullYear(), calM = now0.getMonth() + 1;
+  let selDate = { d: now0.getDate(), m: now0.getMonth() + 1, y: now0.getFullYear() };
+
+  function holiday(d, m, l){
+    const out = [];
+    if(SOLAR_HOL[d + '-' + m]) out.push(SOLAR_HOL[d + '-' + m]);
+    if(!l[3] && LUNAR_HOL[l[0] + '-' + l[1]]) out.push(LUNAR_HOL[l[0] + '-' + l[1]]);
+    return out;
+  }
+  function renderCal(){
+    $('#calTitle').textContent = 'Tháng ' + calM + ' / ' + calY;
+    const grid = $('#calGrid'); grid.innerHTML = '';
+    ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].forEach((t, i) => {
+      const h = document.createElement('div'); h.className = 'cal-wd' + (i === 6 ? ' sun' : ''); h.textContent = t; grid.appendChild(h);
+    });
+    const off = (new Date(calY, calM - 1, 1).getDay() + 6) % 7;      // Thứ Hai = 0
+    const dim = new Date(calY, calM, 0).getDate();
+    const prevDim = new Date(calY, calM - 1, 0).getDate();
+    const cells = Math.ceil((off + dim) / 7) * 7;
+    const t = new Date();
+    for(let i = 0; i < cells; i++){
+      let d, m = calM, y = calY, other = false;
+      if(i < off){ d = prevDim - off + i + 1; m = calM - 1; if(m < 1){ m = 12; y--; } other = true; }
+      else if(i >= off + dim){ d = i - off - dim + 1; m = calM + 1; if(m > 12){ m = 1; y++; } other = true; }
+      else d = i - off + 1;
+      const l = solar2lunar(d, m, y);
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'cell' + (other ? ' other' : '') + (i % 7 === 6 ? ' sun' : '')
+        + (l[0] === 1 ? ' first' : '')
+        + (d === t.getDate() && m === t.getMonth() + 1 && y === t.getFullYear() ? ' today' : '')
+        + (d === selDate.d && m === selDate.m && y === selDate.y ? ' sel' : '')
+        + (holiday(d, m, l).length ? ' hol' : '');
+      const sd = document.createElement('span'); sd.className = 'sd'; sd.textContent = d;
+      const ld = document.createElement('span'); ld.className = 'ld'; ld.textContent = l[0] === 1 ? l[0] + '/' + l[1] + (l[3] ? 'n' : '') : l[0];
+      b.append(sd, ld);
+      b.onclick = () => {
+        selDate = { d: d, m: m, y: y };
+        if(other){ calY = y; calM = m; }
+        renderCal();
+      };
+      grid.appendChild(b);
+    }
+    const sdt = new Date(selDate.y, selDate.m - 1, selDate.d);
+    const l = solar2lunar(selDate.d, selDate.m, selDate.y);
+    const ev = holiday(selDate.d, selDate.m, l);
+    $('#calInfo').innerHTML = '';
+    const p1 = document.createElement('div');
+    p1.textContent = WD[sdt.getDay()] + ', ' + pad(selDate.d) + '/' + pad(selDate.m) + '/' + selDate.y;
+    const p2 = document.createElement('div');
+    p2.textContent = 'Âm lịch: ' + l[0] + '/' + l[1] + (l[3] ? ' (nhuận)' : '') + ' năm ' + canChi(l[2]);
+    $('#calInfo').append(p1, p2);
+    if(ev.length){ const p3 = document.createElement('div'); p3.className = 'ev'; p3.textContent = '● ' + ev.join(' · '); $('#calInfo').appendChild(p3); }
+  }
+  $('#calPrev').onclick = () => { calM--; if(calM < 1){ calM = 12; calY--; } renderCal(); };
+  $('#calNext').onclick = () => { calM++; if(calM > 12){ calM = 1; calY++; } renderCal(); };
+  $('#calToday').onclick = () => { const n = new Date(); calY = n.getFullYear(); calM = n.getMonth() + 1; selDate = { d: n.getDate(), m: calM, y: calY }; renderCal(); };
+
+  /* ---- Báo khi sạc pin ---- */
+  let bat = null, batOn = !!store.get('batOn', false), batFired = false, audioCtx = null, ringTimer = null;
+  $('#batTh').value = String(store.get('batTh', 100));
+  if(!$('#batTh').value) $('#batTh').value = '100';
+  const batTh = () => Number($('#batTh').value) || 100;
+
+  function ensureAudio(){
+    try{
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+    }catch(e){}
+  }
+  function beep(){
+    try{
+      ensureAudio();
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'square'; o.frequency.value = 880; g.gain.value = 0.15;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(); o.stop(audioCtx.currentTime + 0.35);
+    }catch(e){}
+  }
+  function ring(text){
+    $('#alarm').hidden = false;
+    $('#alarmText').textContent = text;
+    clearInterval(ringTimer);
+    beep();
+    ringTimer = setInterval(() => { beep(); if(navigator.vibrate) navigator.vibrate([300, 150, 300]); }, 900);
+    try{ if('Notification' in window && Notification.permission === 'granted') new Notification('CarDeck', { body: text }); }catch(e){}
+  }
+  function stopRing(){ clearInterval(ringTimer); ringTimer = null; $('#alarm').hidden = true; }
+  $('#alarmOff').onclick = stopRing;
+
+  function renderBat(){
+    const btn = $('#batToggle');
+    btn.textContent = batOn ? 'Tắt báo' : 'Bật báo';
+    btn.classList.toggle('primary', !batOn);
+    if(!bat) return;
+    const pc = Math.round(bat.level * 100);
+    $('#batLevel').textContent = pc + '%';
+    $('#batBar').style.width = pc + '%';
+    $('#batState').textContent = (bat.charging ? '⚡ Đang sạc' : 'Không sạc') + (batOn ? ' · sẽ báo khi đạt ' + batTh() + '%' : ' · báo đang tắt');
+  }
+  function checkBat(){
+    if(!bat) return;
+    const pc = bat.level * 100;
+    if(batOn && bat.charging && pc >= batTh() && !batFired){
+      batFired = true;
+      ring('Pin đã đạt ' + Math.round(pc) + '% — hãy rút sạc');
+    }
+    if(!bat.charging || pc < batTh() - 1) batFired = false;
+  }
+  $('#batToggle').onclick = () => {
+    batOn = !batOn; store.set('batOn', batOn);
+    if(batOn){
+      ensureAudio();
+      try{ if('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); }catch(e){}
+    }
+    batFired = false; renderBat(); checkBat();
+  };
+  $('#batTh').onchange = () => { store.set('batTh', batTh()); batFired = false; renderBat(); checkBat(); };
+  $('#batTest').onclick = () => { ensureAudio(); ring('Thử chuông báo sạc pin'); };
+  if(navigator.getBattery){
+    navigator.getBattery().then(b => {
+      bat = b;
+      ['levelchange', 'chargingchange'].forEach(ev => b.addEventListener(ev, () => { renderBat(); checkBat(); }));
+      renderBat(); checkBat();
+      setInterval(checkBat, 15000);
+    }).catch(() => { $('#batState').textContent = 'Không đọc được thông tin pin trên thiết bị này.'; });
+  }else{
+    $('#batLevel').textContent = '—';
+    $('#batState').textContent = 'Trình duyệt này không cho đọc pin (Safari/Firefox không hỗ trợ). Dùng Chrome hoặc Edge trên Android/máy tính.';
+  }
+  renderBat();
+
+  /* ---- GPS chuyến đi ---- */
+  let watchId = null, last = null, distKm = 0, tripStart = 0, tripTimer = null;
+  function hav(a, b){
+    const R = 6371, rad = x => x * Math.PI / 180;
+    const dLat = rad(b.latitude - a.latitude), dLon = rad(b.longitude - a.longitude);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.latitude)) * Math.cos(rad(b.latitude)) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+  function showTrip(){
+    $('#dist').textContent = distKm.toFixed(2);
+    const s = tripStart ? Math.floor((Date.now() - tripStart) / 1000) : 0;
+    const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60;
+    $('#trip').textContent = (h ? pad(h) + ':' : '') + pad(m) + ':' + pad(ss);
+  }
+  function onPos(p){
+    const c = p.coords;
+    const v = (c.speed != null && !isNaN(c.speed)) ? c.speed * 3.6 : null;
+    $('#spd').textContent = v == null ? '—' : Math.round(v);
+    if(last && c.accuracy < 50){
+      const d = hav(last, c);
+      if(d > 0.003){ distKm += d; last = c; }
+    }else if(!last && c.accuracy < 50){ last = c; }
+    showTrip();
+  }
+  $('#gpsToggle').onclick = () => {
+    if(watchId !== null){
+      navigator.geolocation.clearWatch(watchId); watchId = null; clearInterval(tripTimer);
+      $('#gpsToggle').textContent = 'Bật GPS'; $('#spd').textContent = '—'; return;
+    }
+    if(!navigator.geolocation){ alert('Thiết bị không hỗ trợ GPS.'); return; }
+    if(!tripStart) tripStart = Date.now();
+    watchId = navigator.geolocation.watchPosition(onPos,
+      () => { alert('Không lấy được vị trí. Hãy cho phép truy cập vị trí (cần HTTPS hoặc localhost).'); },
+      { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 });
+    tripTimer = setInterval(showTrip, 1000);
+    $('#gpsToggle').textContent = 'Tắt GPS';
+  };
+  $('#gpsReset').onclick = () => { distKm = 0; last = null; tripStart = watchId !== null ? Date.now() : 0; showTrip(); };
+
+  let toolsLoaded = false;
+  function refreshTools(){
+    if(!toolsLoaded){ toolsLoaded = true; loadCity(); renderCal(); }
+  }
+
+  /* =====================================================================
+     KHỞI TẠO
+     ===================================================================== */
   const r0 = getRecent();
-  if(store.get('tab','yt') === 'tv') showTab(true);
-  if(r0.length) render(r0); else msg('Dán link YouTube vào ô tìm kiếm, hoặc bấm ⚙ nhập API key để tìm kiếm và duyệt danh mục.');
+  if(r0.length) renderYT(r0); else msg(results, 'Dán link YouTube vào ô tìm kiếm, hoặc bấm ⚙ nhập API key để tìm kiếm và duyệt danh mục.');
+  tvLoad();
+  go(page, false);
+  refreshTools();
 })();
 </script>
 </body>
