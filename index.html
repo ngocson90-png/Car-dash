@@ -6,12 +6,14 @@
 <title>Car Dashboard OS</title>
 <style>
   :root{
-    --bg:#0b1220; --card:#16213a; --card2:#1d2b4a; --text:#f8fafc; --muted:#94a3b8;
-    --accent:#3b82f6; --green:#34d399; --red:#f87171; --yellow:#facc15; --border:#2c3b5e;
+    --bg:#0b1220; --card:#16213a; --card2:#22325a; --text:#ffffff; --muted:#d3deec;
+    --accent:#7dd3fc; --btn:#2563eb; --warn:#b45309; --green:#6ee7b7; --red:#fca5a5; --yellow:#fde047; --yt:#ff5a5a; --border:#44588a;
+    --c-sun:#fde047; --c-partly:#fcd34d; --c-cloud:#d3deec; --c-rain:#7dd3fc; --c-snow:#e0f2fe; --c-bolt:#fde047;
   }
   body.light{
-    --bg:#e8eef7; --card:#ffffff; --card2:#eef2f9; --text:#0f172a; --muted:#64748b;
-    --accent:#2563eb; --border:#d5deec;
+    --bg:#e3eaf5; --card:#ffffff; --card2:#e6edf8; --text:#050b18; --muted:#273449;
+    --accent:#1d4ed8; --btn:#1d4ed8; --warn:#92400e; --green:#047857; --red:#b91c1c; --yellow:#8a3b05; --yt:#b91c1c; --border:#9fb0cc;
+    --c-sun:#b45309; --c-partly:#b45309; --c-cloud:#475569; --c-rain:#1d4ed8; --c-snow:#0369a1; --c-bolt:#8a5a00;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
   html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--text);
@@ -38,7 +40,7 @@
 
   /* weather */
   #weather-card .now{display:flex;align-items:center;justify-content:center;gap:3vmin;flex:0 0 auto;margin:1vmin 0}
-  #w-icon{font-size:11vmin;color:#7dd3fc;display:flex}
+  #w-icon{font-size:11vmin;color:var(--c-rain);display:flex}
   #w-temp{font-size:13vmin;font-weight:800;line-height:1}
   #w-temp span{font-size:.4em;color:var(--muted)}
   #w-desc{text-align:center;font-size:2.8vmin;font-weight:700;color:var(--accent)}
@@ -46,7 +48,7 @@
   #w-extra{display:flex;justify-content:center;gap:3vmin;font-size:2.3vmin;color:var(--muted);margin-top:.8vmin}
   #forecast{display:grid;grid-template-columns:repeat(5,1fr);gap:.9vmin;margin-top:auto;padding-top:1vmin}
   .fc{background:var(--card2);border-radius:1.6vmin;padding:.8vmin .4vmin;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.2vmin}
-  .fc b{font-size:1.9vmin}.fc em{font-style:normal;font-size:1.5vmin;color:var(--muted)}
+  .fc b{font-size:1.9vmin}.fc em{font-style:normal;font-size:1.7vmin;color:var(--muted)}
   .fc .ic{font-size:3.2vmin;margin:.2vmin 0}.fc div{font-size:1.8vmin;font-weight:700}.fc div s{text-decoration:none;color:var(--muted);font-weight:400}
 
   /* timer */
@@ -60,7 +62,7 @@
   .tbtns button{background:var(--card2);border:1px solid var(--border);border-radius:1.6vmin;padding:1.4vmin 0;font-size:2.4vmin;font-weight:800}
   .tbtns button:active{transform:scale(.95)}
   .tbtns .rst{color:var(--red)}
-  #t-main{background:var(--accent);color:#fff;border-radius:2vmin;padding:1.9vmin;font-size:2.7vmin;font-weight:800;display:flex;align-items:center;justify-content:center;gap:1.2vmin}
+  #t-main{background:var(--btn);color:#fff;border-radius:2vmin;padding:1.9vmin;font-size:2.7vmin;font-weight:800;display:flex;align-items:center;justify-content:center;gap:1.2vmin}
   #t-main:active{transform:scale(.98)}
 
   /* calendar */
@@ -75,11 +77,11 @@
   .days{flex:1;min-height:0;grid-auto-rows:1fr}
   .day{border-radius:1.2vmin;background:var(--card2);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;min-height:0}
   .day b{font-size:2.9vmin;font-weight:800}
-  .day span{font-size:1.7vmin;color:var(--muted)}
+  .day span{font-size:1.9vmin;font-weight:600;color:var(--muted)}
   .day.sun b{color:var(--red)}
   .day.first span{color:var(--yellow);font-weight:800}
   .day.empty{background:transparent}
-  .day.today{background:var(--accent);color:#fff}
+  .day.today{background:var(--btn);color:#fff}
   .day.today b,.day.today span{color:#fff}
 
   /* buttons inside clock card */
@@ -87,7 +89,7 @@
     display:flex;align-items:center;justify-content:center;font-size:3.4vmin}
   .fab:active{transform:scale(.92)}
   #theme-btn{top:2vmin;right:2vmin;color:var(--yellow)}
-  #next-btn{bottom:2vmin;right:2vmin;color:#ef4444}
+  #next-btn{bottom:2vmin;right:2vmin;color:var(--yt)}
   #dots{position:absolute;bottom:.5vmin;left:50%;transform:translateX(-50%);display:flex;gap:1vmin;z-index:25}
   #dots i{width:1.2vmin;height:1.2vmin;border-radius:50%;background:var(--muted);opacity:.5;transition:.3s}
   #dots i.on{background:var(--accent);opacity:1;width:3vmin;border-radius:1vmin}
@@ -111,8 +113,9 @@
   .res img{width:36%;border-radius:1.2vmin;flex-shrink:0;aspect-ratio:16/9;object-fit:cover;background:#000}
   .res div{font-size:2vmin;font-weight:700;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
   .res.preset{padding:1.6vmin 1.8vmin;font-size:2.3vmin;font-weight:700;gap:1.2vmin}
-  .res.preset .ic{color:#ef4444;font-size:3.4vmin}
+  .res.preset .ic{color:var(--yt);font-size:3.4vmin}
   .side-title{font-size:2vmin;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.1em;padding:.4vmin .6vmin}
+  .res.cur{outline:2px solid var(--yellow)}
   /* trang chủ YouTube */
   #home{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;gap:1.2vmin;padding:1.8vmin;background:var(--bg);overflow:auto;text-align:left;touch-action:pan-y}
   #home.open{display:flex}
@@ -127,7 +130,6 @@
   .tile:active{transform:scale(.98)}
   .tile img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#222}
   .tile div{padding:.8vmin 1vmin;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .res.cur{outline:2px solid var(--yellow)}
   #edge{position:absolute;left:0;top:10vmin;bottom:0;width:4.5vmin;z-index:15;
     background:linear-gradient(90deg,rgba(59,130,246,.35),transparent);border-radius:0 2vmin 2vmin 0;touch-action:none}
 
@@ -427,15 +429,15 @@ async function getLocation(){
   return {lat:21.30,lon:105.66,name:'Bình Xuyên, Phú Thọ',src:'mặc định'};
 }
 function wmo(c){
-  if(c===0) return ['sun','#facc15','Trời quang'];
-  if(c<=2) return ['partly','#fcd34d','Ít mây'];
-  if(c===3) return ['cloud','#94a3b8','Nhiều mây'];
-  if(c<=48) return ['fog','#94a3b8','Sương mù'];
-  if(c<=57) return ['rain','#7dd3fc','Mưa phùn'];
-  if(c<=67) return ['rain','#60a5fa','Mưa'];
-  if(c<=77) return ['snow','#e0f2fe','Tuyết'];
-  if(c<=82) return ['rain','#60a5fa','Mưa rào'];
-  return ['bolt','#facc15','Dông'];
+  if(c===0) return ['sun','var(--c-sun)','Trời quang'];
+  if(c<=2) return ['partly','var(--c-partly)','Ít mây'];
+  if(c===3) return ['cloud','var(--c-cloud)','Nhiều mây'];
+  if(c<=48) return ['fog','var(--c-cloud)','Sương mù'];
+  if(c<=57) return ['rain','var(--c-rain)','Mưa phùn'];
+  if(c<=67) return ['rain','var(--c-rain)','Mưa'];
+  if(c<=77) return ['snow','var(--c-snow)','Tuyết'];
+  if(c<=82) return ['rain','var(--c-rain)','Mưa rào'];
+  return ['bolt','var(--c-bolt)','Dông'];
 }
 const DOW_S=['CN','T2','T3','T4','T5','T6','T7'];
 async function loadWeather(){
@@ -495,22 +497,22 @@ function addTime(min){
 function resetTimer(){
   clearInterval(tInt); clearInterval(alarmInt); tInt=alarmInt=null; tSec=tTotal=0; drawTimer();
   $('ring').style.stroke='var(--accent)'; $('cd').style.color='';
-  setStatus('SẴN SÀNG'); setBtn('play','BẮT ĐẦU','var(--accent)');
+  setStatus('SẴN SÀNG'); setBtn('play','BẮT ĐẦU','var(--btn)');
 }
 function mainBtn(){
   ensureAudio();
   if(alarmInt){ resetTimer(); return; }
-  if(tInt){ clearInterval(tInt); tInt=null; setBtn('play','TIẾP TỤC','#f59e0b'); setStatus('TẠM DỪNG','#facc15'); return; }
+  if(tInt){ clearInterval(tInt); tInt=null; setBtn('play','TIẾP TỤC','var(--warn)'); setStatus('TẠM DỪNG','var(--yellow)'); return; }
   if(tSec<=0) return;
-  setBtn('pause','TẠM DỪNG','#f59e0b'); setStatus('ĐANG CHẠY','#60a5fa');
+  setBtn('pause','TẠM DỪNG','var(--warn)'); setStatus('ĐANG CHẠY','var(--accent)');
   tInt=setInterval(()=>{ tSec--; drawTimer(); if(tSec<=0){ clearInterval(tInt); tInt=null; fire(); } },1000);
 }
 function fire(){
   beep(); alarmInt=setInterval(beep,1000);
   $('ring').style.stroke='var(--red)'; $('cd').style.color='var(--red)';
-  setStatus('HẾT GIỜ!','#f87171'); setBtn('bell','TẮT BÁO THỨC','#dc2626');
+  setStatus('HẾT GIỜ!','var(--red)'); setBtn('bell','TẮT BÁO THỨC','#dc2626');
 }
-setBtn('play','BẮT ĐẦU','var(--accent)');
+setBtn('play','BẮT ĐẦU','var(--btn)');
 
 /* ================= YouTube (iframe thuần, không API key) + Trang chủ ================= */
 const onFile=location.protocol==='file:';
@@ -582,7 +584,7 @@ function playQueue(items,idx){
   addRecent(it); if(!it.title) fillTitle(it);
   const rest=items.slice(idx+1,idx+26).map(x=>x.id);
   let src=`https://www.youtube.com/embed/${it.id}?autoplay=1&playsinline=1&rel=0&modestbranding=1`;
-  if(rest.length) src+='&playlist='+rest.join(',');
+  if(rest.length) src+='&playlist='+rest.join(',')+'&loop=1';
   $('yt').src=src;
   closeHome(); showMsg(''); renderSide();
 }
