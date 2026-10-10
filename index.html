@@ -13,7 +13,7 @@
   }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0}
-  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;-webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;touch-action:pan-y;-webkit-tap-highlight-color:transparent}
   button{font-family:inherit}
   header{display:flex;align-items:center;gap:12px;padding:8px 14px;border-bottom:1px solid var(--line);background:#0e1530}
   .brand{font-weight:800;letter-spacing:.14em;font-size:15px}
@@ -29,10 +29,12 @@
   /* ---- Pager ---- */
   .viewport{flex:1;min-height:0;position:relative;overflow:hidden}
   .track{display:flex;width:300%;height:100%;will-change:transform;transition:transform .28s ease}
-  .page{width:calc(100% / 3);height:100%;overflow-y:auto;overflow-x:hidden;padding:12px;-webkit-overflow-scrolling:touch}
-  .edge{position:absolute;top:0;bottom:0;width:22px;z-index:5}
-  .edge.l{left:0} .edge.r{right:0}
-  nav.dots{display:flex;justify-content:center;gap:8px;padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#0e1530}
+  .page{width:calc(100% / 3);height:100%;overflow-y:auto;overflow-x:hidden;padding:12px 18px;-webkit-overflow-scrolling:touch}
+  nav.dots{display:flex;align-items:center;justify-content:center;gap:10px;padding:9px 8px calc(9px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#0e1530;user-select:none;-webkit-user-select:none}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--line);transition:all .25s}
+  .dot.on{width:24px;border-radius:999px;background:var(--accent2)}
+  .hint{font-size:12px;color:var(--muted);margin-left:8px;transition:opacity .5s}
+  .hint.off{opacity:0}
   .chip{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer;font-size:14px}
   .chip.on{background:var(--accent2);color:#0a1030;border-color:var(--accent2);font-weight:700}
 
@@ -75,54 +77,83 @@
     .col-main .stage{max-height:calc(100% - 40px);margin:0 auto}
   }
 
-  /* ---- Trang Tiện ích ---- */
-  .tools{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
-  .widget{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
-  .widget h3{margin:0 0 8px;font-size:12px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
-  .kv{color:var(--muted);font-size:14px;line-height:1.5}
-  .kv b{color:var(--text)}
-  @media (min-width:640px){
-    .tools{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);grid-template-areas:"clk cal" "wx cal" "bat gps"}
+  /* ---- Trang Tiện ích: lấp đầy khung hình, cỡ chữ co giãn theo màn hình (đơn vị em = --u) ---- */
+  .tools{--u:clamp(14px,4.2vw,20px);font-size:var(--u);display:grid;gap:.75em;min-height:100%;
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:auto auto minmax(min-content,1fr) auto;
+    grid-template-areas:"clk" "wx" "cal" "tm"}
+  @media (orientation:landscape) and (min-width:720px){
+    /* cỡ chữ theo cả chiều rộng lẫn chiều cao để toàn bộ nội dung vừa khít một màn hình ngang */
+    .tools{--u:clamp(11px,min(1.6vw,calc((100vh - 111px) / 42)),30px);
+      --u:clamp(11px,min(1.6vw,calc((100dvh - 111px) / 42)),30px);
+      grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) minmax(0,1fr);
+      grid-template-rows:minmax(min-content,.8fr) minmax(min-content,1.2fr);
+      grid-template-areas:"clk cal tm" "wx cal tm"}
   }
-  @media (min-width:1000px){
-    .tools{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr);grid-template-areas:"clk cal bat" "wx cal gps"}
-  }
-  .w-clk{grid-area:clk} .w-cal{grid-area:cal} .w-wx{grid-area:wx} .w-bat{grid-area:bat} .w-gps{grid-area:gps}
-  @media (max-width:639px){ .w-clk,.w-cal,.w-wx,.w-bat,.w-gps{grid-area:auto} }
+  .widget{background:var(--panel);border:1px solid var(--line);border-radius:1em;padding:1em 1.1em;min-width:0;display:flex;flex-direction:column;gap:.55em}
+  .widget h3{margin:0;font-size:max(11px,.62em);letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+  .kv{color:var(--muted);font-size:max(13px,.8em);line-height:1.5}
+  .kv b{color:var(--text);font-size:1.15em}
+  .w-clk{grid-area:clk;justify-content:center} .w-wx{grid-area:wx} .w-cal{grid-area:cal} .w-bat{grid-area:tm}
+  .tools .btn{font-size:max(13px,.8em);padding:.5em .85em;border-radius:.6em}
+  .tools .chip{font-size:max(13px,.8em);padding:.45em .9em}
+  .btn:disabled,.chip:disabled{opacity:.45;cursor:default}
 
-  .clk-t{font-size:56px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
-  .clk-t small{font-size:24px;color:var(--muted);font-weight:600;margin-left:6px}
-  .clk-d{color:var(--text);margin-top:8px;font-size:15px}
-  .clk-l{color:var(--accent);margin-top:2px;font-size:14px}
+  .clk-t{font-size:3.9em;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+  .clk-t small{font-size:.42em;color:var(--muted);font-weight:600;margin-left:.3em}
+  .clk-d{color:var(--text);font-size:1.15em}
+  .clk-l{color:var(--accent);font-size:1.05em}
 
-  select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 8px;font-size:14px}
-  .wx-t{font-size:44px;font-weight:800;margin-top:8px}
-  .wx-t span{font-size:34px;margin-right:6px}
+  .wx-place{display:flex;align-items:center;justify-content:space-between;gap:.6em}
+  #wxPlace{font-weight:700;font-size:1.05em;min-width:0}
+  .wx-main{display:flex;align-items:center;gap:.35em;flex-wrap:wrap}
+  .wx-i{font-size:3.2em;line-height:1}
+  .wx-t{font-size:3.7em;font-weight:800;line-height:1}
+  .wx-d{font-size:1.1em;color:var(--muted);margin-left:.3em}
+  .wx-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5em;margin-top:auto}
+  .wx-s:nth-child(5){grid-column:span 2}
+  @media (orientation:landscape) and (min-width:720px){ .wx-stats{grid-template-columns:repeat(3,minmax(0,1fr))} }
+  .wx-s{background:var(--panel2);border-radius:.7em;padding:.6em .8em;min-width:0}
+  .wx-s span{display:block;font-size:max(11px,.62em);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .wx-s b{font-size:1.3em;white-space:nowrap}
 
-  .cal-h{display:flex;align-items:center;gap:6px;margin-bottom:8px}
-  .cal-h .ttl{flex:1;text-align:center;font-weight:700}
-  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-  .cal-wd{text-align:center;font-size:12px;color:var(--muted);padding:2px 0}
+  .cal-h{display:flex;align-items:center;gap:.4em}
+  .cal-h .ttl{flex:1;text-align:center;font-weight:700;font-size:1.25em}
+  .cal-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:auto;grid-auto-rows:minmax(3.2em,1fr);gap:.3em}
+  .cal-wd{text-align:center;font-size:max(11px,.7em);color:var(--muted);padding:.2em 0}
   .cal-wd.sun{color:var(--danger)}
-  .cell{background:var(--panel2);border:1px solid transparent;border-radius:10px;padding:5px 2px;min-height:48px;text-align:center;color:var(--text);cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
-  .cell .sd{font-size:16px;font-weight:700;line-height:1.1}
-  .cell .ld{font-size:10.5px;color:var(--muted);line-height:1}
+  .cell{font:inherit;background:var(--panel2);border:1px solid transparent;border-radius:.7em;padding:.2em 0;min-height:0;text-align:center;color:var(--text);cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1em}
+  .cell .sd{font-size:1.35em;font-weight:700;line-height:1.1}
+  .cell .ld{font-size:max(10px,.68em);color:var(--muted);line-height:1}
   .cell.other{opacity:.38}
   .cell.sun .sd{color:var(--danger)}
   .cell.today{border-color:var(--accent)}
   .cell.sel{background:var(--accent2)}
   .cell.sel .sd,.cell.sel .ld{color:#0a1030}
   .cell.first .ld{color:var(--warn);font-weight:700}
-  .cell.hol::after{content:"";position:absolute;top:4px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--warn)}
-  .cal-info{margin-top:10px;font-size:14px;line-height:1.5}
+  .cell.hol::after{content:"";position:absolute;top:.3em;right:.4em;width:.4em;height:.4em;border-radius:50%;background:var(--warn)}
+  .cal-info{font-size:1em;line-height:1.5}
   .cal-info .ev{color:var(--warn)}
 
-  .bar{height:12px;background:var(--panel2);border-radius:999px;overflow:hidden;margin:8px 0}
+  .tm-t{font-size:4.6em;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:var(--accent)}
+  .tm-t.idle{color:var(--muted)}
+  .w-bat{justify-content:space-between}
+  .grp{display:flex;flex-direction:column;gap:.6em}
+  .presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.45em}
+  .tools .presets .chip{padding:.75em .3em;font-size:max(13px,.92em);text-align:center}
+  .w-bat .btn{font-size:max(13px,.95em);padding:.65em 1em}
+  .widget input[type=number],.widget input[type=time]{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:.55em;padding:.6em .7em;font-size:1.05em;width:5.4em;font-family:inherit}
+  .widget input[type=time]{width:8em}
+  .widget input:disabled{opacity:.5}
+  .bat-box{display:flex;flex-direction:column;gap:.5em}
+  .bar{height:.7em;background:var(--panel2);border-radius:999px;overflow:hidden}
   .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .4s}
-  .bat-big{font-size:34px;font-weight:800}
+  .note{font-size:max(11px,.62em);margin:0}
 
-  .speed{font-size:56px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:var(--accent)}
-  .speed small{font-size:16px;color:var(--muted);font-weight:500;margin-left:6px}
+  /* Vùng cuộn dọc có quy tắc cảm ứng riêng: ép mọi phần tử trong các trang chỉ cuộn dọc, để vuốt ngang thuộc về ứng dụng */
+  .track,.track *{touch-action:pan-y}
+  .track{user-select:none;-webkit-user-select:none}
+  .track input{user-select:text;-webkit-user-select:text}
 
   dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:14px;max-width:460px;width:92%}
   dialog::backdrop{background:#000a}
@@ -210,75 +241,75 @@
         </div>
 
         <div class="widget w-wx">
-          <h3>Thời tiết</h3>
-          <div class="row">
-            <select id="city"></select>
-            <button class="btn" id="wxHere">Vị trí của tôi</button>
+          <h3>Thời tiết · theo GPS</h3>
+          <div class="wx-place">
+            <span id="wxPlace">Đang xác định vị trí…</span>
+            <button class="btn" id="wxRefresh" type="button">⟳ Cập nhật</button>
           </div>
-          <div class="wx-t"><span id="wxIcon">⛅</span><b id="wxTemp">—</b></div>
+          <div class="wx-main">
+            <span class="wx-i" id="wxIcon">⛅</span><b class="wx-t" id="wxTemp">—</b><span class="wx-d" id="wxDesc"></span>
+          </div>
           <div class="kv" id="wxInfo">Đang tải…</div>
-          <div class="kv" id="wxMore"></div>
-          <p class="kv" style="margin:8px 0 0;font-size:12px">Dữ liệu: Open-Meteo (miễn phí).</p>
+          <div class="wx-stats" id="wxStats"></div>
         </div>
 
         <div class="widget w-cal">
           <h3>Lịch tháng · Dương &amp; Âm</h3>
           <div class="cal-h">
-            <button class="btn" id="calPrev" aria-label="Tháng trước">◀</button>
+            <button class="btn" id="calPrev" type="button" aria-label="Tháng trước">◀</button>
             <div class="ttl" id="calTitle"></div>
-            <button class="btn" id="calNext" aria-label="Tháng sau">▶</button>
-            <button class="btn" id="calToday">Hôm nay</button>
+            <button class="btn" id="calNext" type="button" aria-label="Tháng sau">▶</button>
+            <button class="btn" id="calToday" type="button">Hôm nay</button>
           </div>
           <div class="cal-grid" id="calGrid"></div>
           <div class="cal-info" id="calInfo"></div>
         </div>
 
         <div class="widget w-bat">
-          <h3>Báo khi sạc pin</h3>
-          <div class="bat-big" id="batLevel">—</div>
-          <div class="bar"><i id="batBar"></i></div>
-          <div class="kv" id="batState">Đang kiểm tra pin…</div>
-          <div class="row" style="margin-top:10px">
-            <label class="kv" for="batTh">Báo khi đạt</label>
-            <select id="batTh">
-              <option value="80">80%</option><option value="90">90%</option>
-              <option value="95">95%</option><option value="100">100%</option>
-            </select>
-            <button class="btn primary" id="batToggle">Bật báo</button>
-            <button class="btn" id="batTest">Thử chuông</button>
+          <div class="grp">
+            <h3>Hẹn giờ sạc pin</h3>
+            <div class="tm-t idle" id="tmLeft">1:00:00</div>
+            <div class="kv" id="tmSub">Chưa hẹn giờ</div>
           </div>
-        </div>
-
-        <div class="widget w-gps">
-          <h3>Chuyến đi · GPS</h3>
-          <div class="speed"><span id="spd">—</span><small>km/h</small></div>
-          <div class="row" style="margin-top:10px">
-            <div class="kv">Quãng đường <b id="dist">0.00</b> km</div>
-            <div class="kv">Thời gian <b id="trip">00:00</b></div>
+          <div class="presets" id="tmPresets"></div>
+          <div class="grp">
+          <div class="row">
+            <input type="number" id="tmMin" min="1" max="1440" step="1" inputmode="numeric" value="60" aria-label="Số phút">
+            <span class="kv">phút</span>
+            <button class="btn primary" id="tmStart" type="button">Bắt đầu</button>
+            <button class="btn" id="tmCancel" type="button" disabled>Hủy</button>
           </div>
-          <div class="row" style="margin-top:10px">
-            <button class="btn primary" id="gpsToggle">Bật GPS</button>
-            <button class="btn" id="gpsReset">Đặt lại</button>
+          <div class="row">
+            <span class="kv">hoặc báo lúc</span>
+            <input type="time" id="tmAt" value="22:00" aria-label="Giờ báo">
+            <button class="btn" id="tmAtGo" type="button">Hẹn</button>
+          </div>
+          </div>
+          <div class="bat-box">
+            <div class="bar"><i id="batBar"></i></div>
+            <div class="kv">🔋 <b id="batLevel">—</b> · <span id="batState">Đang kiểm tra pin…</span></div>
+            <div class="row"><button class="btn" id="batTest" type="button">Thử chuông</button></div>
+            <p class="kv note">Trình duyệt không điều khiển được dòng sạc: hết giờ sẽ có chuông, rung và màn hình nhắc để bạn rút sạc. Hãy để trang mở (màn hình bật) để chuông đúng giờ.</p>
           </div>
         </div>
       </div>
     </section>
 
   </div>
-  <div class="edge l" id="edgeL"></div>
-  <div class="edge r" id="edgeR"></div>
 </div>
 
-<nav class="dots" id="dots">
-  <button class="chip on" data-p="0" type="button">YouTube</button>
-  <button class="chip" data-p="1" type="button">TV</button>
-  <button class="chip" data-p="2" type="button">Tiện ích</button>
+<nav class="dots" id="dots" aria-hidden="true">
+  <span class="dot on"></span><span class="dot"></span><span class="dot"></span>
+  <span class="hint" id="hint">‹ Vuốt ngang để chuyển trang ›</span>
 </nav>
 
 <div id="alarm" hidden>
-  <h2>🔋 Báo sạc pin</h2>
+  <h2 id="alarmTitle">⏰ Hết giờ sạc pin</h2>
   <p id="alarmText"></p>
-  <button class="btn danger" id="alarmOff" type="button" style="font-size:18px;padding:14px 28px">Tắt báo</button>
+  <div class="row" style="justify-content:center">
+    <button class="btn" id="alarmMore" type="button" style="font-size:18px;padding:14px 22px">+15 phút</button>
+    <button class="btn danger" id="alarmOff" type="button" style="font-size:18px;padding:14px 28px">Tắt báo</button>
+  </div>
 </div>
 
 <dialog id="dlg">
@@ -390,7 +421,7 @@
   const WD = ['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
 
   /* =====================================================================
-     TRANG (vuốt trái / phải)
+     TRANG — chỉ cần vuốt trái / phải để chuyển (không có nút bấm chọn trang)
      ===================================================================== */
   const N = 3, TITLES = ['YouTube', 'TV · VTV', 'Tiện ích'];
   const track = $('#track'), vp = $('#viewport');
@@ -400,47 +431,69 @@
     page = Math.min(N - 1, Math.max(0, i));
     track.style.transition = anim === false ? 'none' : 'transform .28s ease';
     track.style.transform = 'translate3d(' + (-page * 100 / N) + '%,0,0)';
-    [...$('#dots').children].forEach((b, j) => b.classList.toggle('on', j === page));
+    $('#dots').querySelectorAll('.dot').forEach((d, j) => d.classList.toggle('on', j === page));
     $('#ptitle').textContent = TITLES[page];
     store.set('page', page);
     if(page === 0) tvStop();          // sang trang YouTube: dừng TV
     if(page === 1) tube.pause();      // sang trang TV: tạm dừng YouTube
     if(page === 2) refreshTools();
   }
-  [...$('#dots').children].forEach(b => b.onclick = () => go(Number(b.dataset.p)));
+  if(store.get('swiped', false)) $('#hint').classList.add('off');
 
-  let sx = 0, sy = 0, dx = 0, drag = false, lock = null, t0 = 0;
-  vp.addEventListener('touchstart', e => {
-    if(e.touches.length !== 1){ drag = false; return; }
-    sx = e.touches[0].clientX; sy = e.touches[0].clientY; dx = 0; lock = null; t0 = Date.now(); drag = true;
-  }, { passive: true });
-  vp.addEventListener('touchmove', e => {
-    if(!drag) return;
-    const x = e.touches[0].clientX - sx, y = e.touches[0].clientY - sy;
+  // Vuốt bằng Pointer Events: dùng được cho cảm ứng (điện thoại, màn hình xe) và cả chuột kéo.
+  // Vuốt dọc vẫn cuộn bình thường (touch-action: pan-y), vuốt ngang mới đổi trang.
+  const NOSWIPE = 'input,select,textarea,dialog';
+  let sx = 0, sy = 0, dx = 0, drag = false, lock = null, t0 = 0, pid = null, swallow = false;
+
+  function blocked(e){
+    if(!$('#alarm').hidden || $('#dlg').open) return true;
+    const t = e.target;
+    if(t && t.closest && t.closest(NOSWIPE)) return true;
+    if(t && t.tagName === 'VIDEO'){                       // chừa thanh điều khiển video (tua, âm lượng)
+      const r = t.getBoundingClientRect();
+      if(e.clientY > r.bottom - 56) return true;
+    }
+    return false;
+  }
+  document.addEventListener('pointerdown', e => {
+    if(!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0) || blocked(e)){ drag = false; return; }
+    sx = e.clientX; sy = e.clientY; dx = 0; lock = null; t0 = Date.now(); drag = true; pid = e.pointerId;
+  });
+  document.addEventListener('pointermove', e => {
+    if(!drag || e.pointerId !== pid) return;
+    const x = e.clientX - sx, y = e.clientY - sy;
     if(lock === null){
-      if(Math.abs(x) < 8 && Math.abs(y) < 8) return;
+      if(Math.abs(x) < 10 && Math.abs(y) < 10) return;
       lock = Math.abs(x) > Math.abs(y) * 1.2 ? 'h' : 'v';
-      if(lock === 'h') track.style.transition = 'none';
+      if(lock === 'h'){
+        track.style.transition = 'none';
+        try{ document.body.setPointerCapture(pid); }catch(_){}
+      }
     }
     if(lock !== 'h') return;
-    e.preventDefault();
     let d = x;
     if((page === 0 && d > 0) || (page === N - 1 && d < 0)) d *= 0.3;   // kéo quá mép: cản lại
     dx = d;
     track.style.transform = 'translate3d(calc(' + (-page * 100 / N) + '% + ' + dx + 'px),0,0)';
-  }, { passive: false });
-  function endDrag(){
-    if(!drag) return;
+  });
+  function endDrag(e, cancelled){
+    if(!drag || (e && e.pointerId !== pid)) return;
     drag = false;
     if(lock === 'h'){
+      try{ document.body.releasePointerCapture(pid); }catch(_){}
       const w = vp.clientWidth || 1, dt = Math.max(1, Date.now() - t0);
       const fast = Math.abs(dx) / dt > 0.4 && Math.abs(dx) > 30;
-      if(Math.abs(dx) > w * 0.2 || fast) go(page + (dx < 0 ? 1 : -1)); else go(page);
+      const before = page;
+      if(!cancelled && (Math.abs(dx) > w * 0.2 || fast)) go(page + (dx < 0 ? 1 : -1)); else go(page);
+      if(page !== before){ store.set('swiped', true); $('#hint').classList.add('off'); }
+      swallow = true; setTimeout(() => { swallow = false; }, 350);   // nuốt cú "click" sinh ra sau khi vuốt
     }
     lock = null; dx = 0;
   }
-  vp.addEventListener('touchend', endDrag);
-  vp.addEventListener('touchcancel', endDrag);
+  document.addEventListener('pointerup', e => endDrag(e, false));
+  document.addEventListener('pointercancel', e => endDrag(e, true));
+  document.addEventListener('click', e => { if(swallow){ e.stopPropagation(); e.preventDefault(); } }, true);
+
   document.addEventListener('keydown', e => {
     const t = (e.target && e.target.tagName) || '';
     if(/INPUT|SELECT|TEXTAREA/.test(t)) return;
@@ -863,20 +916,35 @@
   }
   tick(); setInterval(tick, 1000);
 
-  /* ---- Thời tiết (Open-Meteo) ---- */
-  const cities = {
-    'Hà Nội': [21.0285, 105.8542], 'Hải Phòng': [20.8449, 106.6881], 'Huế': [16.4637, 107.5909],
-    'Đà Nẵng': [16.0544, 108.2022], 'Nha Trang': [12.2388, 109.1967], 'TP. Hồ Chí Minh': [10.8231, 106.6297],
-    'Cần Thơ': [10.0452, 105.7469]
-  };
-  const sel = $('#city');
-  Object.keys(cities).forEach(n => { const o = document.createElement('option'); o.textContent = n; sel.appendChild(o); });
-  sel.value = store.get('city', 'Hà Nội');
-  if(!sel.value) sel.value = 'Hà Nội';
+  /* ---- Thời tiết theo vị trí GPS (Open-Meteo) ---- */
   const wDesc = c => c === 0 ? 'Trời quang' : c <= 2 ? 'Ít mây' : c === 3 ? 'Nhiều mây' : c <= 48 ? 'Sương mù' : c <= 57 ? 'Mưa phùn' : c <= 67 ? 'Mưa' : c <= 77 ? 'Tuyết' : c <= 82 ? 'Mưa rào' : 'Dông';
   const wIcon = c => c === 0 ? '☀️' : c <= 2 ? '🌤️' : c === 3 ? '☁️' : c <= 48 ? '🌫️' : c <= 57 ? '🌦️' : c <= 67 ? '🌧️' : c <= 77 ? '❄️' : c <= 82 ? '🌧️' : '⛈️';
-  async function weather(lat, lon, label){
-    $('#wxInfo').textContent = 'Đang tải…';
+  const fmtPos = (lat, lon) => Math.abs(lat).toFixed(2) + '°' + (lat >= 0 ? 'B' : 'N') + ', ' + Math.abs(lon).toFixed(2) + '°' + (lon >= 0 ? 'Đ' : 'T');
+
+  // Tên địa điểm (reverse geocode, không cần API key); lỗi thì hiện tọa độ
+  async function placeName(lat, lon){
+    const key = lat.toFixed(2) + ',' + lon.toFixed(2);
+    const c = store.get('placeCache', null);
+    if(c && c.key === key) return c.name;
+    try{
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 6000);
+      const r = await fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + lat + '&longitude=' + lon + '&localityLanguage=vi', { signal: ctl.signal });
+      clearTimeout(t);
+      const j = await r.json();
+      const name = [...new Set([j.locality || j.city, j.principalSubdivision].filter(Boolean))].join(', ');
+      if(name){ store.set('placeCache', { key: key, name: name }); return name; }
+    }catch(e){}
+    return fmtPos(lat, lon);
+  }
+  function wxStat(label, value){
+    const d = document.createElement('div'); d.className = 'wx-s';
+    const s = document.createElement('span'); s.textContent = label;
+    const b = document.createElement('b'); b.textContent = value;
+    d.append(s, b); return d;
+  }
+  async function weather(lat, lon, note){
+    $('#wxPlace').textContent = '📍 ' + fmtPos(lat, lon);
+    placeName(lat, lon).then(n => { $('#wxPlace').textContent = '📍 ' + n; });
     try{
       const u = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon
         + '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m'
@@ -886,26 +954,40 @@
       const j = await r.json(), c = j.current, dd = j.daily || {};
       $('#wxIcon').textContent = wIcon(c.weather_code);
       $('#wxTemp').textContent = Math.round(c.temperature_2m) + '°C';
-      $('#wxInfo').textContent = label + ' · ' + wDesc(c.weather_code);
-      const mm = [];
-      mm.push('Cảm giác ' + Math.round(c.apparent_temperature) + '°C');
-      mm.push('Ẩm ' + c.relative_humidity_2m + '%');
-      mm.push('Gió ' + Math.round(c.wind_speed_10m) + ' km/h');
-      if(dd.temperature_2m_max && dd.temperature_2m_min) mm.push('Hôm nay ' + Math.round(dd.temperature_2m_min[0]) + '–' + Math.round(dd.temperature_2m_max[0]) + '°C');
-      if(dd.precipitation_probability_max && dd.precipitation_probability_max[0] != null) mm.push('Khả năng mưa ' + dd.precipitation_probability_max[0] + '%');
-      $('#wxMore').textContent = mm.join(' · ');
-    }catch(e){ $('#wxInfo').textContent = 'Không tải được thời tiết.'; $('#wxMore').textContent = ''; }
+      $('#wxDesc').textContent = wDesc(c.weather_code);
+      const t = new Date();
+      $('#wxInfo').textContent = note || ('Cập nhật lúc ' + pad(t.getHours()) + ':' + pad(t.getMinutes()));
+      const box = $('#wxStats'); box.replaceChildren();
+      box.append(wxStat('Cảm giác', Math.round(c.apparent_temperature) + '°C'), wxStat('Độ ẩm', c.relative_humidity_2m + '%'), wxStat('Gió', Math.round(c.wind_speed_10m) + ' km/h'));
+      if(dd.temperature_2m_max && dd.temperature_2m_min) box.append(wxStat('Hôm nay', Math.round(dd.temperature_2m_min[0]) + '–' + Math.round(dd.temperature_2m_max[0]) + '°C'));
+      if(dd.precipitation_probability_max && dd.precipitation_probability_max[0] != null) box.append(wxStat('Khả năng mưa', dd.precipitation_probability_max[0] + '%'));
+    }catch(e){ $('#wxInfo').textContent = 'Không tải được thời tiết (kiểm tra kết nối mạng).'; }
   }
-  function loadCity(){ const n = sel.value; store.set('city', n); const c = cities[n]; weather(c[0], c[1], n); }
-  sel.onchange = loadCity;
-  setInterval(loadCity, 15 * 60 * 1000);
-  $('#wxHere').onclick = () => {
-    if(!navigator.geolocation){ $('#wxInfo').textContent = 'Thiết bị không hỗ trợ định vị.'; return; }
-    navigator.geolocation.getCurrentPosition(
-      p => weather(p.coords.latitude.toFixed(3), p.coords.longitude.toFixed(3), 'Vị trí của bạn'),
-      () => { $('#wxInfo').textContent = 'Bạn chưa cho phép truy cập vị trí.'; }
-    );
-  };
+
+  let locBusy = false;
+  function locate(){
+    if(locBusy) return;
+    const info = $('#wxInfo');
+    if(!navigator.geolocation){ info.textContent = 'Thiết bị không hỗ trợ định vị GPS.'; $('#wxPlace').textContent = 'Chưa có vị trí'; return; }
+    locBusy = true;
+    info.textContent = 'Đang lấy vị trí GPS…';
+    navigator.geolocation.getCurrentPosition(p => {
+      locBusy = false;
+      const pos = { lat: p.coords.latitude, lon: p.coords.longitude };
+      store.set('lastPos', pos);
+      weather(pos.lat, pos.lon);
+    }, err => {
+      locBusy = false;
+      const why = err && err.code === 1
+        ? 'Bạn chưa cho phép truy cập vị trí. Bấm “Cập nhật” rồi chọn Cho phép (trang cần mở qua HTTPS hoặc localhost).'
+        : 'Không lấy được vị trí GPS. Hãy bật định vị của thiết bị rồi bấm “Cập nhật”.';
+      const last = store.get('lastPos', null);
+      if(last) weather(last.lat, last.lon, 'Đang dùng vị trí lần trước. ' + why);
+      else { $('#wxPlace').textContent = 'Chưa có vị trí'; info.textContent = why; }
+    }, { enableHighAccuracy: false, timeout: 20000, maximumAge: 10 * 60 * 1000 });
+  }
+  $('#wxRefresh').onclick = locate;
+  setInterval(locate, 10 * 60 * 1000);       // xe di chuyển: cập nhật lại vị trí và thời tiết mỗi 10 phút
 
   /* ---- Lịch tháng dương + âm ---- */
   const SOLAR_HOL = { '1-1': 'Tết Dương lịch', '8-3': 'Quốc tế Phụ nữ', '30-4': 'Giải phóng miền Nam', '1-5': 'Quốc tế Lao động',
@@ -971,11 +1053,12 @@
   $('#calNext').onclick = () => { calM++; if(calM > 12){ calM = 1; calY++; } renderCal(); };
   $('#calToday').onclick = () => { const n = new Date(); calY = n.getFullYear(); calM = n.getMonth() + 1; selDate = { d: n.getDate(), m: calM, y: calY }; renderCal(); };
 
-  /* ---- Báo khi sạc pin ---- */
-  let bat = null, batOn = !!store.get('batOn', false), batFired = false, audioCtx = null, ringTimer = null;
-  $('#batTh').value = String(store.get('batTh', 100));
-  if(!$('#batTh').value) $('#batTh').value = '100';
-  const batTh = () => Number($('#batTh').value) || 100;
+  /* ---- Hẹn giờ sạc pin ---- */
+  // Trình duyệt không điều khiển được dòng sạc; hẹn giờ chỉ phát chuông nhắc để bạn rút sạc đúng lúc.
+  let bat = null, audioCtx = null, ringTimer = null, wake = null;
+  let tmEnd = Number(store.get('tmEnd', 0)) || 0;
+  let tmLen = Number(store.get('tmLen', 0)) || 0;
+  let tmMins = Math.min(1440, Math.max(1, Math.round(Number(store.get('tmMins', 60))) || 60));
 
   function ensureAudio(){
     try{
@@ -992,101 +1075,139 @@
       o.start(); o.stop(audioCtx.currentTime + 0.35);
     }catch(e){}
   }
-  function ring(text){
-    $('#alarm').hidden = false;
+  function ring(title, text, extend){
+    $('#alarmTitle').textContent = title;
     $('#alarmText').textContent = text;
+    $('#alarmMore').hidden = !extend;
+    $('#alarm').hidden = false;
     clearInterval(ringTimer);
+    let n = 0;
     beep();
-    ringTimer = setInterval(() => { beep(); if(navigator.vibrate) navigator.vibrate([300, 150, 300]); }, 900);
-    try{ if('Notification' in window && Notification.permission === 'granted') new Notification('CarDeck', { body: text }); }catch(e){}
+    ringTimer = setInterval(() => {
+      if(++n > 130){ clearInterval(ringTimer); ringTimer = null; return; }   // tự ngưng chuông sau ~2 phút
+      beep();
+      try{ if(navigator.vibrate) navigator.vibrate([300, 150, 300]); }catch(e){}
+    }, 900);
+    try{ if('Notification' in window && Notification.permission === 'granted') new Notification('CarDeck', { body: title + ' — ' + text }); }catch(e){}
   }
   function stopRing(){ clearInterval(ringTimer); ringTimer = null; $('#alarm').hidden = true; }
   $('#alarmOff').onclick = stopRing;
+  $('#alarmMore').onclick = () => { stopRing(); startTimer(15); };
+
+  // Giữ màn hình sáng khi đang hẹn giờ để chuông kêu đúng lúc (Chrome/Edge, cần HTTPS hoặc localhost)
+  async function holdWake(){
+    try{
+      if(navigator.wakeLock && !wake){
+        wake = await navigator.wakeLock.request('screen');
+        wake.addEventListener('release', () => { wake = null; });
+      }
+    }catch(e){}
+  }
+  function dropWake(){ try{ if(wake) wake.release(); }catch(e){} wake = null; }
+
+  const fmtLeft = ms => {
+    const s = Math.max(0, Math.ceil(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60;
+    return h ? h + ':' + pad(m) + ':' + pad(ss) : pad(m) + ':' + pad(ss);
+  };
+  const batText = () => bat ? ' · pin ' + Math.round(bat.level * 100) + '%' + (bat.charging ? ' (đang sạc)' : '') : '';
+
+  function renderTimer(){
+    const run = tmEnd > Date.now();
+    const el = $('#tmLeft');
+    el.textContent = fmtLeft(run ? tmEnd - Date.now() : tmMins * 60000);   // lúc rảnh: hiện thời lượng đang chọn
+    el.classList.toggle('idle', !run);
+    if(run){
+      const e = new Date(tmEnd);
+      $('#tmSub').textContent = 'Đang hẹn · sẽ báo lúc ' + pad(e.getHours()) + ':' + pad(e.getMinutes());
+    }else if(!$('#tmSub').dataset.msg){
+      $('#tmSub').textContent = 'Chưa hẹn giờ';
+    }
+    $('#tmStart').disabled = run; $('#tmAtGo').disabled = run; $('#tmCancel').disabled = !run;
+    $('#tmMin').disabled = run; $('#tmAt').disabled = run;
+    [...$('#tmPresets').children].forEach(b => { b.disabled = run; });
+  }
+  function startTimer(mins, endAt){
+    ensureAudio();
+    try{ if('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); }catch(e){}
+    delete $('#tmSub').dataset.msg;
+    tmLen = mins;
+    tmEnd = endAt || (Date.now() + mins * 60000);
+    store.set('tmEnd', tmEnd); store.set('tmLen', tmLen);
+    holdWake(); renderTimer();
+  }
+  function cancelTimer(){
+    tmEnd = 0; store.set('tmEnd', 0); dropWake();
+    delete $('#tmSub').dataset.msg;
+    renderTimer();
+  }
+  function tmCheck(){
+    if(tmEnd && Date.now() >= tmEnd){
+      tmEnd = 0; store.set('tmEnd', 0); dropWake();
+      ring('⏰ Hết giờ sạc pin', 'Đã hẹn ' + tmLen + ' phút' + batText() + ' — hãy rút sạc.', true);
+    }
+    renderTimer();
+  }
+  setInterval(tmCheck, 1000);
+  document.addEventListener('visibilitychange', () => { if(!document.hidden){ if(tmEnd > Date.now()) holdWake(); tmCheck(); } });
+
+  const pr = $('#tmPresets');
+  [[15, '15 phút'], [30, '30 phút'], [60, '1 giờ'], [90, '1g30'], [120, '2 giờ'], [180, '3 giờ']].forEach(p => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.textContent = p[1]; b.dataset.m = p[0];
+    b.onclick = () => setMins(p[0]);
+    pr.appendChild(b);
+  });
+  function setMins(m){
+    tmMins = Math.min(1440, Math.max(1, Math.round(Number(m)) || 60));
+    $('#tmMin').value = tmMins; store.set('tmMins', tmMins);
+    [...pr.children].forEach(b => b.classList.toggle('on', Number(b.dataset.m) === tmMins));
+    renderTimer();
+  }
+  $('#tmMin').addEventListener('change', () => setMins($('#tmMin').value));
+  $('#tmStart').onclick = () => {
+    const m = Math.round(Number($('#tmMin').value));
+    if(!(m >= 1 && m <= 1440)){ $('#tmSub').dataset.msg = '1'; $('#tmSub').textContent = 'Nhập số phút từ 1 đến 1440.'; return; }
+    setMins(m); startTimer(m);
+  };
+  $('#tmAtGo').onclick = () => {
+    const v = $('#tmAt').value;
+    const mt = /^(\d{1,2}):(\d{2})$/.exec(v || '');
+    if(!mt){ $('#tmSub').dataset.msg = '1'; $('#tmSub').textContent = 'Hãy chọn giờ hợp lệ.'; return; }
+    const t = new Date(); t.setHours(Number(mt[1]), Number(mt[2]), 0, 0);
+    if(t.getTime() <= Date.now() + 30000) t.setDate(t.getDate() + 1);       // giờ đã qua → hẹn cho ngày mai
+    startTimer(Math.max(1, Math.round((t.getTime() - Date.now()) / 60000)), t.getTime());
+  };
+  $('#tmCancel').onclick = cancelTimer;
+  $('#batTest').onclick = () => { ensureAudio(); ring('🔔 Thử chuông', 'Đây là chuông của hẹn giờ sạc pin.', false); };
 
   function renderBat(){
-    const btn = $('#batToggle');
-    btn.textContent = batOn ? 'Tắt báo' : 'Bật báo';
-    btn.classList.toggle('primary', !batOn);
     if(!bat) return;
     const pc = Math.round(bat.level * 100);
     $('#batLevel').textContent = pc + '%';
     $('#batBar').style.width = pc + '%';
-    $('#batState').textContent = (bat.charging ? '⚡ Đang sạc' : 'Không sạc') + (batOn ? ' · sẽ báo khi đạt ' + batTh() + '%' : ' · báo đang tắt');
+    $('#batState').textContent = bat.charging ? '⚡ Đang sạc' : 'Không sạc';
   }
-  function checkBat(){
-    if(!bat) return;
-    const pc = bat.level * 100;
-    if(batOn && bat.charging && pc >= batTh() && !batFired){
-      batFired = true;
-      ring('Pin đã đạt ' + Math.round(pc) + '% — hãy rút sạc');
-    }
-    if(!bat.charging || pc < batTh() - 1) batFired = false;
-  }
-  $('#batToggle').onclick = () => {
-    batOn = !batOn; store.set('batOn', batOn);
-    if(batOn){
-      ensureAudio();
-      try{ if('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); }catch(e){}
-    }
-    batFired = false; renderBat(); checkBat();
-  };
-  $('#batTh').onchange = () => { store.set('batTh', batTh()); batFired = false; renderBat(); checkBat(); };
-  $('#batTest').onclick = () => { ensureAudio(); ring('Thử chuông báo sạc pin'); };
   if(navigator.getBattery){
     navigator.getBattery().then(b => {
       bat = b;
-      ['levelchange', 'chargingchange'].forEach(ev => b.addEventListener(ev, () => { renderBat(); checkBat(); }));
-      renderBat(); checkBat();
-      setInterval(checkBat, 15000);
-    }).catch(() => { $('#batState').textContent = 'Không đọc được thông tin pin trên thiết bị này.'; });
+      ['levelchange', 'chargingchange'].forEach(ev => b.addEventListener(ev, renderBat));
+      renderBat();
+    }).catch(() => { $('#batState').textContent = 'Không đọc được thông tin pin — hẹn giờ vẫn hoạt động.'; });
   }else{
-    $('#batLevel').textContent = '—';
-    $('#batState').textContent = 'Trình duyệt này không cho đọc pin (Safari/Firefox không hỗ trợ). Dùng Chrome hoặc Edge trên Android/máy tính.';
+    $('#batState').textContent = 'Trình duyệt không cho đọc mức pin — hẹn giờ vẫn hoạt động bình thường.';
   }
-  renderBat();
-
-  /* ---- GPS chuyến đi ---- */
-  let watchId = null, last = null, distKm = 0, tripStart = 0, tripTimer = null;
-  function hav(a, b){
-    const R = 6371, rad = x => x * Math.PI / 180;
-    const dLat = rad(b.latitude - a.latitude), dLon = rad(b.longitude - a.longitude);
-    const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.latitude)) * Math.cos(rad(b.latitude)) * Math.sin(dLon / 2) ** 2;
-    return 2 * R * Math.asin(Math.sqrt(h));
-  }
-  function showTrip(){
-    $('#dist').textContent = distKm.toFixed(2);
-    const s = tripStart ? Math.floor((Date.now() - tripStart) / 1000) : 0;
-    const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60;
-    $('#trip').textContent = (h ? pad(h) + ':' : '') + pad(m) + ':' + pad(ss);
-  }
-  function onPos(p){
-    const c = p.coords;
-    const v = (c.speed != null && !isNaN(c.speed)) ? c.speed * 3.6 : null;
-    $('#spd').textContent = v == null ? '—' : Math.round(v);
-    if(last && c.accuracy < 50){
-      const d = hav(last, c);
-      if(d > 0.003){ distKm += d; last = c; }
-    }else if(!last && c.accuracy < 50){ last = c; }
-    showTrip();
-  }
-  $('#gpsToggle').onclick = () => {
-    if(watchId !== null){
-      navigator.geolocation.clearWatch(watchId); watchId = null; clearInterval(tripTimer);
-      $('#gpsToggle').textContent = 'Bật GPS'; $('#spd').textContent = '—'; return;
-    }
-    if(!navigator.geolocation){ alert('Thiết bị không hỗ trợ GPS.'); return; }
-    if(!tripStart) tripStart = Date.now();
-    watchId = navigator.geolocation.watchPosition(onPos,
-      () => { alert('Không lấy được vị trí. Hãy cho phép truy cập vị trí (cần HTTPS hoặc localhost).'); },
-      { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 });
-    tripTimer = setInterval(showTrip, 1000);
-    $('#gpsToggle').textContent = 'Tắt GPS';
-  };
-  $('#gpsReset').onclick = () => { distKm = 0; last = null; tripStart = watchId !== null ? Date.now() : 0; showTrip(); };
+  setMins(tmMins);
+  if(tmEnd > Date.now()) holdWake();
+  tmCheck();
 
   let toolsLoaded = false;
   function refreshTools(){
-    if(!toolsLoaded){ toolsLoaded = true; loadCity(); renderCal(); }
+    if(toolsLoaded) return;
+    toolsLoaded = true;
+    renderCal();
+    const last = store.get('lastPos', null);
+    if(last) weather(last.lat, last.lon, 'Vị trí lần trước · đang lấy GPS…');   // hiện ngay, rồi cập nhật theo GPS
+    locate();
   }
 
   /* =====================================================================
